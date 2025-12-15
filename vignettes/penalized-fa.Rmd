@@ -1,0 +1,226 @@
+---
+title: "Penalized Estimation of Cross-Loadings and Unique Covariances"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Penalized Estimation of Cross-Loadings and Unique Covariances}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+    collapse = TRUE,
+    comment = "#>"
+)
+```
+
+```{r}
+library(plavaan)
+library(lavaan)
+data(PoliticalDemocracy)
+```
+
+## Penalize cross-loadings
+
+### Two-factor CFA model
+
+```{r}
+mod0 <- "
+  ind60 =~ x1 + x2 + x3
+  dem60 =~ y1 + y2 + y3 + y4
+  ind60 ~~ dem60
+"
+fit0 <- cfa(mod0, data = PoliticalDemocracy, std.lv = TRUE)
+```
+
+### Two-factor EFA model (unidentified)
+
+```{r}
+mod <- "
+  ind60 =~ x1 + x2 + x3 + y1 + y2 + y3 + y4
+  dem60 =~ x1 + x2 + x3 + y1 + y2 + y3 + y4
+  ind60 ~~ ind60
+"
+fit <- cfa(mod, data = PoliticalDemocracy, std.lv = TRUE, do.fit = FALSE)
+```
+
+### Two-factor EFA model with penalized cross-loadings
+
+The cross-loadings are the parameters 4 to 10 in the parameter table (see the `free` column).
+
+```{r}
+parTable(fit)
+```
+
+```{r}
+pefa_fit <- penalized_est(
+    fit,
+    w = .03,
+    pen_par_id = 4:10
+)
+summary(pefa_fit)
+```
+
+## Penalize Cross-loadings and Unique Covariances
+
+### Two-factor EFA model with unique covariances
+
+```{r}
+mod2 <- "
+  ind60 =~ x1 + x2 + x3 + y1 + y2 + y3 + y4
+  dem60 =~ x1 + x2 + x3 + y1 + y2 + y3 + y4
+  ind60 ~~ ind60
+  x1 ~~ x2 + x3 + y1 + y2 + y3 + y4
+  x2 ~~ x3 + y1 + y2 + y3 + y4
+  x3 ~~ y1 + y2 + y3 + y4
+  y1 ~~ y2 + y3 + y4
+  y2 ~~ y3 + y4
+  y3 ~~ y4
+"
+fit2 <- cfa(mod2, data = PoliticalDemocracy, std.lv = TRUE, do.fit = FALSE)
+```
+
+### Two-factor EFA model with penalized cross-loadings and unique covariances
+
+The unique covariances are the parameters 15 to 35 in the parameter table (see the `free` column).
+
+```{r}
+parTable(fit2)
+```
+
+```{r}
+pefa_fit2 <- penalized_est(
+    fit2,
+    w = .03,
+    pen_par_id = c(4:10, 15:35)
+)
+summary(pefa_fit2)
+```
+
+The unique covariances were all estimated close to zero. One can approximate the "effective" number of cross-loadings and unique covariances by:
+
+```{r}
+pen_ests <- as.numeric(coef(pefa_fit2)[c(4:10, 15:35)])
+sum(l0a(pen_ests))
+```
+
+So out of 28 parameters penalized, only about 1.6 (or close to 2) are effectively non-zero.
+
+## Penalize Cross-Loadings, Unique Covariances, and Difference in Loadings and Intercepts Across Time
+
+First, the model without cross-loadings and concurrent unique covariances
+
+```{r}
+mod3 <- "
+    ind60 =~ NA * x1 + x2 + x3
+    dem60 =~ NA * l1 * y1 + l2 * y2 + l3 * y3 + l4 * y4
+    dem65 =~ NA * l1 * y5 + l2 * y6 + l3 * y7 + l4 * y8
+    dem60 ~ ind60
+    dem65 ~ ind60 + dem60
+    ind60 ~~ 1 * ind60
+    dem60 ~~ 1 * dem60
+    dem65 ~~ NA * dem65
+    ind60 ~ 0 * 1
+    dem60 ~ 0 * 1
+    dem65 ~ NA * 1
+    x1 + x2 + x3 ~ NA * 1
+    y1 ~ i1 * 1
+    y2 ~ i2 * 1
+    y3 ~ i3 * 1
+    y4 ~ i4 * 1
+    y5 ~ i1 * 1
+    y6 ~ i2 * 1
+    y7 ~ i3 * 1
+    y8 ~ i4 * 1
+    y1 ~~ y5
+    y2 ~~ y6
+    y3 ~~ y7
+    y4 ~~ y8
+"
+fit3_base <- cfa(mod3, data = PoliticalDemocracy)
+```
+
+```{r}
+# Lavaan example of Political Democracy
+mod3_un <- "
+    ind60 =~ NA * x1 + x2 + x3 + y1 + y2 + y3 + y4
+    dem60 =~ NA * x1 + x2 + x3 + y1 + y2 + y3 + y4
+    dem65 =~ NA * y5 + y6 + y7 + y8
+    dem60 ~ ind60
+    dem65 ~ ind60 + dem60
+    ind60 ~~ 1 * ind60
+    dem60 ~~ 1 * dem60
+    dem65 ~~ NA * dem65
+    ind60 ~ 0 * 1
+    dem60 ~ 0 * 1
+    dem65 ~ NA * 1
+    x1 + x2 + x3 + y1 + y2 + y3 + y4 ~ NA * 1
+    y5 + y6 + y7 + y8 ~ NA * 1
+    x1 ~~ x2 + x3 + y1 + y2 + y3 + y4
+    x2 ~~ x3 + y1 + y2 + y3 + y4
+    x3 ~~ y1 + y2 + y3 + y4
+    y1 ~~ y2 + y3 + y4
+    y2 ~~ y3 + y4
+    y3 ~~ y4
+    y1 ~~ y5
+    y2 ~~ y6
+    y3 ~~ y7
+    y4 ~~ y8
+"
+fit3 <- cfa(
+    mod3_un,
+    data = PoliticalDemocracy,
+    do.fit = FALSE,
+    start = fit3_base
+)
+```
+
+```{r}
+pt3 <- parTable(fit3)
+# Provide better starting values
+pt3$start[c(4:10, 35:55)] <- 0
+fit3_2 <- lavaan::cfa(
+    pt3,
+    data = PoliticalDemocracy,
+    do.fit = FALSE
+)
+```
+
+Parameter IDs:
+
+- (Concurrent) Cross-loadings: 4 to 10
+- (Concurrent) Unique covariances: 35 to 55
+- Loadings across time: 11 to 18
+- Intercepts across time: 27 to 34
+
+
+```{r}
+pefa_fit3 <- penalized_est(
+    fit3_2,
+    w = .03,
+    pen_par_id = c(4:10, 35:55),
+    pen_diff_id = list(
+        loadings = rbind(11:14, 15:18),
+        intercepts = rbind(27:30, 31:34)
+    )
+)
+summary(pefa_fit3, standardized = TRUE)
+```
+
+We can again compute the "effective" number of cross-loadings and unique covariances that are non-zero:
+
+```{r}
+pen_ests2 <- as.numeric(coef(pefa_fit3)[c(4:10, 35:55)])
+sum(l0a(pen_ests2))
+```
+
+And the "effective" number of loadings and intercepts that differ across time:
+
+```{r}
+ld_ests <- as.numeric(coef(pefa_fit3)[11:18])
+int_ests <- as.numeric(coef(pefa_fit3)[27:34])
+ld_mat <- matrix(ld_ests, nrow = 2, byrow = TRUE)
+int_mat <- matrix(int_ests, nrow = 2, byrow = TRUE)
+composite_pair_loss(ld_mat, fun = l0a) +
+    composite_pair_loss(int_mat, fun = l0a)
+```

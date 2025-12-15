@@ -1,0 +1,21 @@
+Package: plavaan
+Title: Penalized estimation for latent variable models with 'lavaan'
+Version: 0.0.0.9000
+Authors@R: 
+    person("Hok Chio (Mark)", "Lai", , "marklhc@gmail.com", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0002-9196-7406"))
+Description: Extends the popular 'lavaan' package by adding penalized
+    estimation capabilities.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.3
+Suggests: 
+    knitr,
+    rmarkdown,
+    testthat (>= 3.0.0)
+VignetteBuilder: knitr
+Config/testthat/edition: 3
+Imports: 
+    lavaan,
+    numDeriv
