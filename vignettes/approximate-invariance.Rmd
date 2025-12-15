@@ -1,0 +1,59 @@
+---
+title: "Approximate Invariance with Penalized Estimation"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Approximate Invariance with Penalized Estimation}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(plavaan)
+library(lavaan)
+```
+
+```{r}
+# Load the PoliticalDemocracy data
+data("PoliticalDemocracy", package = "lavaan")
+# Configural invariance (pretend y7 is not available in dem65),
+# and freely estimated latent means and variances
+config_mod <- "
+  dem60 =~ y1 + y2 + y3 + y4
+  dem65 =~ y5 + y6 +      y8
+  dem60 ~~ dem65
+  dem60 ~~ 1 * dem60
+  dem65 ~~ NA * dem65
+  dem60 ~ 0
+  dem65 ~ NA * 1
+  y1 ~~ y5
+  y2 ~~ y6
+  y4 ~~ y8
+"
+fit_dry <- cfa(config_mod, data = PoliticalDemocracy, auto.fix.first = FALSE,
+               do.fit = FALSE)
+```
+
+Penalized estimation can be used to achieve approximate invariance by penalizing
+the differences in intercepts and loadings across groups.
+
+```{r}
+parTable(fit_dry)
+# Create matrix to indicate the same item loadings across groups/time in columns for
+# penalization on the pairwise differences
+ld_mat <- rbind(1:4, c(5:6, NA, 7))
+int_mat <- rbind(21:24, c(25:26, NA, 28))
+fit_pen <- penalized_est(
+  fit_dry, w = .03, pen_diff_id = list(loadings = ld_mat, intercepts = int_mat),
+  se = "robust.huber.white"
+)
+summary(fit_pen)
+```
+
+The penalized estimation finds a solution where the loadings and intercepts difference are minimized, depending on the penalty weight `w`.

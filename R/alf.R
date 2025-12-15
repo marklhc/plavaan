@@ -70,7 +70,7 @@ hot_gr <- function(x, hot, fun, ...) {
     } else {
         x_hot <- x[hot]
     }
-    out[hot] <- fun(x_hot, ...)
+    out[na.omit(as.numeric(hot))] <- na.omit(fun(x_hot, ...))
     out
 }
 
