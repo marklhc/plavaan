@@ -63,6 +63,7 @@ composite_pair_loss <- function(x, fun, trans = identity, rescale = "df", ...) {
     sum(out, na.rm = TRUE) * rescale
 }
 
+#' @importFrom stats na.omit
 hot_gr <- function(x, hot, fun, ...) {
     out <- 0 * x
     if (is.matrix(hot)) {

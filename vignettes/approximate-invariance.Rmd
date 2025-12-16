@@ -48,7 +48,7 @@ parTable(fit_dry)
 # Create matrix to indicate the same item loadings across groups/time in columns for
 # penalization on the pairwise differences
 ld_mat <- rbind(1:4, c(5:6, NA, 7))
-int_mat <- rbind(21:24, c(25:26, NA, 28))
+int_mat <- rbind(21:24, c(25:26, NA, 27))
 fit_pen <- penalized_est(
   fit_dry, w = .03, pen_diff_id = list(loadings = ld_mat, intercepts = int_mat),
   se = "robust.huber.white"
