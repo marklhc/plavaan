@@ -1,0 +1,196 @@
+---
+title: "Penalized Estimation with Ordinal Data and Multiple Groups"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Penalized Estimation with Ordinal Data and Multiple Groups}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+    collapse = TRUE,
+    comment = "#>"
+)
+```
+
+```{r setup}
+library(plavaan)
+library(lavaan)
+data(HolzingerSwineford1939)
+```
+
+## Prepare Ordinal Data
+
+First, we convert the continuous variables to ordinal with 3 categories:
+
+```{r}
+# Select the 9 cognitive test variables
+hs_data <- HolzingerSwineford1939[, c("school", "x1", "x2", "x3", "x4", 
+                                       "x5", "x6", "x7", "x8", "x9")]
+
+# Convert to ordinal with 3 points
+for (i in 2:10) {
+    hs_data[[i]] <- cut(
+        hs_data[[i]], 
+        breaks = 3, 
+        labels = FALSE,
+        include.lowest = TRUE
+    )
+    hs_data[[i]] <- ordered(hs_data[[i]])
+}
+
+head(hs_data)
+```
+
+## Multiple-Group CFA Model
+
+Now fit the model across the two schools:
+
+```{r}
+mod_base <- "
+  visual =~ x1 + x2 + x3
+  textual =~ x4 + x5 + x6
+  speed =~ x7 + x8 + x9
+  x1 ~~ 1 * x1
+  x2 ~~ 1 * x2
+  x3 ~~ 1 * x3
+  x4 ~~ 1 * x4
+  x5 ~~ 1 * x5
+  x6 ~~ 1 * x6
+  x7 ~~ 1 * x7
+  x8 ~~ 1 * x8
+  x9 ~~ 1 * x9
+"
+fit_mg <- cfa(mod_base, data = hs_data, ordered = TRUE, std.lv = TRUE,
+              parameterization = "theta", group = "school")
+summary(fit_mg, fit.measures = TRUE)
+```
+
+One should also consider the magnitude of the objective function with the DWLS estimator, which is scaled differently than ML-based functions and is generally smaller based on experience.
+
+```{r}
+fit_mg@optim$fx
+```
+
+### Strict and partial invariance models
+
+```{r}
+# Strict invariance: constrain loadings, thresholds, and residual variances
+fit_strict <- cfa(mod_base, data = hs_data, ordered = TRUE, std.lv = TRUE,
+                  parameterization = "theta", group = "school",
+                  group.equal = c("loadings", "thresholds", "residuals"))
+
+# Score test
+lavTestScore(fit_strict)
+```
+
+Only item 9 showed non-invariant thresholds, based on the score test.
+
+## Penalized Multiple-Group Model
+
+We'll penalize differences in loadings and thresholds across groups. First, set up an over-specified (unidentified) model with the latent mean and variance only identified in the first group, without fitting (`do.fit = FALSE`):
+
+```{r}
+mod_un <- "
+  visual =~ x1 + x2 + x3
+  textual =~ x4 + x5 + x6
+  speed =~ x7 + x8 + x9
+  visual ~~ c(1, NA) * visual
+  textual ~~ c(1, NA) * textual
+  speed ~~ c(1, NA) * speed
+  visual ~ c(0, NA) * 1
+  textual ~ c(0, NA) * 1
+  speed ~ c(0, NA) * 1
+  x1 ~~ 1 * x1
+  x2 ~~ 1 * x2
+  x3 ~~ 1 * x3
+  x4 ~~ 1 * x4
+  x5 ~~ 1 * x5
+  x6 ~~ 1 * x6
+  x7 ~~ 1 * x7
+  x8 ~~ 1 * x8
+  x9 ~~ 1 * x9
+"
+fit_mg_nofit <- cfa(mod_base, data = hs_data, ordered = TRUE, std.lv = TRUE,
+                    auto.fix.first = FALSE,
+                    parameterization = "theta", group = "school", do.fit = FALSE)
+```
+
+Examine the parameter table to identify loadings and thresholds:
+
+```{r}
+pt <- parTable(fit_mg_nofit)
+# Show loadings
+pt[pt$op == "=~", c("lhs", "op", "rhs", "group", "free")]
+```
+
+```{r}
+# Show thresholds
+pt[pt$op == "|", c("lhs", "op", "rhs", "group", "free")]
+```
+
+Identify parameter IDs for loadings and thresholds in each group:
+
+```{r}
+# Loadings: group 1 (Pasteur) and group 2 (Grant-White)
+load_g1 <- pt$free[pt$op == "=~" & pt$group == 1 & pt$free > 0]
+load_g2 <- pt$free[pt$op == "=~" & pt$group == 2 & pt$free > 0]
+
+# Thresholds: group 1 and group 2
+thresh_g1 <- pt$free[pt$op == "|" & pt$group == 1 & pt$free > 0]
+thresh_g2 <- pt$free[pt$op == "|" & pt$group == 2 & pt$free > 0]
+
+print(list(
+    loadings_g1 = load_g1,
+    loadings_g2 = load_g2,
+    thresholds_g1 = thresh_g1,
+    thresholds_g2 = thresh_g2
+))
+```
+
+Fit the penalized model with penalties on differences in loadings and thresholds:
+
+```{r}
+fit_pen_mg <- penalized_est(
+    fit_mg_nofit,
+    w = 0.03,
+    pen_diff_id = list(
+        loadings = rbind(load_g1, load_g2),
+        thresholds = rbind(thresh_g1, thresh_g2)
+    )
+)
+summary(fit_pen_mg)
+```
+
+## Evaluate Invariance
+
+Here are the estimated loadings and thresholds, and we can calculate the effective number of parameters that differ across groups:
+
+```{r}
+# Loadings
+load_ests_g1 <- as.numeric(coef(fit_pen_mg)[load_g1])
+load_ests_g2 <- as.numeric(coef(fit_pen_mg)[load_g2])
+load_mat <- rbind(load_ests_g1, load_ests_g2)
+colnames(load_mat) <- names(coef(fit_pen_mg))[load_g1]
+eff_load_diff <- composite_pair_loss(load_mat, fun = l0a)
+
+# Thresholds
+thresh_ests_g1 <- as.numeric(coef(fit_pen_mg)[thresh_g1])
+thresh_ests_g2 <- as.numeric(coef(fit_pen_mg)[thresh_g2])
+thresh_mat <- rbind(thresh_ests_g1, thresh_ests_g2)
+colnames(thresh_mat) <- names(coef(fit_pen_mg))[thresh_g1]
+eff_thresh_diff <- composite_pair_loss(thresh_mat, fun = l0a)
+
+cat("Penalized Loading Estimates:\n")
+print(load_mat, digits = 3)
+
+cat("\nPenalized Threshold Estimates:\n")
+print(thresh_mat, digits = 3)
+
+cat("Effective number of non-invariant loadings:", eff_load_diff, "\n")
+cat("Effective number of non-invariant thresholds:", eff_thresh_diff, "\n")
+```  
+
+The penalized estimation approach identifies which loadings and thresholds substantively differ across groups, providing an efficienct, data-driven assessment of measurement invariance for ordinal data.
+
