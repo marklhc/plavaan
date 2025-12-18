@@ -57,3 +57,47 @@ summary(fit_pen)
 ```
 
 The penalized estimation finds a solution where the loadings and intercepts difference are minimized, depending on the penalty weight `w`.
+
+## Compared to Results from Mplus
+
+```{r, echo=TRUE, eval=FALSE}
+# export to Mplus
+write.table(PoliticalDemocracy,
+            file = here::here("vignettes", "PoliticalDemocracy.dat"),
+            row.names = FALSE, col.names = FALSE)
+# Mplus syntax
+mplus_syntax <- "
+TITLE:  Penalized invariance CFA model;
+DATA:   FILE = PoliticalDemocracy.dat;
+VARIABLE:
+        NAMES = y1-y8;
+        USEVARIABLES = y1-y6 y8;
+MODEL:  dem60 BY y1-y4* (l1_1-l1_4);
+        dem65 BY y5-y6* (l2_1-l2_2)
+                 y8* (l2_4);
+        dem60@1;
+        dem65*1;
+        [dem60@0];
+        [dem65*0];
+        [y1-y4] (i1_1-i1_4);
+        [y5-y6] (i2_1-i2_2);
+        [y8] (i2_4);
+        y1 WITH y5;
+        y2 WITH y6;
+        y4 WITH y8;
+MODEL PRIOR:
+        DO(#,1,2) DIFF(l1_# , l2_#) ~ ALF(0,1);
+        DO(#,1,2) DIFF(i1_# , i2_#) ~ ALF(0,1);
+        DIFF(l1_4 , l2_4) ~ ALF(0,1);
+        DIFF(i1_4 , i2_4) ~ ALF(0,1);
+"
+# Save Mplus syntax
+writeLines(mplus_syntax, con = here::here("vignettes", "penalized_invariance.inp"))
+# Run Mplus
+system("cd vignettes && mplus penalized_invariance.inp")
+```
+
+```{r, echo=FALSE}
+mplus_out <- readLines(here::here("vignettes", "penalized_invariance.out"))
+cat(mplus_out[144:202], sep = "\n")
+```
