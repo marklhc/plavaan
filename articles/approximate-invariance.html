@@ -196,6 +196,98 @@ penalizing the differences in intercepts and loadings across groups.</p>
 <p>The penalized estimation finds a solution where the loadings and
 intercepts difference are minimized, depending on the penalty weight
 <code>w</code>.</p>
+<div class="section level2">
+<h2 id="compared-to-results-from-mplus-version-9-0">Compared to Results from Mplus (version 9.0)<a class="anchor" aria-label="anchor" href="#compared-to-results-from-mplus-version-9-0"></a>
+</h2>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># export to Mplus</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/write.table.html" class="external-link">write.table</a></span><span class="op">(</span><span class="va">PoliticalDemocracy</span>,</span>
+<span>            file <span class="op">=</span> <span class="st">"inst/mplus/PoliticalDemocracy.dat"</span>,</span>
+<span>            row.names <span class="op">=</span> <span class="cn">FALSE</span>, col.names <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="co"># Mplus syntax</span></span>
+<span><span class="va">mplus_syntax</span> <span class="op">&lt;-</span> <span class="st">"</span></span>
+<span><span class="st">TITLE:  Penalized invariance CFA model;</span></span>
+<span><span class="st">DATA:   FILE = PoliticalDemocracy.dat;</span></span>
+<span><span class="st">VARIABLE:</span></span>
+<span><span class="st">        NAMES = y1-y8;</span></span>
+<span><span class="st">        USEVARIABLES = y1-y6 y8;</span></span>
+<span><span class="st">MODEL:  dem60 BY y1-y4* (l1_1-l1_4);</span></span>
+<span><span class="st">        dem65 BY y5-y6* (l2_1-l2_2)</span></span>
+<span><span class="st">                 y8* (l2_4);</span></span>
+<span><span class="st">        dem60@1;</span></span>
+<span><span class="st">        dem65*1;</span></span>
+<span><span class="st">        [dem60@0];</span></span>
+<span><span class="st">        [dem65*0];</span></span>
+<span><span class="st">        [y1-y4] (i1_1-i1_4);</span></span>
+<span><span class="st">        [y5-y6] (i2_1-i2_2);</span></span>
+<span><span class="st">        [y8] (i2_4);</span></span>
+<span><span class="st">        y1 WITH y5;</span></span>
+<span><span class="st">        y2 WITH y6;</span></span>
+<span><span class="st">        y4 WITH y8;</span></span>
+<span><span class="st">MODEL PRIOR:</span></span>
+<span><span class="st">        DO(#,1,2) DIFF(l1_# , l2_#) ~ ALF(0,1);</span></span>
+<span><span class="st">        DO(#,1,2) DIFF(i1_# , i2_#) ~ ALF(0,1);</span></span>
+<span><span class="st">        DIFF(l1_4 , l2_4) ~ ALF(0,1);</span></span>
+<span><span class="st">        DIFF(i1_4 , i2_4) ~ ALF(0,1);</span></span>
+<span><span class="st">"</span></span>
+<span><span class="co"># Save Mplus syntax</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/writeLines.html" class="external-link">writeLines</a></span><span class="op">(</span><span class="va">mplus_syntax</span>, con <span class="op">=</span> <span class="st">"inst/mplus/penalized_invariance.inp"</span><span class="op">)</span></span>
+<span><span class="co"># Run Mplus</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/system.html" class="external-link">system</a></span><span class="op">(</span><span class="st">"cd inst/mplus &amp;&amp; mplus penalized_invariance.inp"</span><span class="op">)</span></span></code></pre></div>
+<pre class="mplus"><code>MODEL RESULTS
+
+                                                    Two-Tailed
+                    Estimate       S.E.  Est./S.E.    P-Value
+
+ DEM60    BY
+    Y1                 2.097      0.212      9.876      0.000
+    Y2                 2.970      0.285     10.439      0.000
+    Y3                 2.260      0.323      6.987      0.000
+    Y4                 2.970      0.220     13.529      0.000
+
+ DEM65    BY
+    Y5                 2.084      0.224      9.315      0.000
+    Y6                 2.965      0.289     10.250      0.000
+    Y8                 2.986      0.222     13.470      0.000
+
+ DEM65    WITH
+    DEM60              0.872      0.056     15.638      0.000
+
+ Y1       WITH
+    Y5                 0.941      0.454      2.073      0.038
+
+ Y2       WITH
+    Y6                 1.745      0.899      1.940      0.052
+
+ Y4       WITH
+    Y8                 0.249      0.504      0.494      0.621
+
+ Means
+    DEM60              0.000      0.000    999.000    999.000
+    DEM65             -0.153      0.074     -2.071      0.038
+
+ Intercepts
+    Y1                 5.461      0.291     18.749      0.000
+    Y2                 4.220      0.454      9.288      0.000
+    Y3                 6.563      0.376     17.444      0.000
+    Y4                 4.472      0.377     11.865      0.000
+    Y5                 5.459      0.291     18.786      0.000
+    Y6                 3.446      0.455      7.571      0.000
+    Y8                 4.480      0.377     11.880      0.000
+
+ Variances
+    DEM60              1.000      0.000    999.000    999.000
+    DEM65              0.869      0.094      9.207      0.000
+
+ Residual Variances
+    Y1                 2.203      0.519      4.243      0.000
+    Y2                 6.470      1.338      4.836      0.000
+    Y3                 5.513      1.088      5.069      0.000
+    Y4                 2.465      0.627      3.930      0.000
+    Y5                 3.007      0.617      4.877      0.000
+    Y6                 3.741      0.801      4.668      0.000
+    Y8                 2.421      0.711      3.406      0.001</code></pre>
+</div>
   </main>
 </div>
 

@@ -138,3 +138,98 @@ summary(fit_pen)
 The penalized estimation finds a solution where the loadings and
 intercepts difference are minimized, depending on the penalty weight
 `w`.
+
+## Compared to Results from Mplus (version 9.0)
+
+``` r
+# export to Mplus
+write.table(PoliticalDemocracy,
+            file = "inst/mplus/PoliticalDemocracy.dat",
+            row.names = FALSE, col.names = FALSE)
+# Mplus syntax
+mplus_syntax <- "
+TITLE:  Penalized invariance CFA model;
+DATA:   FILE = PoliticalDemocracy.dat;
+VARIABLE:
+        NAMES = y1-y8;
+        USEVARIABLES = y1-y6 y8;
+MODEL:  dem60 BY y1-y4* (l1_1-l1_4);
+        dem65 BY y5-y6* (l2_1-l2_2)
+                 y8* (l2_4);
+        dem60@1;
+        dem65*1;
+        [dem60@0];
+        [dem65*0];
+        [y1-y4] (i1_1-i1_4);
+        [y5-y6] (i2_1-i2_2);
+        [y8] (i2_4);
+        y1 WITH y5;
+        y2 WITH y6;
+        y4 WITH y8;
+MODEL PRIOR:
+        DO(#,1,2) DIFF(l1_# , l2_#) ~ ALF(0,1);
+        DO(#,1,2) DIFF(i1_# , i2_#) ~ ALF(0,1);
+        DIFF(l1_4 , l2_4) ~ ALF(0,1);
+        DIFF(i1_4 , i2_4) ~ ALF(0,1);
+"
+# Save Mplus syntax
+writeLines(mplus_syntax, con = "inst/mplus/penalized_invariance.inp")
+# Run Mplus
+system("cd inst/mplus && mplus penalized_invariance.inp")
+```
+
+``` mplus
+MODEL RESULTS
+
+                                                    Two-Tailed
+                    Estimate       S.E.  Est./S.E.    P-Value
+
+ DEM60    BY
+    Y1                 2.097      0.212      9.876      0.000
+    Y2                 2.970      0.285     10.439      0.000
+    Y3                 2.260      0.323      6.987      0.000
+    Y4                 2.970      0.220     13.529      0.000
+
+ DEM65    BY
+    Y5                 2.084      0.224      9.315      0.000
+    Y6                 2.965      0.289     10.250      0.000
+    Y8                 2.986      0.222     13.470      0.000
+
+ DEM65    WITH
+    DEM60              0.872      0.056     15.638      0.000
+
+ Y1       WITH
+    Y5                 0.941      0.454      2.073      0.038
+
+ Y2       WITH
+    Y6                 1.745      0.899      1.940      0.052
+
+ Y4       WITH
+    Y8                 0.249      0.504      0.494      0.621
+
+ Means
+    DEM60              0.000      0.000    999.000    999.000
+    DEM65             -0.153      0.074     -2.071      0.038
+
+ Intercepts
+    Y1                 5.461      0.291     18.749      0.000
+    Y2                 4.220      0.454      9.288      0.000
+    Y3                 6.563      0.376     17.444      0.000
+    Y4                 4.472      0.377     11.865      0.000
+    Y5                 5.459      0.291     18.786      0.000
+    Y6                 3.446      0.455      7.571      0.000
+    Y8                 4.480      0.377     11.880      0.000
+
+ Variances
+    DEM60              1.000      0.000    999.000    999.000
+    DEM65              0.869      0.094      9.207      0.000
+
+ Residual Variances
+    Y1                 2.203      0.519      4.243      0.000
+    Y2                 6.470      1.338      4.836      0.000
+    Y3                 5.513      1.088      5.069      0.000
+    Y4                 2.465      0.627      3.930      0.000
+    Y5                 3.007      0.617      4.877      0.000
+    Y6                 3.741      0.801      4.668      0.000
+    Y8                 2.421      0.711      3.406      0.001
+```
