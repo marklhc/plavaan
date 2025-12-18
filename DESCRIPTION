@@ -21,4 +21,5 @@ Config/testthat/edition: 3
 Imports: 
     lavaan,
     numDeriv
-URL: https://marklhc.github.io/plavaan/
+URL: https://marklhc.github.io/plavaan/, https://github.com/marklhc/plavaan
+BugReports: https://github.com/marklhc/plavaan/issues

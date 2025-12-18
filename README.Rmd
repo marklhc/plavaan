@@ -25,8 +25,7 @@ The goal of plavaan is to perform penalized estimation for latent variable model
 You can install the development version of plavaan like so:
 
 ``` r
-# install.packages("remotes")
-remotes::install_github("marklhc/plavaan")
+install.packages("plavaan")
 ```
 
 ## Example
