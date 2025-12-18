@@ -7,12 +7,15 @@
 
 ## Citation
 
-Lai H (2025). *plavaan: Penalized estimation for latent variable models
+Source:
+[`DESCRIPTION`](https://github.com/marklhc/plavaan/blob/main/DESCRIPTION)
+
+Lai H (2025). *plavaan: Penalized Estimation for Latent Variable Models
 with 'lavaan'*. R package version 0.0.1,
 <https://marklhc.github.io/plavaan/>.
 
     @Manual{,
-      title = {plavaan: Penalized estimation for latent variable models with 'lavaan'},
+      title = {plavaan: Penalized Estimation for Latent Variable Models with 'lavaan'},
       author = {Hok Chio (Mark) Lai},
       year = {2025},
       note = {R package version 0.0.1},
