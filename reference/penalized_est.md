@@ -108,38 +108,113 @@ should be interpreted with caution.
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
 library(lavaan)
+#> This is lavaan 0.6-20
+#> lavaan is FREE software! Please report any bugs.
 
-# Fit a longitudinal factor model using PoliticalDemocracy data
-ind_mat <- cbind(c("y1", "y2", "y3", "y4"), c("y5", "y6", "y7", "y8"))
-fit <- longcfa(ind_mat, lv_names = c("dem60", "dem65"), data = PoliticalDemocracy,
-               long_equal = c("loadings", "intercepts"), lag_cov = TRUE)
-# Obtain an unidentified model
-mod_un <- longcfa_syntax(
-    ind_mat, lv_names = c("dem60", "dem65"),
-    lag_cov = TRUE,
-    free_latvars = TRUE, free_latmeans = TRUE
-)
-fit_un <- cfa(mod_un, data = PoliticalDemocracy, do.fit = FALSE, std.lv = TRUE,
-              start = fit)
+# Define a longitudinal factor model with PoliticalDemocracy data
+model <- "
+  dem60 =~ y1 + y2 + y3 + y4
+  dem65 =~ y5 + y6 + y7 + y8
+  dem60 ~~ dem65
+  dem60 ~~ 1 * dem60
+  dem65 ~~ NA * dem65
+  dem60 ~ 0
+  dem65 ~ NA * 1
+  y1 ~~ y5
+  y2 ~~ y6
+  y3 ~~ y7
+  y4 ~~ y8
+"
 
-# Get parameter IDs for loadings
-load_ids <- get_lav_par_id(fit_un, op = "=~", ind_matrix = ind_mat)
-int_ids <- get_lav_par_id(fit_un, op = "~1", ind_matrix = ind_mat)
+# Fit the model without constraints first to get parameter table
+fit_un <- cfa(model, data = PoliticalDemocracy, std.lv = TRUE,
+              meanstructure = TRUE, do.fit = FALSE)
 
-# Apply penalized estimation with alignment loss
+# Get parameter IDs
+pt <- parTable(fit_un)
+# Loadings
+load_60 <- pt$free[pt$op == "=~" & pt$lhs == "dem60"]
+load_65 <- pt$free[pt$op == "=~" & pt$lhs == "dem65"]
+# Intercepts
+int_60 <- pt$free[pt$op == "~1" & pt$lhs %in% c("y1", "y2", "y3", "y4")]
+int_65 <- pt$free[pt$op == "~1" & pt$lhs %in% c("y5", "y6", "y7", "y8")]
+
+# Apply penalized estimation to penalize differences in loadings and intercepts
 pen_fit <- penalized_est(
     x = fit_un,
-    w = 0.1,
-    pen_diff_id = list(cbind(t(load_ids), t(int_ids))),
-    pen_fn = "alf"
+    w = 0.03,
+    pen_diff_id = list(
+        loadings = rbind(load_60, load_65),
+        intercepts = rbind(int_60, int_65)
+    ),
+    pen_fn = "l0a"
 )
 
 # Compare parameter estimates
-cbind(coef(fit), coef(pen_fit))
-
-# Compare log-likelihoods
-c("scalar invariance" = logLik(fit), "penalized" = logLik(pen_fit))
-} # }
+summary(pen_fit)
+#> lavaan 0.6-20 ended normally after 103 iterations
+#> 
+#>   Estimator                                         ML
+#>   Optimization method                           NLMINB
+#>   Number of model parameters                        31
+#> 
+#>   Number of observations                            75
+#> 
+#> 
+#> Parameter Estimates:
+#> 
+#> 
+#> Latent Variables:
+#>                    Estimate
+#>   dem60 =~                 
+#>     y1                2.105
+#>     y2                2.852
+#>     y3                2.531
+#>     y4                2.905
+#>   dem65 =~                 
+#>     y5                2.083
+#>     y6                2.819
+#>     y7                2.602
+#>     y8                2.898
+#> 
+#> Covariances:
+#>                    Estimate
+#>   dem60 ~~                 
+#>     dem65             0.918
+#>  .y1 ~~                    
+#>    .y5                0.842
+#>  .y2 ~~                    
+#>    .y6                1.820
+#>  .y3 ~~                    
+#>    .y7                1.222
+#>  .y4 ~~                    
+#>    .y8                0.284
+#> 
+#> Intercepts:
+#>                    Estimate
+#>     dem60             0.000
+#>     dem65            -0.147
+#>    .y1                5.456
+#>    .y2                4.251
+#>    .y3                6.572
+#>    .y4                4.460
+#>    .y5                5.454
+#>    .y6                3.393
+#>    .y7                6.572
+#>    .y8                4.460
+#> 
+#> Variances:
+#>                    Estimate
+#>     dem60             1.000
+#>     dem65             0.951
+#>    .y1                2.129
+#>    .y2                6.632
+#>    .y3                5.388
+#>    .y4                2.594
+#>    .y5                2.816
+#>    .y6                4.003
+#>    .y7                3.590
+#>    .y8                2.457
+#> 
 ```

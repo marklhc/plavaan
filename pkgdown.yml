@@ -5,7 +5,8 @@ articles:
   approximate-invariance: approximate-invariance.html
   penalized-cat: penalized-cat.html
   penalized-fa: penalized-fa.html
-last_built: 2025-12-18T16:05Z
+  standard-errors: standard-errors.html
+last_built: 2025-12-18T16:42Z
 urls:
   reference: https://marklhc.github.io/plavaan/reference
   article: https://marklhc.github.io/plavaan/articles

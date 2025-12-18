@@ -15,7 +15,7 @@ the optimized parameter estimates."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">plavaan</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -29,7 +29,9 @@ the optimized parameter estimates."></head><body>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/approximate-invariance.html">Approximate Invariance with Penalized Estimation</a></li>
     <li><a class="dropdown-item" href="../articles/penalized-cat.html">Penalized Estimation with Ordinal Data and Multiple Groups</a></li>
     <li><a class="dropdown-item" href="../articles/penalized-fa.html">Penalized Estimation of Cross-Loadings and Unique Covariances</a></li>
+    <li><a class="dropdown-item" href="../articles/standard-errors.html">Standard Errors</a></li>
   </ul></li>
+<li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
       </ul></div>
@@ -148,40 +150,115 @@ experimental sandwich approximation and should be interpreted with caution.</p>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
-<span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://lavaan.ugent.be" class="external-link">lavaan</a></span><span class="op">)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://lavaan.ugent.be" class="external-link">lavaan</a></span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> This is lavaan 0.6-20</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> lavaan is FREE software! Please report any bugs.</span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Fit a longitudinal factor model using PoliticalDemocracy data</span></span></span>
-<span class="r-in"><span><span class="va">ind_mat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"y1"</span>, <span class="st">"y2"</span>, <span class="st">"y3"</span>, <span class="st">"y4"</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"y5"</span>, <span class="st">"y6"</span>, <span class="st">"y7"</span>, <span class="st">"y8"</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu">longcfa</span><span class="op">(</span><span class="va">ind_mat</span>, lv_names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"dem60"</span>, <span class="st">"dem65"</span><span class="op">)</span>, data <span class="op">=</span> <span class="va">PoliticalDemocracy</span>,</span></span>
-<span class="r-in"><span>               long_equal <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"loadings"</span>, <span class="st">"intercepts"</span><span class="op">)</span>, lag_cov <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="co"># Obtain an unidentified model</span></span></span>
-<span class="r-in"><span><span class="va">mod_un</span> <span class="op">&lt;-</span> <span class="fu">longcfa_syntax</span><span class="op">(</span></span></span>
-<span class="r-in"><span>    <span class="va">ind_mat</span>, lv_names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"dem60"</span>, <span class="st">"dem65"</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>    lag_cov <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
-<span class="r-in"><span>    free_latvars <span class="op">=</span> <span class="cn">TRUE</span>, free_latmeans <span class="op">=</span> <span class="cn">TRUE</span></span></span>
-<span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">fit_un</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/lavaan/man/cfa.html" class="external-link">cfa</a></span><span class="op">(</span><span class="va">mod_un</span>, data <span class="op">=</span> <span class="va">PoliticalDemocracy</span>, do.fit <span class="op">=</span> <span class="cn">FALSE</span>, std.lv <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
-<span class="r-in"><span>              start <span class="op">=</span> <span class="va">fit</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># Define a longitudinal factor model with PoliticalDemocracy data</span></span></span>
+<span class="r-in"><span><span class="va">model</span> <span class="op">&lt;-</span> <span class="st">"</span></span></span>
+<span class="r-in"><span><span class="st">  dem60 =~ y1 + y2 + y3 + y4</span></span></span>
+<span class="r-in"><span><span class="st">  dem65 =~ y5 + y6 + y7 + y8</span></span></span>
+<span class="r-in"><span><span class="st">  dem60 ~~ dem65</span></span></span>
+<span class="r-in"><span><span class="st">  dem60 ~~ 1 * dem60</span></span></span>
+<span class="r-in"><span><span class="st">  dem65 ~~ NA * dem65</span></span></span>
+<span class="r-in"><span><span class="st">  dem60 ~ 0</span></span></span>
+<span class="r-in"><span><span class="st">  dem65 ~ NA * 1</span></span></span>
+<span class="r-in"><span><span class="st">  y1 ~~ y5</span></span></span>
+<span class="r-in"><span><span class="st">  y2 ~~ y6</span></span></span>
+<span class="r-in"><span><span class="st">  y3 ~~ y7</span></span></span>
+<span class="r-in"><span><span class="st">  y4 ~~ y8</span></span></span>
+<span class="r-in"><span><span class="st">"</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Get parameter IDs for loadings</span></span></span>
-<span class="r-in"><span><span class="va">load_ids</span> <span class="op">&lt;-</span> <span class="fu">get_lav_par_id</span><span class="op">(</span><span class="va">fit_un</span>, op <span class="op">=</span> <span class="st">"=~"</span>, ind_matrix <span class="op">=</span> <span class="va">ind_mat</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">int_ids</span> <span class="op">&lt;-</span> <span class="fu">get_lav_par_id</span><span class="op">(</span><span class="va">fit_un</span>, op <span class="op">=</span> <span class="st">"~1"</span>, ind_matrix <span class="op">=</span> <span class="va">ind_mat</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># Fit the model without constraints first to get parameter table</span></span></span>
+<span class="r-in"><span><span class="va">fit_un</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/lavaan/man/cfa.html" class="external-link">cfa</a></span><span class="op">(</span><span class="va">model</span>, data <span class="op">=</span> <span class="va">PoliticalDemocracy</span>, std.lv <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
+<span class="r-in"><span>              meanstructure <span class="op">=</span> <span class="cn">TRUE</span>, do.fit <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Apply penalized estimation with alignment loss</span></span></span>
+<span class="r-in"><span><span class="co"># Get parameter IDs</span></span></span>
+<span class="r-in"><span><span class="va">pt</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/lavaan/man/parTable.html" class="external-link">parTable</a></span><span class="op">(</span><span class="va">fit_un</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># Loadings</span></span></span>
+<span class="r-in"><span><span class="va">load_60</span> <span class="op">&lt;-</span> <span class="va">pt</span><span class="op">$</span><span class="va">free</span><span class="op">[</span><span class="va">pt</span><span class="op">$</span><span class="va">op</span> <span class="op">==</span> <span class="st">"=~"</span> <span class="op">&amp;</span> <span class="va">pt</span><span class="op">$</span><span class="va">lhs</span> <span class="op">==</span> <span class="st">"dem60"</span><span class="op">]</span></span></span>
+<span class="r-in"><span><span class="va">load_65</span> <span class="op">&lt;-</span> <span class="va">pt</span><span class="op">$</span><span class="va">free</span><span class="op">[</span><span class="va">pt</span><span class="op">$</span><span class="va">op</span> <span class="op">==</span> <span class="st">"=~"</span> <span class="op">&amp;</span> <span class="va">pt</span><span class="op">$</span><span class="va">lhs</span> <span class="op">==</span> <span class="st">"dem65"</span><span class="op">]</span></span></span>
+<span class="r-in"><span><span class="co"># Intercepts</span></span></span>
+<span class="r-in"><span><span class="va">int_60</span> <span class="op">&lt;-</span> <span class="va">pt</span><span class="op">$</span><span class="va">free</span><span class="op">[</span><span class="va">pt</span><span class="op">$</span><span class="va">op</span> <span class="op">==</span> <span class="st">"~1"</span> <span class="op">&amp;</span> <span class="va">pt</span><span class="op">$</span><span class="va">lhs</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"y1"</span>, <span class="st">"y2"</span>, <span class="st">"y3"</span>, <span class="st">"y4"</span><span class="op">)</span><span class="op">]</span></span></span>
+<span class="r-in"><span><span class="va">int_65</span> <span class="op">&lt;-</span> <span class="va">pt</span><span class="op">$</span><span class="va">free</span><span class="op">[</span><span class="va">pt</span><span class="op">$</span><span class="va">op</span> <span class="op">==</span> <span class="st">"~1"</span> <span class="op">&amp;</span> <span class="va">pt</span><span class="op">$</span><span class="va">lhs</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"y5"</span>, <span class="st">"y6"</span>, <span class="st">"y7"</span>, <span class="st">"y8"</span><span class="op">)</span><span class="op">]</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Apply penalized estimation to penalize differences in loadings and intercepts</span></span></span>
 <span class="r-in"><span><span class="va">pen_fit</span> <span class="op">&lt;-</span> <span class="fu">penalized_est</span><span class="op">(</span></span></span>
 <span class="r-in"><span>    x <span class="op">=</span> <span class="va">fit_un</span>,</span></span>
-<span class="r-in"><span>    w <span class="op">=</span> <span class="fl">0.1</span>,</span></span>
-<span class="r-in"><span>    pen_diff_id <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="va">load_ids</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="va">int_ids</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>    pen_fn <span class="op">=</span> <span class="st">"alf"</span></span></span>
+<span class="r-in"><span>    w <span class="op">=</span> <span class="fl">0.03</span>,</span></span>
+<span class="r-in"><span>    pen_diff_id <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>        loadings <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="va">load_60</span>, <span class="va">load_65</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>        intercepts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="va">int_60</span>, <span class="va">int_65</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="op">)</span>,</span></span>
+<span class="r-in"><span>    pen_fn <span class="op">=</span> <span class="st">"l0a"</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Compare parameter estimates</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">pen_fit</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Compare log-likelihoods</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"scalar invariance"</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/logLik.html" class="external-link">logLik</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span>, <span class="st">"penalized"</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/logLik.html" class="external-link">logLik</a></span><span class="op">(</span><span class="va">pen_fit</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">pen_fit</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> lavaan 0.6-20 ended normally after 103 iterations</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   Estimator                                         ML</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   Optimization method                           NLMINB</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   Number of model parameters                        31</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   Number of observations                            75</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Parameter Estimates:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Latent Variables:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                    Estimate</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   dem60 =~                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     y1                2.105</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     y2                2.852</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     y3                2.531</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     y4                2.905</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   dem65 =~                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     y5                2.083</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     y6                2.819</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     y7                2.602</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     y8                2.898</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Covariances:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                    Estimate</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   dem60 ~~                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     dem65             0.918</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  .y1 ~~                    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    .y5                0.842</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  .y2 ~~                    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    .y6                1.820</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  .y3 ~~                    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    .y7                1.222</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  .y4 ~~                    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    .y8                0.284</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Intercepts:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                    Estimate</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     dem60             0.000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     dem65            -0.147</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    .y1                5.456</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    .y2                4.251</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    .y3                6.572</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    .y4                4.460</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    .y5                5.454</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    .y6                3.393</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    .y7                6.572</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    .y8                4.460</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Variances:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                    Estimate</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     dem60             1.000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     dem65             0.951</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    .y1                2.129</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    .y2                6.632</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    .y3                5.388</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    .y4                2.594</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    .y5                2.816</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    .y6                4.003</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    .y7                3.590</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    .y8                2.457</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
