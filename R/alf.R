@@ -1,9 +1,3 @@
-# Write a function that computes the penalized log-likelihood of a growth model
-# Write a function that computes the gradient (gradient of LL - gradient of penalty)
-# Find out how to obtain LL from lavaan
-# Obtain analytic gradient from lavaan
-# Write function for optimization using optim . . .
-
 #' Composite Pairwise Loss Function
 #'
 #' Computes the total loss across all pairwise combinations of rows in a matrix.
@@ -159,9 +153,3 @@ l0a <- function(x, eps = .01) {
 gr_l0a <- function(v, eps = .01) {
     2 * v * eps / (v^2 + eps)^2
 }
-
-# Need to write functions for CV (for choosing w) and penalized estimation
-# Not sure if CV is meaningful if the log-likelihood does not change
-# Can consider w = 0 (no penalty, close to alignment) to w = inf (scalar invariant)
-# Also consider strict invariance?
-# Try to make functions general, while the defaults focus on growth models
