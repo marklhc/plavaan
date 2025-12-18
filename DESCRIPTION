@@ -1,5 +1,5 @@
 Package: plavaan
-Title: Penalized estimation for latent variable models with 'lavaan'
+Title: Penalized Estimation for Latent Variable Models with 'lavaan'
 Version: 0.0.1
 Authors@R: 
     person("Hok Chio (Mark)", "Lai", , "marklhc@gmail.com",

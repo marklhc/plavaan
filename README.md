@@ -9,8 +9,8 @@
 
 The goal of plavaan is to perform penalized estimation for latent
 variable models using lavaan with a differentiable penalty function, as
-described in [Robitzsch (2023)](https://www.mdpi.com/1999-4893/16/9/446)
-and similar to the approach described in [Asparouhov & Muthén
+described in Robitzsch (2023) and similar to the approach described in
+[Asparouhov & Muthén
 (2024)](https://www.statmodel.com/download/PML.pdf).
 
 ## Installation
@@ -18,8 +18,7 @@ and similar to the approach described in [Asparouhov & Muthén
 You can install the development version of plavaan like so:
 
 ``` r
-# install.packages("remotes")
-remotes::install_github("marklhc/plavaan")
+install.packages("plavaan")
 ```
 
 ## Example
@@ -154,3 +153,11 @@ summary(fit_pen)
 Sandwich estimates of standard errors can be obtained using the
 `se = "robust.huber.white"` argument in `penalized_est()`, but it is
 unclear how valid these are in the presence of penalization.
+
+References:
+
+- Robitzsch, A. (2023). Implementation Aspects in Regularized Structural
+  Equation Models. Algorithms, 16(9), 446.
+- Asparouhov, T., & Muthén, B. (2024). Penalized structural equation
+  models. Structural Equation Modeling: A Multidisciplinary Journal,
+  31(3), 429-454.
