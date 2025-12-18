@@ -2,10 +2,12 @@ Package: plavaan
 Title: Penalized estimation for latent variable models with 'lavaan'
 Version: 0.0.1
 Authors@R: 
-    person("Hok Chio (Mark)", "Lai", , "marklhc@gmail.com", role = c("aut", "cre"),
+    person("Hok Chio (Mark)", "Lai", , "marklhc@gmail.com",
+           role = c("aut", "cre", "cph"),
            comment = c(ORCID = "0000-0002-9196-7406"))
 Description: Extends the popular 'lavaan' package by adding penalized
-    estimation capabilities.
+    estimation capabilities. It supports penalty on individual parameters
+    as well as the difference between parameters.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)

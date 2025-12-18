@@ -75,40 +75,49 @@ experimental sandwich approximation and should be interpreted with caution.
 }
 
 \examples{
-\dontrun{
 library(lavaan)
 
-# Fit a longitudinal factor model using PoliticalDemocracy data
-ind_mat <- cbind(c("y1", "y2", "y3", "y4"), c("y5", "y6", "y7", "y8"))
-fit <- longcfa(ind_mat, lv_names = c("dem60", "dem65"), data = PoliticalDemocracy,
-               long_equal = c("loadings", "intercepts"), lag_cov = TRUE)
-# Obtain an unidentified model
-mod_un <- longcfa_syntax(
-    ind_mat, lv_names = c("dem60", "dem65"),
-    lag_cov = TRUE,
-    free_latvars = TRUE, free_latmeans = TRUE
-)
-fit_un <- cfa(mod_un, data = PoliticalDemocracy, do.fit = FALSE, std.lv = TRUE,
-              start = fit)
+# Define a longitudinal factor model with PoliticalDemocracy data
+model <- "
+  dem60 =~ y1 + y2 + y3 + y4
+  dem65 =~ y5 + y6 + y7 + y8
+  dem60 ~~ dem65
+  dem60 ~~ 1 * dem60
+  dem65 ~~ NA * dem65
+  dem60 ~ 0
+  dem65 ~ NA * 1
+  y1 ~~ y5
+  y2 ~~ y6
+  y3 ~~ y7
+  y4 ~~ y8
+"
 
-# Get parameter IDs for loadings
-load_ids <- get_lav_par_id(fit_un, op = "=~", ind_matrix = ind_mat)
-int_ids <- get_lav_par_id(fit_un, op = "~1", ind_matrix = ind_mat)
+# Fit the model without constraints first to get parameter table
+fit_un <- cfa(model, data = PoliticalDemocracy, std.lv = TRUE,
+              meanstructure = TRUE, do.fit = FALSE)
 
-# Apply penalized estimation with alignment loss
+# Get parameter IDs
+pt <- parTable(fit_un)
+# Loadings
+load_60 <- pt$free[pt$op == "=~" & pt$lhs == "dem60"]
+load_65 <- pt$free[pt$op == "=~" & pt$lhs == "dem65"]
+# Intercepts
+int_60 <- pt$free[pt$op == "~1" & pt$lhs \%in\% c("y1", "y2", "y3", "y4")]
+int_65 <- pt$free[pt$op == "~1" & pt$lhs \%in\% c("y5", "y6", "y7", "y8")]
+
+# Apply penalized estimation to penalize differences in loadings and intercepts
 pen_fit <- penalized_est(
     x = fit_un,
-    w = 0.1,
-    pen_diff_id = list(cbind(t(load_ids), t(int_ids))),
-    pen_fn = "alf"
+    w = 0.03,
+    pen_diff_id = list(
+        loadings = rbind(load_60, load_65),
+        intercepts = rbind(int_60, int_65)
+    ),
+    pen_fn = "l0a"
 )
 
 # Compare parameter estimates
-cbind(coef(fit), coef(pen_fit))
-
-# Compare log-likelihoods
-c("scalar invariance" = logLik(fit), "penalized" = logLik(pen_fit))
-}
+summary(pen_fit)
 
 }
 \seealso{
