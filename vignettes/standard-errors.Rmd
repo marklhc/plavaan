@@ -1,0 +1,272 @@
+---
+title: "Standard Errors"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Standard Errors}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+    collapse = TRUE,
+    comment = "#>"
+)
+```
+
+This vignette demonstrates the calculation of standard errors for penalized estimates, using the sandwich estimator approach as in the "MLR" estimator of `lavaan`. The standard errors are obtained as the square roots of the diagonal elements of the sandwich variance estimator:
+
+$$
+\mathrm{B}_\text{bread}^{-1} \; \mathrm{B}_\text{meat} \; \mathrm{B}_\text{bread}^{-1},
+$$
+
+where $\mathrm{B}_\text{bread}$ is the observed information matrix (i.e., the Hessian of the penalized objective function) and $\mathrm{B}_\text{meat}$ is the first-order information matrix (obtained using `lavInspect(..., information.first.order)`).
+
+```{r}
+library(lavaan)
+library(plavaan)
+data(PoliticalDemocracy)
+```
+
+## Penalize cross-loadings
+
+### Two-factor CFA model
+
+```{r}
+mod0 <- "
+  ind60 =~ x1 + x2 + x3
+  dem60 =~ y1 + y2 + y3 + y4
+  ind60 ~~ dem60
+"
+fit0 <- cfa(mod0, data = PoliticalDemocracy, std.lv = TRUE, estimator = "MLR")
+```
+
+```{r eval=FALSE, include=FALSE}
+# lav_model_vcov_se(fit0@Model, fit0@ParTable)  # not what I expected
+lavaan:::lav_model_nvcov_robust_sem
+lavaan:::lav_model_nvcov_robust_sandwich
+lavaan:::computeDelta(fit0@Model)
+lavaan:::lav_model_information_firstorder(
+    lavmodel = fit0@Model,
+    lavsamplestats = fit0@SampleStats,
+    lavdata = fit0@Data,
+    lavcache = fit0@Cache,
+    lavimplied = fit0@implied,x
+    lavh1 = fit0@h1,
+    lavoptions = fit0@Options,
+    extra = TRUE,
+    check.pd = FALSE,
+    augmented = FALSE,
+    inverted = FALSE
+)
+meat <- lavInspect(fit0, "information.first.order")
+# crossprod(estfun.lavaan(fit0)) / lavInspect(fit0, "nobs") - meat
+# lavInspect(fit0, "hessian")
+# ff0 <- lav_export_estimation(fit0)
+# numDeriv::hessian(ff0$objective, coef(fit0), lavaan_model = fit0) -
+#     lavInspect(fit0, "hessian")
+bread <- lavInspect(fit0, "information.observed")
+solve(bread) %*% meat %*% solve(bread)
+fit0@vcov$vcov * 75
+# May need to consult EFA
+var.names <- paste("x", 1:9, sep = "")
+# debugonce(lavaan:::lav_model_estimate)  # It appears that EFA also uses optim. So perhaps need to code the objective directly.
+fit <- efa(data = HolzingerSwineford1939[, var.names], nfactors = 1:3)
+fit$nf3@optim
+```
+
+Penalized
+
+```{r}
+mod <- "
+  ind60 =~ x1 + x2 + x3 + y1 + y2 + y3 + y4
+  dem60 =~ x1 + x2 + x3 + y1 + y2 + y3 + y4
+  ind60 ~~ ind60
+"
+fit <- cfa(mod, data = PoliticalDemocracy, std.lv = TRUE, do.fit = FALSE)
+```
+
+```{r}
+pefa_fit <- penalized_est(
+    fit,
+    w = .03,
+    pen_par_id = 4:10,
+    se = "robust.huber.white"
+)
+summary(pefa_fit)
+```
+
+```{r, eval=FALSE}
+# Quick simulation to check SEs
+set.seed(1234)
+R <- 250
+est_res <- matrix(NA, nrow = R, ncol = length(coef(pefa_fit)))
+se_res <- matrix(NA, nrow = R, ncol = length(coef(pefa_fit)))
+
+# Use the simple structure model as population
+pop_model <- parTable(pefa_fit)
+
+for (i in 1:R) {
+    # Simulate data
+    dat_sim <- simulateData(pop_model, sample.nobs = 200)
+
+    # Fit penalized model
+    fit_sim <- cfa(mod, data = dat_sim, std.lv = TRUE, do.fit = FALSE)
+    pefa_sim <- try(
+        penalized_est(
+            fit_sim,
+            w = .03,
+            pen_par_id = 4:10,
+            se = "robust.huber.white"
+        ),
+        silent = TRUE
+    )
+
+    if (!inherits(pefa_sim, "try-error")) {
+        est_res[i, ] <- coef(pefa_sim)
+        se_res[i, ] <- sqrt(diag(vcov(pefa_sim)))
+    }
+}
+
+# Compare empirical SD vs mean SE for a few parameters
+# (e.g., first few loadings)
+res_summary <- data.frame(
+    param = names(coef(pefa_fit)),
+    emp_sd = apply(est_res, 2, sd, na.rm = TRUE),
+    mean_se = apply(se_res, 2, mean, na.rm = TRUE)
+)
+```
+
+```{r include=FALSE}
+if (!file.exists("sim-se-summary.rds")) {
+    saveRDS(res_summary, "sim-se-summary.rds")
+} else {
+    res_summary <- readRDS("sim-se-summary.rds")
+}
+```
+
+```{r}
+print(res_summary, digits = 2)
+```
+
+```{r}
+# meat <- lavInspect(pefa_fit, "information.first.order")
+# bread <- attr(pefa_fit, "hessian")
+# vc_pefa <- solve(bread) %*% meat %*% solve(bread) / 75
+# pefa_fit@vcov$vcov <- vc_pefa
+# se_pefa <- sqrt(diag(vc_pefa))
+# pefa_fit@ParTable$se <- 0 * pefa_fit@ParTable$est
+# pefa_fit@ParTable$se[which(pefa_fit@ParTable$free > 0)] <- se_pefa
+# cbind(coef(pefa_fit), sqrt(diag(vc_pefa)))
+```
+
+## Penalize non-invariance
+
+```{r}
+lconfig_mod_un <- "
+    # Time 1
+    dem60 =~ .l1_1 * y1 + .l2_1 * y2 + .l3_1 * y3 + .l4_1 * y4
+    y1 ~ .i1_1 * 1
+    y2 ~ .i2_1 * 1
+    y3 ~ .i3_1 * 1
+    y4 ~ .i4_1 * 1
+    y1 ~~ .u1_1 * y1
+    y2 ~~ .u2_1 * y2
+    y3 ~~ .u3_1 * y3
+    y4 ~~ .u4_1 * y4
+    
+    # Time 2
+    dem65 =~ .l1_2 * y5 + .l2_2 * y6 + .l3_2 * y7 + .l4_2 * y8
+    y5 ~ .i1_2 * 1
+    y6 ~ .i2_2 * 1
+    y7 ~ .i3_2 * 1
+    y8 ~ .i4_2 * 1
+    y5 ~~ .u1_2 * y5
+    y6 ~~ .u2_2 * y6
+    y7 ~~ .u3_2 * y7
+    y8 ~~ .u4_2 * y8
+    
+    # Latent variances
+    dem60 ~~ 1 * dem60
+    dem65 ~~ NA * dem65
+    
+    # Latent means
+    dem60 ~ 0 * 1
+    dem65 ~ NA * 1
+    
+    # Lag Covariances
+    y1 ~~ y5
+    y2 ~~ y6
+    y3 ~~ y7
+    y4 ~~ y8
+"
+# Specify the under-identified model
+lconfig_fit_un <- cfa(
+    lconfig_mod_un,
+    data = PoliticalDemocracy,
+    do.fit = FALSE,
+    std.lv = TRUE,
+    missing = "fiml",
+    estimator = "mlr"
+)
+ld_id <- rbind(1:4, 13:16)
+int_id <- rbind(5:8, 17:20)
+pen_fit <- penalized_est(
+    lconfig_fit_un,
+    w = 0.03,
+    pen_fn = "l0a",
+    pen_diff_id = list(loadings = ld_id, intercepts = int_id),
+    se = "robust.huber.white"
+)
+parameterEstimates(pen_fit)
+```
+
+Compared to scalar invariance model
+
+```{r}
+lscalar_mod <- "
+    # Time 1
+    dem60 =~ .l1 * y1 + .l2 * y2 + .l3 * y3 + .l4 * y4
+    y1 ~ .i1 * 1
+    y2 ~ .i2 * 1
+    y3 ~ .i3 * 1
+    y4 ~ .i4 * 1
+    y1 ~~ .u1_1 * y1
+    y2 ~~ .u2_1 * y2
+    y3 ~~ .u3_1 * y3
+    y4 ~~ .u4_1 * y4
+    
+    # Time 2
+    dem65 =~ .l1 * y5 + .l2 * y6 + .l3 * y7 + .l4 * y8
+    y5 ~ .i1 * 1
+    y6 ~ .i2 * 1
+    y7 ~ .i3 * 1
+    y8 ~ .i4 * 1
+    y5 ~~ .u1_2 * y5
+    y6 ~~ .u2_2 * y6
+    y7 ~~ .u3_2 * y7
+    y8 ~~ .u4_2 * y8
+    
+    # Latent variances
+    dem60 ~~ 1 * dem60
+    dem65 ~~ NA * dem65
+    
+    # Latent means
+    dem60 ~ 0 * 1
+    dem65 ~ NA * 1
+    
+    # Lag Covariances
+    y1 ~~ y5
+    y2 ~~ y6
+    y3 ~~ y7
+    y4 ~~ y8
+"
+lscalar_fit <- cfa(
+    lscalar_mod,
+    data = PoliticalDemocracy,
+    std.lv = TRUE,
+    missing = "fiml",
+    estimator = "mlr"
+)
+parameterEstimates(lscalar_fit)
+```
