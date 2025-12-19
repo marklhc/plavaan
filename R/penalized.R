@@ -210,6 +210,10 @@ penalized_est <- function(
     )
     out <- add_nlminb_info(out, opt)
     hess <- numDeriv::hessian(f1, opt$par)
+    if (!se %in% c("none", "robust.huber.white")) {
+        warning("se must be either 'none' or 'robust.huber.white'. ",
+                "Defaulting to 'none'")
+    }
     if (se == "robust.huber.white") {
         attr(out, "hessian") <- hess
         out <- add_vcov_pen(out, hess)

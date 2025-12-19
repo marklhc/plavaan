@@ -3,7 +3,7 @@ Title: Penalized Estimation for Latent Variable Models with 'lavaan'
 Version: 0.0.1
 Authors@R: 
     person("Hok Chio (Mark)", "Lai", , "marklhc@gmail.com",
-           role = c("aut", "cre", "cph"),
+           role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-9196-7406"))
 Description: Extends the popular 'lavaan' package by adding penalized
     estimation capabilities. It supports penalty on individual parameters
