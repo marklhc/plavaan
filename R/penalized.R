@@ -1,33 +1,22 @@
 # Penalized objective function
-penalized_obj <- function(
-    x,
-    obj_fn,
-    w,
-    pen_fn,
-    pen_par_id = NULL,
-    pen_diff_id = NULL
-) {
+penalized_obj <- function(x, obj_fn, w, pen_fn, pen_par_id, diff_configs) {
     out <- obj_fn(x)
+    
     if (!is.null(pen_par_id)) {
         out <- out + w * sum(pen_fn(x[pen_par_id]))
     }
-    if (!is.null(pen_diff_id)) {
-        trans_diff <- rep(list(identity), length(pen_diff_id))
-        if (any(grepl("^loading", names(pen_diff_id)))) {
-            trans_diff[[grep("^loading", names(pen_diff_id))]] <- log
-        }
-        pen_diff <- Map(
-            function(mat, trans) {
-                x_mat <- matrix(
-                    x[mat],
-                    nrow = nrow(mat),
-                    ncol = ncol(mat)
-                )
-                composite_pair_loss(x_mat, fun = pen_fn, trans = trans)
-            },
-            mat = pen_diff_id,
-            trans = trans_diff
-        )
+    
+    if (!is.null(diff_configs)) {
+        pen_diff <- lapply(diff_configs, function(cfg) {
+            x_mat <- matrix(x[cfg$mat], nrow = nrow(cfg$mat), ncol = ncol(cfg$mat))
+            x_trans <- as.matrix(cfg$trans(x_mat))
+            
+            # Use pre-computed combn_idx and rescale_val
+            diffs <- x_trans[cfg$combn_idx[1, ], , drop = FALSE] - 
+                     x_trans[cfg$combn_idx[2, ], , drop = FALSE]
+            
+            sum(pen_fn(diffs), na.rm = TRUE) * cfg$rescale_val
+        })
         out <- out + w * sum(unlist(pen_diff))
     }
     out
@@ -162,6 +151,43 @@ penalized_est <- function(
         )
         pen_fn <- get(pen_fn)
     }
+
+    if (!is.function(pen_fn) && !pen_fn %in% c("l0a", "alf")) {
+        stop("pen_fn must be 'l0a', 'alf', or a function.")
+    }
+    diff_configs <- NULL
+    if (!is.null(pen_diff_id)) {
+        diff_configs <- lapply(names(pen_diff_id), function(nm) {
+            mat <- pen_diff_id[[nm]]
+            is_loading <- grepl("^loading", nm)
+            
+            # Pre-assign transformations
+            trans <- if (is_loading) log else identity
+            gr_trans <- if (is_loading) function(x) 1/x else function(x) rep(1, length(x))
+            
+            # Pre-compute combinatorics and rescaling
+            nrow_x <- nrow(mat)
+            combn_idx <- combn(nrow_x, 2)
+            rescale_val <- (nrow_x - 1) / ncol(combn_idx)
+            
+            # Pre-compute gradient row indices to avoid which() loops later
+            grad_idx <- lapply(seq_len(nrow_x), function(i) {
+                list(
+                    idx1 = which(combn_idx[1, ] == i),
+                    idx2 = which(combn_idx[2, ] == i)
+                )
+            })
+            
+            list(
+                mat = mat, 
+                trans = trans, 
+                gr_trans = gr_trans,
+                combn_idx = combn_idx, 
+                rescale_val = rescale_val,
+                grad_idx = grad_idx
+            )
+        })
+    }
     f1 <- function(v) {
         penalized_obj(
             v,
@@ -171,18 +197,22 @@ penalized_est <- function(
             w = w,
             pen_fn = pen_fn,
             pen_par_id = pen_par_id,
-            pen_diff_id = pen_diff_id
+            diff_configs = diff_configs
         )
     }
-    gr1 <- function(v) {
-        penalized_gr(
-            v,
-            gr_fn = function(pars) ff$gradient_function(pars, lavaan_model = x),
-            w = w,
-            pen_gr = pen_gr,
-            pen_par_id = pen_par_id,
-            pen_diff_id = pen_diff_id
-        )
+    gr1 <- if (!is.null(pen_gr)) {
+        function(v) {
+            penalized_gr(
+                v,
+                gr_fn = function(pars) ff$gradient_function(pars, lavaan_model = x),
+                w = w,
+                pen_gr = pen_gr,
+                pen_par_id = pen_par_id,
+                diff_configs = diff_configs
+            )
+        }
+    } else {
+        NULL  # Let nlminb compute numerical gradient
     }
     opt <- nlminb(
         ff$starting_values,
@@ -209,12 +239,12 @@ penalized_est <- function(
         # start = opt$par
     )
     out <- add_nlminb_info(out, opt)
-    hess <- numDeriv::hessian(f1, opt$par)
     if (!se %in% c("none", "robust.huber.white")) {
         warning("se must be either 'none' or 'robust.huber.white'. ",
                 "Defaulting to 'none'")
     }
     if (se == "robust.huber.white") {
+        hess <- numDeriv::hessian(f1, opt$par)
         attr(out, "hessian") <- hess
         out <- add_vcov_pen(out, hess)
     }
@@ -235,7 +265,8 @@ add_nlminb_info <- function(fit, opt) {
 #' @importFrom lavaan lavInspect
 add_vcov_pen <- function(fit, hess) {
     meat <- lavInspect(fit, "information.first.order")
-    vc_out <- try(solve(hess) %*% meat %*% solve(hess), silent = TRUE)
+    H_inv <- solve(hess)
+    vc_out <- try(H_inv %*% meat %*% H_inv, silent = TRUE)
     if (inherits(vc_out, "try-error")) {
         vc_out <- NULL
     }
@@ -251,43 +282,39 @@ add_vcov_pen <- function(fit, hess) {
     fit
 }
 
-penalized_gr <- function(
-    x,
-    gr_fn,
-    w,
-    pen_gr,
-    pen_par_id = NULL,
-    pen_diff_id = NULL,
-    ...
-) {
+penalized_gr <- function(x, gr_fn, w, pen_gr, pen_par_id, diff_configs, ...) {
     out <- gr_fn(x)
+    
     if (!is.null(pen_par_id)) {
         out <- out + w * hot_gr(x, pen_par_id, pen_gr, ...)
     }
-    if (!is.null(pen_diff_id)) {
-        trans_diff <- rep(list(identity), length(pen_diff_id))
-        gr_trans_diff <- rep(list(function(x) 1), length(pen_diff_id))
-        if (any(grepl("^loading", names(pen_diff_id)))) {
-            trans_diff[[grep("^loading", names(pen_diff_id))]] <- log
-            gr_trans_diff[[grep("^loading", names(pen_diff_id))]] <-
-                function(x) 1 / x
-        }
-        pen_diff_gr <- Map(
-            function(mat, trans, gr_trans) {
-                hot_gr(
-                    x,
-                    mat,
-                    gr_cpl,
-                    gr_fun = pen_gr,
-                    trans = trans,
-                    gr_trans = gr_trans,
-                    ...
-                )
-            },
-            mat = pen_diff_id,
-            trans = trans_diff,
-            gr_trans = gr_trans_diff
-        )
+    
+    if (!is.null(diff_configs)) {
+        pen_diff_gr <- lapply(diff_configs, function(cfg) {
+            x_mat <- as.matrix(cfg$trans(matrix(x[cfg$mat], nrow = nrow(cfg$mat))))
+            
+            diffs <- x_mat[cfg$combn_idx[1, ], , drop = FALSE] - 
+                     x_mat[cfg$combn_idx[2, ], , drop = FALSE]
+                     
+            grad_contribs <- pen_gr(diffs)
+            grad <- matrix(0, nrow = nrow(x_mat), ncol = ncol(x_mat))
+            
+            # Loop is now incredibly fast because indices are pre-calculated
+            for (i in seq_len(nrow(x_mat))) {
+                g1 <- grad_contribs[cfg$grad_idx[[i]]$idx1, , drop = FALSE]
+                g2 <- grad_contribs[cfg$grad_idx[[i]]$idx2, , drop = FALSE]
+                
+                grad[i, ] <- colSums(g1, na.rm = TRUE) - colSums(g2, na.rm = TRUE)
+            }
+            
+            grad[which(is.na(x_mat))] <- NA
+            grad_vec <- as.vector(grad) * cfg$rescale_val * cfg$gr_trans(x[cfg$mat])
+            
+            # Re-map back to the full parameter vector space (hot_gr equivalent inline)
+            full_grad <- 0 * x
+            full_grad[na.omit(as.numeric(cfg$mat))] <- na.omit(grad_vec)
+            full_grad
+        })
         out <- out + w * Reduce(`+`, pen_diff_gr)
     }
     out

@@ -24,7 +24,7 @@ terms.}
 
 \item{pen_par_id}{Integer vector of parameter IDs to apply the penalty function
 directly to, in the same order as returned by \code{lavaan::coef()} and by
-\code{\link[lavaan:parTable]{lavaan::partable()}}, with only the free elements.}
+\code{\link[lavaan:partable]{lavaan::partable()}}, with only the free elements.}
 
 \item{pen_diff_id}{List of matrices containing parameter IDs. For each matrix,
 the penalty is applied to the pairwise differences of parameters in the same
