@@ -93,6 +93,7 @@ test_that("gr_cpl() computes the right gradient", {
         function(x) composite_pair_loss(log(x), fun = l0a),
         t(ld_mat2)
     )
+    expect_equal(g5, g6)
 })
 
 test_that("gr_cpl() computes the right gradient with multiple groups", {

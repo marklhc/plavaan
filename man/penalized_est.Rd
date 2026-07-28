@@ -12,7 +12,8 @@ penalized_est(
   pen_fn = "l0a",
   pen_gr = NULL,
   se = "none",
-  opt_control = list()
+  opt_control = list(),
+  start = NULL
 )
 }
 \arguments{
@@ -24,12 +25,11 @@ terms.}
 
 \item{pen_par_id}{Integer vector of parameter IDs to apply the penalty function
 directly to, in the same order as returned by \code{lavaan::coef()} and by
-\code{\link[lavaan:parTable]{lavaan::partable()}}, with only the free elements.}
+\code{\link[lavaan:partable]{lavaan::partable()}}, with only the free elements.}
 
 \item{pen_diff_id}{List of matrices containing parameter IDs. For each matrix,
 the penalty is applied to the pairwise differences of parameters in the same
-column indicated by the IDs. For matrices with names starting with "loading",
-the log transformation is applied before computing differences.}
+column indicated by the IDs.}
 
 \item{pen_fn}{A character string (\code{"l0a"} or \code{"alf"}) or a function that computes
 the penalty. Default is \code{"l0a"}.}
@@ -44,6 +44,10 @@ which is the same as used in the \code{"mlr"} estimator).}
 
 \item{opt_control}{A list of control parameters passed to \code{\link[stats:nlminb]{stats::nlminb()}}.
 Default includes \code{eval.max = 2e4}, \code{iter.max = 1e4}, and \code{abs.tol = 1e-20}.}
+
+\item{start}{Numeric vector of starting values for the optimizer, or \code{NULL}
+(default) to use lavaan's default starting values. If supplied, its length
+must match the number of free parameters in the model.}
 }
 \value{
 A lavaan model object updated with the penalized parameter estimates.

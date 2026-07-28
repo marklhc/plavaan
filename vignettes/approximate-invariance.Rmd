@@ -60,6 +60,9 @@ The penalized estimation finds a solution where the loadings and intercepts diff
 
 ## Compared to Results from Mplus (version 9.0)
 
+The following chunk is illustrative only and requires a local Mplus installation
+and the `inst/mplus/` directory (not included in the package):
+
 ```{r, echo=TRUE, eval=FALSE}
 # export to Mplus
 write.table(PoliticalDemocracy,

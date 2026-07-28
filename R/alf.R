@@ -39,6 +39,9 @@
 #' @importFrom utils combn
 #' @export
 composite_pair_loss <- function(x, fun, trans = identity, rescale = "df", ...) {
+    if (is.numeric(rescale) && length(rescale) != 1) {
+        stop("rescale must be a single numeric value or 'df'.")
+    }
     x <- as.matrix(trans(x))
     nrow_x <- nrow(x)
     if (nrow_x < 2) {
@@ -74,10 +77,13 @@ gr_cpl <- function(
     gr_fun,
     trans = identity,
     gr_trans = function(x) 1,
-    rescale = "df"
+    rescale = "df",
+    combn_idx = NULL
 ) {
     x_mat <- as.matrix(trans(x))
-    combn_idx <- combn(nrow(x_mat), 2)
+    if (is.null(combn_idx)) {
+        combn_idx <- combn(nrow(x_mat), 2)
+    }
     diffs <- x_mat[combn_idx[1, ], , drop = FALSE] -
         x_mat[combn_idx[2, ], , drop = FALSE]
     grad_contribs <- gr_fun(diffs)
