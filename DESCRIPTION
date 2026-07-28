@@ -18,7 +18,7 @@ Suggests:
 VignetteBuilder: knitr
 Config/testthat/edition: 3
 Imports: 
-    lavaan,
+    lavaan (>= 0.6-15),
     numDeriv
 URL: https://marklhc.github.io/plavaan/, https://github.com/marklhc/plavaan
 BugReports: https://github.com/marklhc/plavaan/issues

@@ -83,9 +83,9 @@ random_start <- function(x, n = 1) {
     all_var_mask <- pt$op == "~~" & pt$lhs == pt$rhs
     var_lookup <- setNames(pt$est[all_var_mask], pt$lhs[all_var_mask])
 
-    # For observed variables not in the parTable variance entries, fall back to
-    # sample covariance diagonal. Overwrite existing entries with max(base, obs)
-    # for safety against non-positive-definite matrices.
+    # For variable names present in both the parameter table and observed covariance,
+    # update the variance estimate to the maximum of the two (base estimate and
+    # observed variance) for safety against non-positive-definite matrices.
     for (vn in intersect(names(obs_variances), names(var_lookup))) {
         var_lookup[vn] <- max(var_lookup[vn], obs_variances[vn], na.rm = TRUE)
     }

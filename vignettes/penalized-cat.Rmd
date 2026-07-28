@@ -112,7 +112,7 @@ mod_un <- "
   x8 ~~ 1 * x8
   x9 ~~ 1 * x9
 "
-fit_mg_nofit <- cfa(mod_base, data = hs_data, ordered = TRUE, std.lv = TRUE,
+fit_mg_nofit <- cfa(mod_un, data = hs_data, ordered = TRUE, std.lv = TRUE,
                     auto.fix.first = FALSE,
                     parameterization = "theta", group = "school", do.fit = FALSE)
 ```
@@ -192,5 +192,5 @@ cat("Effective number of non-invariant loadings:", eff_load_diff, "\n")
 cat("Effective number of non-invariant thresholds:", eff_thresh_diff, "\n")
 ```  
 
-The penalized estimation approach identifies which loadings and thresholds substantively differ across groups, providing an efficienct, data-driven assessment of measurement invariance for ordinal data.
+The penalized estimation approach identifies which loadings and thresholds substantively differ across groups, providing an efficient, data-driven assessment of measurement invariance for ordinal data.
 

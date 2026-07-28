@@ -166,6 +166,7 @@ Multistart runs sequentially for simplicity. For parallel execution, call `penal
 library(future.apply)
 plan(multicore)
 
+# Note: random_start() is an internal helper without API stability guarantees.
 starts <- plavaan:::random_start(fit_un, n = 10)[-1, , drop = FALSE]  # skip base
 fits <- future_lapply(seq_len(nrow(starts)), function(i) {
     penalized_est(

@@ -124,7 +124,6 @@ penalized_obj <- function(x, obj_fn, w, pen_fn, pen_par_id, diff_configs) {
 #' # Compare parameter estimates
 #' summary(pen_fit)
 #'
-#' @importFrom stats update
 #' @importFrom utils modifyList
 #' @export
 penalized_est <- function(
@@ -158,11 +157,13 @@ penalized_est <- function(
         )
     }
     if (pen_fn %in% c("l0a", "alf")) {
-        pen_gr <- switch(
-            pen_fn,
-            l0a = gr_l0a,
-            alf = gr_alf
-        )
+        if (is.null(pen_gr)) {
+            pen_gr <- switch(
+                pen_fn,
+                l0a = gr_l0a,
+                alf = gr_alf
+            )
+        }
         pen_fn <- get(pen_fn)
     }
 
@@ -265,7 +266,24 @@ penalized_est <- function(
     if (se == "robust.huber.white") {
         hess <- numDeriv::hessian(f1, opt$par)
         attr(out, "hessian") <- hess
-        out <- add_vcov_pen(out, hess)
+        out <- try(add_vcov_pen(out, hess), silent = TRUE)
+        if (inherits(out, "try-error")) {
+            warning(
+                "Computation of robust sandwich estimator standard errors failed ",
+                "(likely due to a singular or nearly-singular Hessian). ",
+                "Standard errors are not available."
+            )
+            out <- x_opt$start <- opt$par
+            x_opt$do.fit <- FALSE
+            x_opt$se <- "none"
+            out <- lavaan::lavaan(
+                lavaan::partable(x),
+                slotOptions = x_opt,
+                slotSampleStats = x@SampleStats,
+                slotData = x@Data
+            )
+            out <- add_nlminb_info(out, opt)
+        }
     }
     out
 }
@@ -284,13 +302,9 @@ add_nlminb_info <- function(fit, opt) {
 #' @importFrom lavaan lavInspect
 add_vcov_pen <- function(fit, hess) {
     meat <- lavInspect(fit, "information.first.order")
-    vc_out <- try({
-        H_inv <- solve(hess)
-        H_inv %*% meat %*% H_inv
-    }, silent = TRUE)
-    if (inherits(vc_out, "try-error")) {
-        vc_out <- NULL
-    }
+    H_inv <- solve(hess)
+    vc_out <- H_inv %*% meat %*% H_inv
+    
     fit@vcov$se <- "robust.huber.white"
     fit@vcov$vcov <- vc_out / lavInspect(fit, "nobs")
     fit@vcov$information <- "observed"
@@ -301,7 +315,7 @@ add_vcov_pen <- function(fit, hess) {
         fit@vcov$vcov
     ))
     fit
-    }
+}
 
 penalized_gr <- function(x, gr_fn, w, pen_gr, pen_par_id, diff_configs, ...) {
     out <- gr_fn(x)
@@ -357,7 +371,7 @@ penalized_gr <- function(x, gr_fn, w, pen_gr, pen_par_id, diff_configs, ...) {
             value_nan <- is.nan(grad_vec[structural_valid])
             if (any(value_nan)) {
                 warning(
-                    "Gradient of the some penalty is undefined ",
+                    "Gradient of some penalty is undefined ",
                     "(NaN) for ", sum(value_nan), " parameter(s). This could happen when ",
                     "for example, log() was applied to a non-positive loading estimate. ",
                     "These contributions are set to 0; consider using a different ",

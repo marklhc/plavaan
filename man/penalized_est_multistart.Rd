@@ -63,15 +63,15 @@ attribute for inspection of alternative local solutions. Default is \code{FALSE}
 Default is \code{FALSE}.}
 }
 \value{
-A lavaan model object (same shape as \code{\link[=penalized_est]{penalized_est()}}'s return), with
-additional attributes:
+A lavaan model object (same shape as [penalized_est()]'s return), with
+  additional attributes:
 
 \describe{
-\item{\code{multistart}}{A data frame with one row per start, containing columns
-\code{start_id}, \code{objective} (final penalized objective value), and
-\code{converged} (logical). Rows are sorted by ascending objective.}
-\item{\code{all_fits}}{If \code{keep_all = TRUE}, a named list of all fitted lavaan
-objects, one per starting vector.}
+  \item{`multistart`}{A data frame with one row per start, containing columns
+    `start_id`, `objective` (final penalized objective value), and
+    `converged` (logical). Rows are sorted by ascending objective.}
+  \item{`all_fits`}{If `keep_all = TRUE`, a named list of all fitted lavaan
+    objects, one per starting vector.}
 }
 }
 \description{

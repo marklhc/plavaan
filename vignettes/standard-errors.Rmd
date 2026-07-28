@@ -41,40 +41,6 @@ mod0 <- "
 fit0 <- cfa(mod0, data = PoliticalDemocracy, std.lv = TRUE, estimator = "MLR")
 ```
 
-```{r eval=FALSE, include=FALSE}
-# lav_model_vcov_se(fit0@Model, fit0@ParTable)  # not what I expected
-lavaan:::lav_model_nvcov_robust_sem
-lavaan:::lav_model_nvcov_robust_sandwich
-lavaan:::computeDelta(fit0@Model)
-lavaan:::lav_model_information_firstorder(
-    lavmodel = fit0@Model,
-    lavsamplestats = fit0@SampleStats,
-    lavdata = fit0@Data,
-    lavcache = fit0@Cache,
-    lavimplied = fit0@implied,x
-    lavh1 = fit0@h1,
-    lavoptions = fit0@Options,
-    extra = TRUE,
-    check.pd = FALSE,
-    augmented = FALSE,
-    inverted = FALSE
-)
-meat <- lavInspect(fit0, "information.first.order")
-# crossprod(estfun.lavaan(fit0)) / lavInspect(fit0, "nobs") - meat
-# lavInspect(fit0, "hessian")
-# ff0 <- lav_export_estimation(fit0)
-# numDeriv::hessian(ff0$objective, coef(fit0), lavaan_model = fit0) -
-#     lavInspect(fit0, "hessian")
-bread <- lavInspect(fit0, "information.observed")
-solve(bread) %*% meat %*% solve(bread)
-fit0@vcov$vcov * 75
-# May need to consult EFA
-var.names <- paste("x", 1:9, sep = "")
-# debugonce(lavaan:::lav_model_estimate)  # It appears that EFA also uses optim. So perhaps need to code the objective directly.
-fit <- efa(data = HolzingerSwineford1939[, var.names], nfactors = 1:3)
-fit$nf3@optim
-```
-
 Penalized
 
 ```{r}
@@ -138,6 +104,9 @@ res_summary <- data.frame(
 ```
 
 ```{r include=FALSE}
+# Load cached simulation results
+# (the simulation above with eval=FALSE is illustrative only;
+# this .rds file is the source of truth for the displayed summary)
 if (!file.exists("sim-se-summary.rds")) {
     saveRDS(res_summary, "sim-se-summary.rds")
 } else {
