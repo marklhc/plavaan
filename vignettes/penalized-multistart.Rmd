@@ -114,7 +114,7 @@ all_fits <- attr(fit_all, "all_fits")
 ms_table <- attr(fit_all, "multistart")[order(attr(fit_all, "multistart")$objective), ]
 
 loadings_top3 <- lapply(head(all_fits[ms_table$start_id[1:3]], 3), function(f) {
-    coefs <- coef(f)[grep("dem60|=~", names(coef(f)))]
+    coefs <- coef(f)[grep("^dem60=~", names(coef(f)))]
     round(coefs, 4)
 })
 names(loadings_top3) <- paste0("Start ", ms_table$start_id[1:3])

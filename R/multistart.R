@@ -282,10 +282,8 @@ penalized_est_multistart <- function(
         best_conv <- valid_idx[which.min(ms_table$objective[valid_idx])]
     }
 
+    best_start_id <- ms_table$start_id[best_conv]
     ms_table <- ms_table[order(ms_table$objective), ]
-
-    # The best fit: map back from sorted row index to original results list
-    best_start_id <- ms_table$start_id[1]  # Row 1 after sorting = lowest objective
     best_fit <- results[[best_start_id]]
 
     # Attach multistart summary table

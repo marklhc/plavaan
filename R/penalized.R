@@ -171,9 +171,8 @@ penalized_est <- function(
     }
     diff_configs <- NULL
     if (!is.null(pen_diff_id)) {
-        diff_configs <- lapply(names(pen_diff_id), function(nm) {
-            mat <- pen_diff_id[[nm]]
-            is_loading <- grepl("^loading", nm)
+         diff_configs <- lapply(seq_along(pen_diff_id), function(i) {
+            mat <- pen_diff_id[[i]]
             
             # Pre-assign transformations
             trans <- identity
@@ -181,8 +180,13 @@ penalized_est <- function(
             
             # Pre-compute combinatorics and rescaling
             nrow_x <- nrow(mat)
-            combn_idx <- combn(nrow_x, 2)
-            rescale_val <- (nrow_x - 1) / ncol(combn_idx)
+            if (nrow_x < 2) {
+                combn_idx <- matrix(integer(), nrow = 2, ncol = 0)
+                rescale_val <- 0
+            } else {
+                combn_idx <- combn(nrow_x, 2)
+                rescale_val <- (nrow_x - 1) / ncol(combn_idx)
+            }
             
             # Pre-compute gradient row indices to avoid which() loops later
             grad_idx <- lapply(seq_len(nrow_x), function(i) {
@@ -256,6 +260,7 @@ penalized_est <- function(
     if (!se %in% c("none", "robust.huber.white")) {
         warning("se must be either 'none' or 'robust.huber.white'. ",
                 "Defaulting to 'none'")
+        se <- "none"
     }
     if (se == "robust.huber.white") {
         hess <- numDeriv::hessian(f1, opt$par)
@@ -279,8 +284,10 @@ add_nlminb_info <- function(fit, opt) {
 #' @importFrom lavaan lavInspect
 add_vcov_pen <- function(fit, hess) {
     meat <- lavInspect(fit, "information.first.order")
-    H_inv <- solve(hess)
-    vc_out <- try(H_inv %*% meat %*% H_inv, silent = TRUE)
+    vc_out <- try({
+        H_inv <- solve(hess)
+        H_inv %*% meat %*% H_inv
+    }, silent = TRUE)
     if (inherits(vc_out, "try-error")) {
         vc_out <- NULL
     }
@@ -294,7 +301,7 @@ add_vcov_pen <- function(fit, hess) {
         fit@vcov$vcov
     ))
     fit
-}
+    }
 
 penalized_gr <- function(x, gr_fn, w, pen_gr, pen_par_id, diff_configs, ...) {
     out <- gr_fn(x)
@@ -350,12 +357,11 @@ penalized_gr <- function(x, gr_fn, w, pen_gr, pen_par_id, diff_configs, ...) {
             value_nan <- is.nan(grad_vec[structural_valid])
             if (any(value_nan)) {
                 warning(
-                    "Gradient of the loading-difference penalty is undefined ",
-                    "(NaN) for ", sum(value_nan), " parameter(s), likely because ",
-                    "log() was applied to a non-positive loading estimate. ",
-                    "These contributions are set to 0; consider using ",
-                    "better starting values or reviewing sign/identification ",
-                    "of the affected loadings.",
+                    "Gradient of the some penalty is undefined ",
+                    "(NaN) for ", sum(value_nan), " parameter(s). This could happen when ",
+                    "for example, log() was applied to a non-positive loading estimate. ",
+                    "These contributions are set to 0; consider using a different ",
+                    "transformation function.",
                     call. = FALSE
                 )
             }
