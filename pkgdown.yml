@@ -3,10 +3,12 @@ pkgdown: 2.2.1
 pkgdown_sha: ~
 articles:
   approximate-invariance: approximate-invariance.html
+  negative-loading: negative-loading.html
   penalized-cat: penalized-cat.html
   penalized-fa: penalized-fa.html
+  penalized-multistart: penalized-multistart.html
   standard-errors: standard-errors.html
-last_built: 2026-07-28T11:09Z
+last_built: 2026-07-28T12:57Z
 urls:
   reference: https://marklhc.github.io/plavaan/reference
   article: https://marklhc.github.io/plavaan/articles

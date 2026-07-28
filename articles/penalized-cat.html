@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">plavaan</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -34,8 +34,10 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../articles/approximate-invariance.html">Approximate Invariance with Penalized Estimation</a></li>
+    <li><a class="dropdown-item" href="../articles/negative-loading.html">Negative Loadings</a></li>
     <li><a class="dropdown-item" href="../articles/penalized-cat.html">Penalized Estimation with Ordinal Data and Multiple Groups</a></li>
     <li><a class="dropdown-item" href="../articles/penalized-fa.html">Penalized Estimation of Cross-Loadings and Unique Covariances</a></li>
+    <li><a class="dropdown-item" href="../articles/penalized-multistart.html">Multistart Penalized Estimation</a></li>
     <li><a class="dropdown-item" href="../articles/standard-errors.html">Standard Errors</a></li>
   </ul>
 </li>
@@ -62,7 +64,7 @@
       <h1>Penalized Estimation with Ordinal Data and Multiple Groups</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/marklhc/plavaan/blob/v0.0.1/vignettes/penalized-cat.Rmd" class="external-link"><code>vignettes/penalized-cat.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/marklhc/plavaan/blob/main/vignettes/penalized-cat.Rmd" class="external-link"><code>vignettes/penalized-cat.Rmd</code></a></small>
       <div class="d-none name"><code>penalized-cat.Rmd</code></div>
     </div>
 
@@ -436,7 +438,7 @@ mean and variance only identified in the first group, without fitting
 <span><span class="st">  x8 ~~ 1 * x8</span></span>
 <span><span class="st">  x9 ~~ 1 * x9</span></span>
 <span><span class="st">"</span></span>
-<span><span class="va">fit_mg_nofit</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/lavaan/man/cfa.html" class="external-link">cfa</a></span><span class="op">(</span><span class="va">mod_base</span>, data <span class="op">=</span> <span class="va">hs_data</span>, ordered <span class="op">=</span> <span class="cn">TRUE</span>, std.lv <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span><span class="va">fit_mg_nofit</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/lavaan/man/cfa.html" class="external-link">cfa</a></span><span class="op">(</span><span class="va">mod_un</span>, data <span class="op">=</span> <span class="va">hs_data</span>, ordered <span class="op">=</span> <span class="cn">TRUE</span>, std.lv <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>                    auto.fix.first <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>                    parameterization <span class="op">=</span> <span class="st">"theta"</span>, group <span class="op">=</span> <span class="st">"school"</span>, do.fit <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
 <p>Examine the parameter table to identify loadings and thresholds:</p>
@@ -466,43 +468,43 @@ mean and variance only identified in the first group, without fitting
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Show thresholds</span></span>
 <span><span class="va">pt</span><span class="op">[</span><span class="va">pt</span><span class="op">$</span><span class="va">op</span> <span class="op">==</span> <span class="st">"|"</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"lhs"</span>, <span class="st">"op"</span>, <span class="st">"rhs"</span>, <span class="st">"group"</span>, <span class="st">"free"</span><span class="op">)</span><span class="op">]</span></span>
-<span><span class="co">#&gt;    lhs op rhs group free</span></span>
-<span><span class="co">#&gt; 19  x1  |  t1     1   10</span></span>
-<span><span class="co">#&gt; 20  x1  |  t2     1   11</span></span>
-<span><span class="co">#&gt; 21  x2  |  t1     1   12</span></span>
-<span><span class="co">#&gt; 22  x2  |  t2     1   13</span></span>
-<span><span class="co">#&gt; 23  x3  |  t1     1   14</span></span>
-<span><span class="co">#&gt; 24  x3  |  t2     1   15</span></span>
-<span><span class="co">#&gt; 25  x4  |  t1     1   16</span></span>
-<span><span class="co">#&gt; 26  x4  |  t2     1   17</span></span>
-<span><span class="co">#&gt; 27  x5  |  t1     1   18</span></span>
-<span><span class="co">#&gt; 28  x5  |  t2     1   19</span></span>
-<span><span class="co">#&gt; 29  x6  |  t1     1   20</span></span>
-<span><span class="co">#&gt; 30  x6  |  t2     1   21</span></span>
-<span><span class="co">#&gt; 31  x7  |  t1     1   22</span></span>
-<span><span class="co">#&gt; 32  x7  |  t2     1   23</span></span>
-<span><span class="co">#&gt; 33  x8  |  t1     1   24</span></span>
-<span><span class="co">#&gt; 34  x8  |  t2     1   25</span></span>
-<span><span class="co">#&gt; 35  x9  |  t1     1   26</span></span>
-<span><span class="co">#&gt; 36  x9  |  t2     1   27</span></span>
-<span><span class="co">#&gt; 82  x1  |  t1     2   40</span></span>
-<span><span class="co">#&gt; 83  x1  |  t2     2   41</span></span>
-<span><span class="co">#&gt; 84  x2  |  t1     2   42</span></span>
-<span><span class="co">#&gt; 85  x2  |  t2     2   43</span></span>
-<span><span class="co">#&gt; 86  x3  |  t1     2   44</span></span>
-<span><span class="co">#&gt; 87  x3  |  t2     2   45</span></span>
-<span><span class="co">#&gt; 88  x4  |  t1     2   46</span></span>
-<span><span class="co">#&gt; 89  x4  |  t2     2   47</span></span>
-<span><span class="co">#&gt; 90  x5  |  t1     2   48</span></span>
-<span><span class="co">#&gt; 91  x5  |  t2     2   49</span></span>
-<span><span class="co">#&gt; 92  x6  |  t1     2   50</span></span>
-<span><span class="co">#&gt; 93  x6  |  t2     2   51</span></span>
-<span><span class="co">#&gt; 94  x7  |  t1     2   52</span></span>
-<span><span class="co">#&gt; 95  x7  |  t2     2   53</span></span>
-<span><span class="co">#&gt; 96  x8  |  t1     2   54</span></span>
-<span><span class="co">#&gt; 97  x8  |  t2     2   55</span></span>
-<span><span class="co">#&gt; 98  x9  |  t1     2   56</span></span>
-<span><span class="co">#&gt; 99  x9  |  t2     2   57</span></span></code></pre></div>
+<span><span class="co">#&gt;     lhs op rhs group free</span></span>
+<span><span class="co">#&gt; 25   x1  |  t1     1   10</span></span>
+<span><span class="co">#&gt; 26   x1  |  t2     1   11</span></span>
+<span><span class="co">#&gt; 27   x2  |  t1     1   12</span></span>
+<span><span class="co">#&gt; 28   x2  |  t2     1   13</span></span>
+<span><span class="co">#&gt; 29   x3  |  t1     1   14</span></span>
+<span><span class="co">#&gt; 30   x3  |  t2     1   15</span></span>
+<span><span class="co">#&gt; 31   x4  |  t1     1   16</span></span>
+<span><span class="co">#&gt; 32   x4  |  t2     1   17</span></span>
+<span><span class="co">#&gt; 33   x5  |  t1     1   18</span></span>
+<span><span class="co">#&gt; 34   x5  |  t2     1   19</span></span>
+<span><span class="co">#&gt; 35   x6  |  t1     1   20</span></span>
+<span><span class="co">#&gt; 36   x6  |  t2     1   21</span></span>
+<span><span class="co">#&gt; 37   x7  |  t1     1   22</span></span>
+<span><span class="co">#&gt; 38   x7  |  t2     1   23</span></span>
+<span><span class="co">#&gt; 39   x8  |  t1     1   24</span></span>
+<span><span class="co">#&gt; 40   x8  |  t2     1   25</span></span>
+<span><span class="co">#&gt; 41   x9  |  t1     1   26</span></span>
+<span><span class="co">#&gt; 42   x9  |  t2     1   27</span></span>
+<span><span class="co">#&gt; 88   x1  |  t1     2   46</span></span>
+<span><span class="co">#&gt; 89   x1  |  t2     2   47</span></span>
+<span><span class="co">#&gt; 90   x2  |  t1     2   48</span></span>
+<span><span class="co">#&gt; 91   x2  |  t2     2   49</span></span>
+<span><span class="co">#&gt; 92   x3  |  t1     2   50</span></span>
+<span><span class="co">#&gt; 93   x3  |  t2     2   51</span></span>
+<span><span class="co">#&gt; 94   x4  |  t1     2   52</span></span>
+<span><span class="co">#&gt; 95   x4  |  t2     2   53</span></span>
+<span><span class="co">#&gt; 96   x5  |  t1     2   54</span></span>
+<span><span class="co">#&gt; 97   x5  |  t2     2   55</span></span>
+<span><span class="co">#&gt; 98   x6  |  t1     2   56</span></span>
+<span><span class="co">#&gt; 99   x6  |  t2     2   57</span></span>
+<span><span class="co">#&gt; 100  x7  |  t1     2   58</span></span>
+<span><span class="co">#&gt; 101  x7  |  t2     2   59</span></span>
+<span><span class="co">#&gt; 102  x8  |  t1     2   60</span></span>
+<span><span class="co">#&gt; 103  x8  |  t2     2   61</span></span>
+<span><span class="co">#&gt; 104  x9  |  t1     2   62</span></span>
+<span><span class="co">#&gt; 105  x9  |  t2     2   63</span></span></code></pre></div>
 <p>Identify parameter IDs for loadings and thresholds in each group:</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Loadings: group 1 (Pasteur) and group 2 (Grant-White)</span></span>
@@ -529,7 +531,7 @@ mean and variance only identified in the first group, without fitting
 <span><span class="co">#&gt;  [1] 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $thresholds_g2</span></span>
-<span><span class="co">#&gt;  [1] 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57</span></span></code></pre></div>
+<span><span class="co">#&gt;  [1] 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63</span></span></code></pre></div>
 <p>Fit the penalized model with penalties on differences in loadings and
 thresholds:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
@@ -542,11 +544,11 @@ thresholds:</p>
 <span>    <span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">fit_pen_mg</span><span class="op">)</span></span>
-<span><span class="co">#&gt; lavaan 0.7-2 ended normally after 152 iterations</span></span>
+<span><span class="co">#&gt; lavaan 0.7-2 ended normally after 207 iterations</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;   Estimator                                       DWLS</span></span>
 <span><span class="co">#&gt;   Optimization method                           NLMINB</span></span>
-<span><span class="co">#&gt;   Number of model parameters                        60</span></span>
+<span><span class="co">#&gt;   Number of model parameters                        66</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;   Number of observations per group:                   </span></span>
 <span><span class="co">#&gt;     Pasteur                                        156</span></span>
@@ -563,49 +565,58 @@ thresholds:</p>
 <span><span class="co">#&gt; Latent Variables:</span></span>
 <span><span class="co">#&gt;                    Estimate</span></span>
 <span><span class="co">#&gt;   visual =~                </span></span>
-<span><span class="co">#&gt;     x1                1.435</span></span>
-<span><span class="co">#&gt;     x2                0.567</span></span>
-<span><span class="co">#&gt;     x3                0.763</span></span>
+<span><span class="co">#&gt;     x1                1.332</span></span>
+<span><span class="co">#&gt;     x2                0.540</span></span>
+<span><span class="co">#&gt;     x3                0.785</span></span>
 <span><span class="co">#&gt;   textual =~               </span></span>
-<span><span class="co">#&gt;     x4                1.548</span></span>
-<span><span class="co">#&gt;     x5                2.499</span></span>
-<span><span class="co">#&gt;     x6                1.400</span></span>
+<span><span class="co">#&gt;     x4                1.716</span></span>
+<span><span class="co">#&gt;     x5                2.640</span></span>
+<span><span class="co">#&gt;     x6                1.502</span></span>
 <span><span class="co">#&gt;   speed =~                 </span></span>
-<span><span class="co">#&gt;     x7                0.849</span></span>
-<span><span class="co">#&gt;     x8                0.930</span></span>
-<span><span class="co">#&gt;     x9                1.550</span></span>
+<span><span class="co">#&gt;     x7                0.787</span></span>
+<span><span class="co">#&gt;     x8                0.809</span></span>
+<span><span class="co">#&gt;     x9                1.189</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Covariances:</span></span>
 <span><span class="co">#&gt;                    Estimate</span></span>
 <span><span class="co">#&gt;   visual ~~                </span></span>
-<span><span class="co">#&gt;     textual           0.448</span></span>
-<span><span class="co">#&gt;     speed             0.193</span></span>
+<span><span class="co">#&gt;     textual           0.445</span></span>
+<span><span class="co">#&gt;     speed             0.205</span></span>
 <span><span class="co">#&gt;   textual ~~               </span></span>
-<span><span class="co">#&gt;     speed             0.258</span></span>
+<span><span class="co">#&gt;     speed             0.275</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Intercepts:</span></span>
+<span><span class="co">#&gt;                    Estimate</span></span>
+<span><span class="co">#&gt;     visual            0.000</span></span>
+<span><span class="co">#&gt;     textual           0.000</span></span>
+<span><span class="co">#&gt;     speed             0.000</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Thresholds:</span></span>
 <span><span class="co">#&gt;                    Estimate</span></span>
-<span><span class="co">#&gt;     x1|t1            -2.379</span></span>
-<span><span class="co">#&gt;     x1|t2             1.477</span></span>
-<span><span class="co">#&gt;     x2|t1            -1.565</span></span>
-<span><span class="co">#&gt;     x2|t2             0.853</span></span>
-<span><span class="co">#&gt;     x3|t1            -0.704</span></span>
-<span><span class="co">#&gt;     x3|t2             0.566</span></span>
-<span><span class="co">#&gt;     x4|t1            -0.963</span></span>
-<span><span class="co">#&gt;     x4|t2             2.116</span></span>
-<span><span class="co">#&gt;     x5|t1            -1.404</span></span>
-<span><span class="co">#&gt;     x5|t2             1.970</span></span>
-<span><span class="co">#&gt;     x6|t1             0.731</span></span>
-<span><span class="co">#&gt;     x6|t2             3.338</span></span>
-<span><span class="co">#&gt;     x7|t1            -1.388</span></span>
-<span><span class="co">#&gt;     x7|t2             1.100</span></span>
-<span><span class="co">#&gt;     x8|t1            -0.176</span></span>
-<span><span class="co">#&gt;     x8|t2             2.570</span></span>
-<span><span class="co">#&gt;     x9|t1            -0.782</span></span>
-<span><span class="co">#&gt;     x9|t2             3.352</span></span>
+<span><span class="co">#&gt;     x1|t1            -2.520</span></span>
+<span><span class="co">#&gt;     x1|t2             1.248</span></span>
+<span><span class="co">#&gt;     x2|t1            -1.534</span></span>
+<span><span class="co">#&gt;     x2|t2             0.771</span></span>
+<span><span class="co">#&gt;     x3|t1            -0.571</span></span>
+<span><span class="co">#&gt;     x3|t2             0.691</span></span>
+<span><span class="co">#&gt;     x4|t1            -1.063</span></span>
+<span><span class="co">#&gt;     x4|t2             2.366</span></span>
+<span><span class="co">#&gt;     x5|t1            -1.511</span></span>
+<span><span class="co">#&gt;     x5|t2             2.256</span></span>
+<span><span class="co">#&gt;     x6|t1             0.788</span></span>
+<span><span class="co">#&gt;     x6|t2             3.112</span></span>
+<span><span class="co">#&gt;     x7|t1            -1.158</span></span>
+<span><span class="co">#&gt;     x7|t2             1.063</span></span>
+<span><span class="co">#&gt;     x8|t1            -0.217</span></span>
+<span><span class="co">#&gt;     x8|t2             2.475</span></span>
+<span><span class="co">#&gt;     x9|t1            -0.763</span></span>
+<span><span class="co">#&gt;     x9|t2             2.883</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Variances:</span></span>
 <span><span class="co">#&gt;                    Estimate</span></span>
+<span><span class="co">#&gt;     visual            1.000</span></span>
+<span><span class="co">#&gt;     textual           1.000</span></span>
+<span><span class="co">#&gt;     speed             1.000</span></span>
 <span><span class="co">#&gt;    .x1                1.000</span></span>
 <span><span class="co">#&gt;    .x2                1.000</span></span>
 <span><span class="co">#&gt;    .x3                1.000</span></span>
@@ -615,9 +626,6 @@ thresholds:</p>
 <span><span class="co">#&gt;    .x7                1.000</span></span>
 <span><span class="co">#&gt;    .x8                1.000</span></span>
 <span><span class="co">#&gt;    .x9                1.000</span></span>
-<span><span class="co">#&gt;     visual            1.000</span></span>
-<span><span class="co">#&gt;     textual           1.000</span></span>
-<span><span class="co">#&gt;     speed             1.000</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Group 2 [Grant-White]:</span></span>
@@ -625,49 +633,58 @@ thresholds:</p>
 <span><span class="co">#&gt; Latent Variables:</span></span>
 <span><span class="co">#&gt;                    Estimate</span></span>
 <span><span class="co">#&gt;   visual =~                </span></span>
-<span><span class="co">#&gt;     x1                1.437</span></span>
-<span><span class="co">#&gt;     x2                0.567</span></span>
-<span><span class="co">#&gt;     x3                0.763</span></span>
+<span><span class="co">#&gt;     x1                1.331</span></span>
+<span><span class="co">#&gt;     x2                0.540</span></span>
+<span><span class="co">#&gt;     x3                0.785</span></span>
 <span><span class="co">#&gt;   textual =~               </span></span>
-<span><span class="co">#&gt;     x4                1.548</span></span>
-<span><span class="co">#&gt;     x5                2.498</span></span>
-<span><span class="co">#&gt;     x6                1.395</span></span>
+<span><span class="co">#&gt;     x4                1.717</span></span>
+<span><span class="co">#&gt;     x5                2.639</span></span>
+<span><span class="co">#&gt;     x6                1.503</span></span>
 <span><span class="co">#&gt;   speed =~                 </span></span>
-<span><span class="co">#&gt;     x7                0.852</span></span>
-<span><span class="co">#&gt;     x8                0.931</span></span>
-<span><span class="co">#&gt;     x9                1.549</span></span>
+<span><span class="co">#&gt;     x7                0.792</span></span>
+<span><span class="co">#&gt;     x8                0.807</span></span>
+<span><span class="co">#&gt;     x9                1.187</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Covariances:</span></span>
 <span><span class="co">#&gt;                    Estimate</span></span>
 <span><span class="co">#&gt;   visual ~~                </span></span>
-<span><span class="co">#&gt;     textual           0.561</span></span>
-<span><span class="co">#&gt;     speed             0.581</span></span>
+<span><span class="co">#&gt;     textual           0.519</span></span>
+<span><span class="co">#&gt;     speed             0.728</span></span>
 <span><span class="co">#&gt;   textual ~~               </span></span>
-<span><span class="co">#&gt;     speed             0.448</span></span>
+<span><span class="co">#&gt;     speed             0.477</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Intercepts:</span></span>
+<span><span class="co">#&gt;                    Estimate</span></span>
+<span><span class="co">#&gt;     visual           -0.298</span></span>
+<span><span class="co">#&gt;     textual           0.596</span></span>
+<span><span class="co">#&gt;     speed            -0.139</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Thresholds:</span></span>
 <span><span class="co">#&gt;                    Estimate</span></span>
-<span><span class="co">#&gt;     x1|t1            -2.378</span></span>
-<span><span class="co">#&gt;     x1|t2             1.476</span></span>
-<span><span class="co">#&gt;     x2|t1            -2.153</span></span>
-<span><span class="co">#&gt;     x2|t2             0.850</span></span>
-<span><span class="co">#&gt;     x3|t1            -0.184</span></span>
-<span><span class="co">#&gt;     x3|t2             1.058</span></span>
-<span><span class="co">#&gt;     x4|t1            -2.185</span></span>
-<span><span class="co">#&gt;     x4|t2             1.445</span></span>
-<span><span class="co">#&gt;     x5|t1            -3.393</span></span>
-<span><span class="co">#&gt;     x5|t2             0.887</span></span>
-<span><span class="co">#&gt;     x6|t1            -0.094</span></span>
-<span><span class="co">#&gt;     x6|t2             2.173</span></span>
-<span><span class="co">#&gt;     x7|t1            -0.800</span></span>
-<span><span class="co">#&gt;     x7|t2             1.678</span></span>
-<span><span class="co">#&gt;     x8|t1            -0.178</span></span>
-<span><span class="co">#&gt;     x8|t2             2.570</span></span>
-<span><span class="co">#&gt;     x9|t1            -0.783</span></span>
-<span><span class="co">#&gt;     x9|t2             3.353</span></span>
+<span><span class="co">#&gt;     x1|t1            -2.520</span></span>
+<span><span class="co">#&gt;     x1|t2             1.245</span></span>
+<span><span class="co">#&gt;     x2|t1            -2.352</span></span>
+<span><span class="co">#&gt;     x2|t2             0.767</span></span>
+<span><span class="co">#&gt;     x3|t1            -0.566</span></span>
+<span><span class="co">#&gt;     x3|t2             0.695</span></span>
+<span><span class="co">#&gt;     x4|t1            -1.064</span></span>
+<span><span class="co">#&gt;     x4|t2             2.367</span></span>
+<span><span class="co">#&gt;     x5|t1            -1.511</span></span>
+<span><span class="co">#&gt;     x5|t2             2.257</span></span>
+<span><span class="co">#&gt;     x6|t1             0.788</span></span>
+<span><span class="co">#&gt;     x6|t2             3.110</span></span>
+<span><span class="co">#&gt;     x7|t1            -1.153</span></span>
+<span><span class="co">#&gt;     x7|t2             1.693</span></span>
+<span><span class="co">#&gt;     x8|t1            -0.221</span></span>
+<span><span class="co">#&gt;     x8|t2             2.475</span></span>
+<span><span class="co">#&gt;     x9|t1            -0.766</span></span>
+<span><span class="co">#&gt;     x9|t2             2.884</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Variances:</span></span>
 <span><span class="co">#&gt;                    Estimate</span></span>
+<span><span class="co">#&gt;     visual            1.130</span></span>
+<span><span class="co">#&gt;     textual           0.746</span></span>
+<span><span class="co">#&gt;     speed             1.563</span></span>
 <span><span class="co">#&gt;    .x1                1.000</span></span>
 <span><span class="co">#&gt;    .x2                1.000</span></span>
 <span><span class="co">#&gt;    .x3                1.000</span></span>
@@ -676,10 +693,7 @@ thresholds:</p>
 <span><span class="co">#&gt;    .x6                1.000</span></span>
 <span><span class="co">#&gt;    .x7                1.000</span></span>
 <span><span class="co">#&gt;    .x8                1.000</span></span>
-<span><span class="co">#&gt;    .x9                1.000</span></span>
-<span><span class="co">#&gt;     visual            1.000</span></span>
-<span><span class="co">#&gt;     textual           1.000</span></span>
-<span><span class="co">#&gt;     speed             1.000</span></span></code></pre></div>
+<span><span class="co">#&gt;    .x9                1.000</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="evaluate-invariance">Evaluate Invariance<a class="anchor" aria-label="anchor" href="#evaluate-invariance"></a>
@@ -705,29 +719,29 @@ the effective number of parameters that differ across groups:</p>
 <span><span class="co">#&gt; Penalized Loading Estimates:</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">load_mat</span>, digits <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span>
 <span><span class="co">#&gt;              visual=~x1 visual=~x2 visual=~x3 textual=~x4 textual=~x5</span></span>
-<span><span class="co">#&gt; load_ests_g1       1.43      0.567      0.763        1.55         2.5</span></span>
-<span><span class="co">#&gt; load_ests_g2       1.44      0.567      0.763        1.55         2.5</span></span>
+<span><span class="co">#&gt; load_ests_g1       1.33       0.54      0.785        1.72        2.64</span></span>
+<span><span class="co">#&gt; load_ests_g2       1.33       0.54      0.785        1.72        2.64</span></span>
 <span><span class="co">#&gt;              textual=~x6 speed=~x7 speed=~x8 speed=~x9</span></span>
-<span><span class="co">#&gt; load_ests_g1         1.4     0.849     0.930      1.55</span></span>
-<span><span class="co">#&gt; load_ests_g2         1.4     0.852     0.931      1.55</span></span>
+<span><span class="co">#&gt; load_ests_g1         1.5     0.787     0.809      1.19</span></span>
+<span><span class="co">#&gt; load_ests_g2         1.5     0.792     0.807      1.19</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"\nPenalized Threshold Estimates:\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Penalized Threshold Estimates:</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">thresh_mat</span>, digits <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span>
-<span><span class="co">#&gt;                x1|t1 x1|t2 x2|t1 x2|t2  x3|t1 x3|t2  x4|t1 x4|t2 x5|t1 x5|t2</span></span>
-<span><span class="co">#&gt; thresh_ests_g1 -2.38  1.48 -1.57 0.853 -0.704 0.566 -0.963  2.12 -1.40 1.970</span></span>
-<span><span class="co">#&gt; thresh_ests_g2 -2.38  1.48 -2.15 0.850 -0.184 1.058 -2.185  1.45 -3.39 0.887</span></span>
-<span><span class="co">#&gt;                  x6|t1 x6|t2 x7|t1 x7|t2  x8|t1 x8|t2  x9|t1 x9|t2</span></span>
-<span><span class="co">#&gt; thresh_ests_g1  0.7309  3.34 -1.39  1.10 -0.176  2.57 -0.782  3.35</span></span>
-<span><span class="co">#&gt; thresh_ests_g2 -0.0939  2.17 -0.80  1.68 -0.178  2.57 -0.783  3.35</span></span>
+<span><span class="co">#&gt;                x1|t1 x1|t2 x2|t1 x2|t2  x3|t1 x3|t2 x4|t1 x4|t2 x5|t1 x5|t2</span></span>
+<span><span class="co">#&gt; thresh_ests_g1 -2.52  1.25 -1.53 0.771 -0.571 0.691 -1.06  2.37 -1.51  2.26</span></span>
+<span><span class="co">#&gt; thresh_ests_g2 -2.52  1.24 -2.35 0.767 -0.566 0.695 -1.06  2.37 -1.51  2.26</span></span>
+<span><span class="co">#&gt;                x6|t1 x6|t2 x7|t1 x7|t2  x8|t1 x8|t2  x9|t1 x9|t2</span></span>
+<span><span class="co">#&gt; thresh_ests_g1 0.788  3.11 -1.16  1.06 -0.217  2.47 -0.763  2.88</span></span>
+<span><span class="co">#&gt; thresh_ests_g2 0.788  3.11 -1.15  1.69 -0.221  2.48 -0.766  2.88</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Effective number of non-invariant loadings:"</span>, <span class="va">eff_load_diff</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Effective number of non-invariant loadings: 0.004100349</span></span>
+<span><span class="co">#&gt; Effective number of non-invariant loadings: 0.002959255</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Effective number of non-invariant thresholds:"</span>, <span class="va">eff_thresh_diff</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Effective number of non-invariant thresholds: 10.77962</span></span></code></pre></div>
+<span><span class="co">#&gt; Effective number of non-invariant thresholds: 1.973607</span></span></code></pre></div>
 <p>The penalized estimation approach identifies which loadings and
-thresholds substantively differ across groups, providing an efficienct,
+thresholds substantively differ across groups, providing an efficient,
 data-driven assessment of measurement invariance for ordinal data.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

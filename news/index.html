@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">plavaan</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -19,8 +19,10 @@
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/approximate-invariance.html">Approximate Invariance with Penalized Estimation</a></li>
+    <li><a class="dropdown-item" href="../articles/negative-loading.html">Negative Loadings</a></li>
     <li><a class="dropdown-item" href="../articles/penalized-cat.html">Penalized Estimation with Ordinal Data and Multiple Groups</a></li>
     <li><a class="dropdown-item" href="../articles/penalized-fa.html">Penalized Estimation of Cross-Loadings and Unique Covariances</a></li>
+    <li><a class="dropdown-item" href="../articles/penalized-multistart.html">Multistart Penalized Estimation</a></li>
     <li><a class="dropdown-item" href="../articles/standard-errors.html">Standard Errors</a></li>
   </ul></li>
 <li class="active nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -36,14 +38,25 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Changelog</h1>
-      <small>Source: <a href="https://github.com/marklhc/plavaan/blob/v0.0.1/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
+      <small>Source: <a href="https://github.com/marklhc/plavaan/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.0.2" id="plavaan-002">plavaan 0.0.2<a class="anchor" aria-label="anchor" href="#plavaan-002"></a></h2>
+<ul><li>Added <code><a href="../reference/penalized_est_multistart.html">penalized_est_multistart()</a></code> and support for custom optimizer starting values via <code>start</code> in <code><a href="../reference/penalized_est.html">penalized_est()</a></code>.</li>
+<li>Minor changes to speed up the optimization process.</li>
+</ul><div class="section level3">
+<h3 id="breaking-changes-0-0-2">Breaking Changes<a class="anchor" aria-label="anchor" href="#breaking-changes-0-0-2"></a></h3>
+<ul><li>
+<strong>Penalty metric for factor loadings:</strong> The penalty for cross-group differences in factor loadings is now computed on the <strong>original scale</strong> (<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>λ</mi><mrow><mi>g</mi><mn>1</mn></mrow></msub><mo>−</mo><msub><mi>λ</mi><mrow><mi>g</mi><mn>2</mn></mrow></msub></mrow><annotation encoding="application/x-tex">\lambda_{g1} - \lambda_{g2}</annotation></semantics></math>) rather than the log scale (<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><msub><mi>λ</mi><mrow><mi>g</mi><mn>1</mn></mrow></msub><mo stretchy="false" form="postfix">)</mo><mo>−</mo><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><msub><mi>λ</mi><mrow><mi>g</mi><mn>2</mn></mrow></msub><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\log(\lambda_{g1}) - \log(\lambda_{g2})</annotation></semantics></math>).</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.0.1" id="plavaan-001">plavaan 0.0.1<a class="anchor" aria-label="anchor" href="#plavaan-001"></a></h2><p class="text-muted">CRAN release: 2025-12-30</p>
 <ul><li>Initial CRAN submission.</li>
 </ul></div>
-  </main></div>
+  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
+    </nav></aside></div>
 
 
     <footer><div class="pkgdown-footer-left">

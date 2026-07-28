@@ -17,7 +17,8 @@ penalized_est(
   pen_fn = "l0a",
   pen_gr = NULL,
   se = "none",
-  opt_control = list()
+  opt_control = list(),
+  start = NULL
 )
 ```
 
@@ -44,9 +45,7 @@ penalized_est(
 
   List of matrices containing parameter IDs. For each matrix, the
   penalty is applied to the pairwise differences of parameters in the
-  same column indicated by the IDs. For matrices with names starting
-  with "loading", the log transformation is applied before computing
-  differences.
+  same column indicated by the IDs.
 
 - pen_fn:
 
@@ -71,6 +70,12 @@ penalized_est(
   A list of control parameters passed to
   [`stats::nlminb()`](https://rdrr.io/r/stats/nlminb.html). Default
   includes `eval.max = 2e4`, `iter.max = 1e4`, and `abs.tol = 1e-20`.
+
+- start:
+
+  Numeric vector of starting values for the optimizer, or `NULL`
+  (default) to use lavaan's default starting values. If supplied, its
+  length must match the number of free parameters in the model.
 
 ## Value
 
@@ -153,7 +158,7 @@ pen_fit <- penalized_est(
 
 # Compare parameter estimates
 summary(pen_fit)
-#> lavaan 0.7-2 ended normally after 103 iterations
+#> lavaan 0.7-2 ended normally after 129 iterations
 #> 
 #>   Estimator                                         ML
 #>   Optimization method                           NLMINB
@@ -168,53 +173,53 @@ summary(pen_fit)
 #> Latent Variables:
 #>                    Estimate
 #>   dem60 =~                 
-#>     y1                2.105
-#>     y2                2.852
-#>     y3                2.531
-#>     y4                2.905
+#>     y1                2.098
+#>     y2                2.830
+#>     y3                2.561
+#>     y4                2.901
 #>   dem65 =~                 
-#>     y5                2.083
-#>     y6                2.819
-#>     y7                2.602
-#>     y8                2.898
+#>     y5                2.092
+#>     y6                2.825
+#>     y7                2.572
+#>     y8                2.900
 #> 
 #> Covariances:
 #>                    Estimate
 #>   dem60 ~~                 
-#>     dem65             0.918
+#>     dem65             0.917
 #>  .y1 ~~                    
-#>    .y5                0.842
+#>    .y5                0.838
 #>  .y2 ~~                    
-#>    .y6                1.820
+#>    .y6                1.825
 #>  .y3 ~~                    
-#>    .y7                1.222
+#>    .y7                1.205
 #>  .y4 ~~                    
-#>    .y8                0.284
+#>    .y8                0.286
 #> 
 #> Intercepts:
 #>                    Estimate
 #>     dem60             0.000
 #>     dem65            -0.147
-#>    .y1                5.456
-#>    .y2                4.251
-#>    .y3                6.572
-#>    .y4                4.460
-#>    .y5                5.454
-#>    .y6                3.393
-#>    .y7                6.572
-#>    .y8                4.460
+#>    .y1                5.457
+#>    .y2                4.252
+#>    .y3                6.570
+#>    .y4                4.461
+#>    .y5                5.456
+#>    .y6                3.396
+#>    .y7                6.570
+#>    .y8                4.462
 #> 
 #> Variances:
 #>                    Estimate
 #>     dem60             1.000
-#>     dem65             0.951
-#>    .y1                2.129
-#>    .y2                6.632
-#>    .y3                5.388
-#>    .y4                2.594
-#>    .y5                2.816
-#>    .y6                4.003
-#>    .y7                3.590
-#>    .y8                2.457
+#>     dem65             0.950
+#>    .y1                2.128
+#>    .y2                6.658
+#>    .y3                5.385
+#>    .y4                2.600
+#>    .y5                2.813
+#>    .y6                4.000
+#>    .y7                3.615
+#>    .y8                2.456
 #> 
 ```

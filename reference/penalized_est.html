@@ -15,7 +15,7 @@ the optimized parameter estimates."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">plavaan</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -27,8 +27,10 @@ the optimized parameter estimates."></head><body>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/approximate-invariance.html">Approximate Invariance with Penalized Estimation</a></li>
+    <li><a class="dropdown-item" href="../articles/negative-loading.html">Negative Loadings</a></li>
     <li><a class="dropdown-item" href="../articles/penalized-cat.html">Penalized Estimation with Ordinal Data and Multiple Groups</a></li>
     <li><a class="dropdown-item" href="../articles/penalized-fa.html">Penalized Estimation of Cross-Loadings and Unique Covariances</a></li>
+    <li><a class="dropdown-item" href="../articles/penalized-multistart.html">Multistart Penalized Estimation</a></li>
     <li><a class="dropdown-item" href="../articles/standard-errors.html">Standard Errors</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -44,7 +46,7 @@ the optimized parameter estimates."></head><body>
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Penalized Parameter Estimation for Longitudinal CFA Models</h1>
-      <small class="dont-index">Source: <a href="https://github.com/marklhc/plavaan/blob/v0.0.1/R/penalized.R" class="external-link"><code>R/penalized.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/marklhc/plavaan/blob/main/R/penalized.R" class="external-link"><code>R/penalized.R</code></a></small>
       <div class="d-none name"><code>penalized_est.Rd</code></div>
     </div>
 
@@ -66,7 +68,8 @@ the optimized parameter estimates.</p>
 <span>  pen_fn <span class="op">=</span> <span class="st">"l0a"</span>,</span>
 <span>  pen_gr <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  se <span class="op">=</span> <span class="st">"none"</span>,</span>
-<span>  opt_control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>  opt_control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  start <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -93,8 +96,7 @@ directly to, in the same order as returned by <code>lavaan::coef()</code> and by
 <dt id="arg-pen-diff-id">pen_diff_id<a class="anchor" aria-label="anchor" href="#arg-pen-diff-id"></a></dt>
 <dd><p>List of matrices containing parameter IDs. For each matrix,
 the penalty is applied to the pairwise differences of parameters in the same
-column indicated by the IDs. For matrices with names starting with "loading",
-the log transformation is applied before computing differences.</p></dd>
+column indicated by the IDs.</p></dd>
 
 
 <dt id="arg-pen-fn">pen_fn<a class="anchor" aria-label="anchor" href="#arg-pen-fn"></a></dt>
@@ -117,6 +119,12 @@ which is the same as used in the <code>"mlr"</code> estimator).</p></dd>
 <dt id="arg-opt-control">opt_control<a class="anchor" aria-label="anchor" href="#arg-opt-control"></a></dt>
 <dd><p>A list of control parameters passed to <code><a href="https://rdrr.io/r/stats/nlminb.html" class="external-link">stats::nlminb()</a></code>.
 Default includes <code>eval.max = 2e4</code>, <code>iter.max = 1e4</code>, and <code>abs.tol = 1e-20</code>.</p></dd>
+
+
+<dt id="arg-start">start<a class="anchor" aria-label="anchor" href="#arg-start"></a></dt>
+<dd><p>Numeric vector of starting values for the optimizer, or <code>NULL</code>
+(default) to use lavaan's default starting values. If supplied, its length
+must match the number of free parameters in the model.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -196,7 +204,7 @@ experimental sandwich approximation and should be interpreted with caution.</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Compare parameter estimates</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">pen_fit</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> lavaan 0.7-2 ended normally after 103 iterations</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> lavaan 0.7-2 ended normally after 129 iterations</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   Estimator                                         ML</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   Optimization method                           NLMINB</span>
@@ -211,54 +219,54 @@ experimental sandwich approximation and should be interpreted with caution.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Latent Variables:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                    Estimate</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   dem60 =~                 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     y1                2.105</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     y2                2.852</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     y3                2.531</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     y4                2.905</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     y1                2.098</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     y2                2.830</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     y3                2.561</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     y4                2.901</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   dem65 =~                 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     y5                2.083</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     y6                2.819</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     y7                2.602</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     y8                2.898</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     y5                2.092</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     y6                2.825</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     y7                2.572</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     y8                2.900</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Covariances:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                    Estimate</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   dem60 ~~                 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     dem65             0.918</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     dem65             0.917</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  .y1 ~~                    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    .y5                0.842</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    .y5                0.838</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  .y2 ~~                    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    .y6                1.820</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    .y6                1.825</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  .y3 ~~                    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    .y7                1.222</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    .y7                1.205</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  .y4 ~~                    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    .y8                0.284</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    .y8                0.286</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Intercepts:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                    Estimate</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     dem60             0.000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     dem65            -0.147</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    .y1                5.456</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    .y2                4.251</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    .y3                6.572</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    .y4                4.460</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    .y5                5.454</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    .y6                3.393</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    .y7                6.572</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    .y8                4.460</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    .y1                5.457</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    .y2                4.252</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    .y3                6.570</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    .y4                4.461</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    .y5                5.456</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    .y6                3.396</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    .y7                6.570</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    .y8                4.462</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Variances:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                    Estimate</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     dem60             1.000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     dem65             0.951</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    .y1                2.129</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    .y2                6.632</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    .y3                5.388</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    .y4                2.594</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    .y5                2.816</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    .y6                4.003</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    .y7                3.590</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    .y8                2.457</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     dem65             0.950</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    .y1                2.128</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    .y2                6.658</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    .y3                5.385</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    .y4                2.600</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    .y5                2.813</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    .y6                4.000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    .y7                3.615</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    .y8                2.456</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span></span></span>
 </code></pre></div>

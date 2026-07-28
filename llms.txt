@@ -23,7 +23,7 @@ confirmatory factor analysis model:
 ``` r
 
 library(lavaan)
-#> This is lavaan 0.6-20
+#> This is lavaan 0.7-2
 #> lavaan is FREE software! Please report any bugs.
 library(plavaan)
 data(HolzingerSwineford1939)
@@ -76,7 +76,7 @@ fit_pen <- penalized_est(
   pen_fn = "l0a"  # approximate L0 penalty
 )
 summary(fit_pen)
-#> lavaan 0.6-20 ended normally after 113 iterations
+#> lavaan 0.7-2 ended normally after 113 iterations
 #> 
 #>   Estimator                                         ML
 #>   Optimization method                           NLMINB
@@ -169,6 +169,8 @@ References:
   functions
 - [`penalized_est()`](https://marklhc.github.io/plavaan/reference/penalized_est.md)
   : Penalized Parameter Estimation for Longitudinal CFA Models
+- [`penalized_est_multistart()`](https://marklhc.github.io/plavaan/reference/penalized_est_multistart.md)
+  : Multistart Penalized Estimation
 
 # Articles
 
@@ -176,9 +178,13 @@ References:
 
 - [Approximate Invariance with Penalized
   Estimation](https://marklhc.github.io/plavaan/articles/approximate-invariance.md):
+- [Negative
+  Loadings](https://marklhc.github.io/plavaan/articles/negative-loading.md):
 - [Penalized Estimation with Ordinal Data and Multiple
   Groups](https://marklhc.github.io/plavaan/articles/penalized-cat.md):
 - [Penalized Estimation of Cross-Loadings and Unique
   Covariances](https://marklhc.github.io/plavaan/articles/penalized-fa.md):
+- [Multistart Penalized
+  Estimation](https://marklhc.github.io/plavaan/articles/penalized-multistart.md):
 - [Standard
   Errors](https://marklhc.github.io/plavaan/articles/standard-errors.md):

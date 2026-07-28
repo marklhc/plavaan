@@ -380,7 +380,7 @@ mod_un <- "
   x8 ~~ 1 * x8
   x9 ~~ 1 * x9
 "
-fit_mg_nofit <- cfa(mod_base, data = hs_data, ordered = TRUE, std.lv = TRUE,
+fit_mg_nofit <- cfa(mod_un, data = hs_data, ordered = TRUE, std.lv = TRUE,
                     auto.fix.first = FALSE,
                     parameterization = "theta", group = "school", do.fit = FALSE)
 ```
@@ -417,43 +417,43 @@ pt[pt$op == "=~", c("lhs", "op", "rhs", "group", "free")]
 
 # Show thresholds
 pt[pt$op == "|", c("lhs", "op", "rhs", "group", "free")]
-#>    lhs op rhs group free
-#> 19  x1  |  t1     1   10
-#> 20  x1  |  t2     1   11
-#> 21  x2  |  t1     1   12
-#> 22  x2  |  t2     1   13
-#> 23  x3  |  t1     1   14
-#> 24  x3  |  t2     1   15
-#> 25  x4  |  t1     1   16
-#> 26  x4  |  t2     1   17
-#> 27  x5  |  t1     1   18
-#> 28  x5  |  t2     1   19
-#> 29  x6  |  t1     1   20
-#> 30  x6  |  t2     1   21
-#> 31  x7  |  t1     1   22
-#> 32  x7  |  t2     1   23
-#> 33  x8  |  t1     1   24
-#> 34  x8  |  t2     1   25
-#> 35  x9  |  t1     1   26
-#> 36  x9  |  t2     1   27
-#> 82  x1  |  t1     2   40
-#> 83  x1  |  t2     2   41
-#> 84  x2  |  t1     2   42
-#> 85  x2  |  t2     2   43
-#> 86  x3  |  t1     2   44
-#> 87  x3  |  t2     2   45
-#> 88  x4  |  t1     2   46
-#> 89  x4  |  t2     2   47
-#> 90  x5  |  t1     2   48
-#> 91  x5  |  t2     2   49
-#> 92  x6  |  t1     2   50
-#> 93  x6  |  t2     2   51
-#> 94  x7  |  t1     2   52
-#> 95  x7  |  t2     2   53
-#> 96  x8  |  t1     2   54
-#> 97  x8  |  t2     2   55
-#> 98  x9  |  t1     2   56
-#> 99  x9  |  t2     2   57
+#>     lhs op rhs group free
+#> 25   x1  |  t1     1   10
+#> 26   x1  |  t2     1   11
+#> 27   x2  |  t1     1   12
+#> 28   x2  |  t2     1   13
+#> 29   x3  |  t1     1   14
+#> 30   x3  |  t2     1   15
+#> 31   x4  |  t1     1   16
+#> 32   x4  |  t2     1   17
+#> 33   x5  |  t1     1   18
+#> 34   x5  |  t2     1   19
+#> 35   x6  |  t1     1   20
+#> 36   x6  |  t2     1   21
+#> 37   x7  |  t1     1   22
+#> 38   x7  |  t2     1   23
+#> 39   x8  |  t1     1   24
+#> 40   x8  |  t2     1   25
+#> 41   x9  |  t1     1   26
+#> 42   x9  |  t2     1   27
+#> 88   x1  |  t1     2   46
+#> 89   x1  |  t2     2   47
+#> 90   x2  |  t1     2   48
+#> 91   x2  |  t2     2   49
+#> 92   x3  |  t1     2   50
+#> 93   x3  |  t2     2   51
+#> 94   x4  |  t1     2   52
+#> 95   x4  |  t2     2   53
+#> 96   x5  |  t1     2   54
+#> 97   x5  |  t2     2   55
+#> 98   x6  |  t1     2   56
+#> 99   x6  |  t2     2   57
+#> 100  x7  |  t1     2   58
+#> 101  x7  |  t2     2   59
+#> 102  x8  |  t1     2   60
+#> 103  x8  |  t2     2   61
+#> 104  x9  |  t1     2   62
+#> 105  x9  |  t2     2   63
 ```
 
 Identify parameter IDs for loadings and thresholds in each group:
@@ -484,7 +484,7 @@ print(list(
 #>  [1] 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27
 #> 
 #> $thresholds_g2
-#>  [1] 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57
+#>  [1] 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63
 ```
 
 Fit the penalized model with penalties on differences in loadings and
@@ -501,11 +501,11 @@ fit_pen_mg <- penalized_est(
     )
 )
 summary(fit_pen_mg)
-#> lavaan 0.7-2 ended normally after 152 iterations
+#> lavaan 0.7-2 ended normally after 207 iterations
 #> 
 #>   Estimator                                       DWLS
 #>   Optimization method                           NLMINB
-#>   Number of model parameters                        60
+#>   Number of model parameters                        66
 #> 
 #>   Number of observations per group:                   
 #>     Pasteur                                        156
@@ -522,49 +522,58 @@ summary(fit_pen_mg)
 #> Latent Variables:
 #>                    Estimate
 #>   visual =~                
-#>     x1                1.435
-#>     x2                0.567
-#>     x3                0.763
+#>     x1                1.332
+#>     x2                0.540
+#>     x3                0.785
 #>   textual =~               
-#>     x4                1.548
-#>     x5                2.499
-#>     x6                1.400
+#>     x4                1.716
+#>     x5                2.640
+#>     x6                1.502
 #>   speed =~                 
-#>     x7                0.849
-#>     x8                0.930
-#>     x9                1.550
+#>     x7                0.787
+#>     x8                0.809
+#>     x9                1.189
 #> 
 #> Covariances:
 #>                    Estimate
 #>   visual ~~                
-#>     textual           0.448
-#>     speed             0.193
+#>     textual           0.445
+#>     speed             0.205
 #>   textual ~~               
-#>     speed             0.258
+#>     speed             0.275
+#> 
+#> Intercepts:
+#>                    Estimate
+#>     visual            0.000
+#>     textual           0.000
+#>     speed             0.000
 #> 
 #> Thresholds:
 #>                    Estimate
-#>     x1|t1            -2.379
-#>     x1|t2             1.477
-#>     x2|t1            -1.565
-#>     x2|t2             0.853
-#>     x3|t1            -0.704
-#>     x3|t2             0.566
-#>     x4|t1            -0.963
-#>     x4|t2             2.116
-#>     x5|t1            -1.404
-#>     x5|t2             1.970
-#>     x6|t1             0.731
-#>     x6|t2             3.338
-#>     x7|t1            -1.388
-#>     x7|t2             1.100
-#>     x8|t1            -0.176
-#>     x8|t2             2.570
-#>     x9|t1            -0.782
-#>     x9|t2             3.352
+#>     x1|t1            -2.520
+#>     x1|t2             1.248
+#>     x2|t1            -1.534
+#>     x2|t2             0.771
+#>     x3|t1            -0.571
+#>     x3|t2             0.691
+#>     x4|t1            -1.063
+#>     x4|t2             2.366
+#>     x5|t1            -1.511
+#>     x5|t2             2.256
+#>     x6|t1             0.788
+#>     x6|t2             3.112
+#>     x7|t1            -1.158
+#>     x7|t2             1.063
+#>     x8|t1            -0.217
+#>     x8|t2             2.475
+#>     x9|t1            -0.763
+#>     x9|t2             2.883
 #> 
 #> Variances:
 #>                    Estimate
+#>     visual            1.000
+#>     textual           1.000
+#>     speed             1.000
 #>    .x1                1.000
 #>    .x2                1.000
 #>    .x3                1.000
@@ -574,9 +583,6 @@ summary(fit_pen_mg)
 #>    .x7                1.000
 #>    .x8                1.000
 #>    .x9                1.000
-#>     visual            1.000
-#>     textual           1.000
-#>     speed             1.000
 #> 
 #> 
 #> Group 2 [Grant-White]:
@@ -584,49 +590,58 @@ summary(fit_pen_mg)
 #> Latent Variables:
 #>                    Estimate
 #>   visual =~                
-#>     x1                1.437
-#>     x2                0.567
-#>     x3                0.763
+#>     x1                1.331
+#>     x2                0.540
+#>     x3                0.785
 #>   textual =~               
-#>     x4                1.548
-#>     x5                2.498
-#>     x6                1.395
+#>     x4                1.717
+#>     x5                2.639
+#>     x6                1.503
 #>   speed =~                 
-#>     x7                0.852
-#>     x8                0.931
-#>     x9                1.549
+#>     x7                0.792
+#>     x8                0.807
+#>     x9                1.187
 #> 
 #> Covariances:
 #>                    Estimate
 #>   visual ~~                
-#>     textual           0.561
-#>     speed             0.581
+#>     textual           0.519
+#>     speed             0.728
 #>   textual ~~               
-#>     speed             0.448
+#>     speed             0.477
+#> 
+#> Intercepts:
+#>                    Estimate
+#>     visual           -0.298
+#>     textual           0.596
+#>     speed            -0.139
 #> 
 #> Thresholds:
 #>                    Estimate
-#>     x1|t1            -2.378
-#>     x1|t2             1.476
-#>     x2|t1            -2.153
-#>     x2|t2             0.850
-#>     x3|t1            -0.184
-#>     x3|t2             1.058
-#>     x4|t1            -2.185
-#>     x4|t2             1.445
-#>     x5|t1            -3.393
-#>     x5|t2             0.887
-#>     x6|t1            -0.094
-#>     x6|t2             2.173
-#>     x7|t1            -0.800
-#>     x7|t2             1.678
-#>     x8|t1            -0.178
-#>     x8|t2             2.570
-#>     x9|t1            -0.783
-#>     x9|t2             3.353
+#>     x1|t1            -2.520
+#>     x1|t2             1.245
+#>     x2|t1            -2.352
+#>     x2|t2             0.767
+#>     x3|t1            -0.566
+#>     x3|t2             0.695
+#>     x4|t1            -1.064
+#>     x4|t2             2.367
+#>     x5|t1            -1.511
+#>     x5|t2             2.257
+#>     x6|t1             0.788
+#>     x6|t2             3.110
+#>     x7|t1            -1.153
+#>     x7|t2             1.693
+#>     x8|t1            -0.221
+#>     x8|t2             2.475
+#>     x9|t1            -0.766
+#>     x9|t2             2.884
 #> 
 #> Variances:
 #>                    Estimate
+#>     visual            1.130
+#>     textual           0.746
+#>     speed             1.563
 #>    .x1                1.000
 #>    .x2                1.000
 #>    .x3                1.000
@@ -636,9 +651,6 @@ summary(fit_pen_mg)
 #>    .x7                1.000
 #>    .x8                1.000
 #>    .x9                1.000
-#>     visual            1.000
-#>     textual           1.000
-#>     speed             1.000
 ```
 
 ## Evaluate Invariance
@@ -666,29 +678,29 @@ cat("Penalized Loading Estimates:\n")
 #> Penalized Loading Estimates:
 print(load_mat, digits = 3)
 #>              visual=~x1 visual=~x2 visual=~x3 textual=~x4 textual=~x5
-#> load_ests_g1       1.43      0.567      0.763        1.55         2.5
-#> load_ests_g2       1.44      0.567      0.763        1.55         2.5
+#> load_ests_g1       1.33       0.54      0.785        1.72        2.64
+#> load_ests_g2       1.33       0.54      0.785        1.72        2.64
 #>              textual=~x6 speed=~x7 speed=~x8 speed=~x9
-#> load_ests_g1         1.4     0.849     0.930      1.55
-#> load_ests_g2         1.4     0.852     0.931      1.55
+#> load_ests_g1         1.5     0.787     0.809      1.19
+#> load_ests_g2         1.5     0.792     0.807      1.19
 
 cat("\nPenalized Threshold Estimates:\n")
 #> 
 #> Penalized Threshold Estimates:
 print(thresh_mat, digits = 3)
-#>                x1|t1 x1|t2 x2|t1 x2|t2  x3|t1 x3|t2  x4|t1 x4|t2 x5|t1 x5|t2
-#> thresh_ests_g1 -2.38  1.48 -1.57 0.853 -0.704 0.566 -0.963  2.12 -1.40 1.970
-#> thresh_ests_g2 -2.38  1.48 -2.15 0.850 -0.184 1.058 -2.185  1.45 -3.39 0.887
-#>                  x6|t1 x6|t2 x7|t1 x7|t2  x8|t1 x8|t2  x9|t1 x9|t2
-#> thresh_ests_g1  0.7309  3.34 -1.39  1.10 -0.176  2.57 -0.782  3.35
-#> thresh_ests_g2 -0.0939  2.17 -0.80  1.68 -0.178  2.57 -0.783  3.35
+#>                x1|t1 x1|t2 x2|t1 x2|t2  x3|t1 x3|t2 x4|t1 x4|t2 x5|t1 x5|t2
+#> thresh_ests_g1 -2.52  1.25 -1.53 0.771 -0.571 0.691 -1.06  2.37 -1.51  2.26
+#> thresh_ests_g2 -2.52  1.24 -2.35 0.767 -0.566 0.695 -1.06  2.37 -1.51  2.26
+#>                x6|t1 x6|t2 x7|t1 x7|t2  x8|t1 x8|t2  x9|t1 x9|t2
+#> thresh_ests_g1 0.788  3.11 -1.16  1.06 -0.217  2.47 -0.763  2.88
+#> thresh_ests_g2 0.788  3.11 -1.15  1.69 -0.221  2.48 -0.766  2.88
 
 cat("Effective number of non-invariant loadings:", eff_load_diff, "\n")
-#> Effective number of non-invariant loadings: 0.004100349
+#> Effective number of non-invariant loadings: 0.002959255
 cat("Effective number of non-invariant thresholds:", eff_thresh_diff, "\n")
-#> Effective number of non-invariant thresholds: 10.77962
+#> Effective number of non-invariant thresholds: 1.973607
 ```
 
 The penalized estimation approach identifies which loadings and
-thresholds substantively differ across groups, providing an efficienct,
+thresholds substantively differ across groups, providing an efficient,
 data-driven assessment of measurement invariance for ordinal data.

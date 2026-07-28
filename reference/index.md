@@ -9,3 +9,5 @@
   functions
 - [`penalized_est()`](https://marklhc.github.io/plavaan/reference/penalized_est.md)
   : Penalized Parameter Estimation for Longitudinal CFA Models
+- [`penalized_est_multistart()`](https://marklhc.github.io/plavaan/reference/penalized_est_multistart.md)
+  : Multistart Penalized Estimation

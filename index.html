@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="index.html">plavaan</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -36,8 +36,10 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="articles/approximate-invariance.html">Approximate Invariance with Penalized Estimation</a></li>
+    <li><a class="dropdown-item" href="articles/negative-loading.html">Negative Loadings</a></li>
     <li><a class="dropdown-item" href="articles/penalized-cat.html">Penalized Estimation with Ordinal Data and Multiple Groups</a></li>
     <li><a class="dropdown-item" href="articles/penalized-fa.html">Penalized Estimation of Cross-Loadings and Unique Covariances</a></li>
+    <li><a class="dropdown-item" href="articles/penalized-multistart.html">Multistart Penalized Estimation</a></li>
     <li><a class="dropdown-item" href="articles/standard-errors.html">Standard Errors</a></li>
   </ul>
 </li>
@@ -74,7 +76,7 @@
 <p>This is a basic example to obtain penalized cross-loadings in a confirmatory factor analysis model:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://lavaan.ugent.be" class="external-link">lavaan</a></span><span class="op">)</span></span>
-<span><span class="co">#&gt; This is lavaan 0.6-20</span></span>
+<span><span class="co">#&gt; This is lavaan 0.7-2</span></span>
 <span><span class="co">#&gt; lavaan is FREE software! Please report any bugs.</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://marklhc.github.io/plavaan/">plavaan</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">HolzingerSwineford1939</span><span class="op">)</span></span>
@@ -127,7 +129,7 @@
 <span>  pen_fn <span class="op">=</span> <span class="st">"l0a"</span>  <span class="co"># approximate L0 penalty</span></span>
 <span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">fit_pen</span><span class="op">)</span></span>
-<span><span class="co">#&gt; lavaan 0.6-20 ended normally after 113 iterations</span></span>
+<span><span class="co">#&gt; lavaan 0.7-2 ended normally after 113 iterations</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;   Estimator                                         ML</span></span>
 <span><span class="co">#&gt;   Optimization method                           NLMINB</span></span>
