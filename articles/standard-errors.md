@@ -6,16 +6,19 @@ penalized estimates, using the sandwich estimator approach as in the
 square roots of the diagonal elements of the sandwich variance
 estimator:
 
-$$B_{\text{bread}}^{- 1}\; B_{\text{meat}}\; B_{\text{bread}}^{- 1},$$
+``` math
+\mathrm{B}_\text{bread}^{-1} \; \mathrm{B}_\text{meat} \; \mathrm{B}_\text{bread}^{-1},
+```
 
-where $B_{\text{bread}}$ is the observed information matrix (i.e., the
-Hessian of the penalized objective function) and $B_{\text{meat}}$ is
-the first-order information matrix (obtained using
-`lavInspect(..., information.first.order)`).
+where $`\mathrm{B}_\text{bread}`$ is the observed information matrix
+(i.e., the Hessian of the penalized objective function) and
+$`\mathrm{B}_\text{meat}`$ is the first-order information matrix
+(obtained using `lavInspect(..., information.first.order)`).
 
 ``` r
+
 library(lavaan)
-#> This is lavaan 0.6-20
+#> This is lavaan 0.7-2
 #> lavaan is FREE software! Please report any bugs.
 library(plavaan)
 data(PoliticalDemocracy)
@@ -26,6 +29,7 @@ data(PoliticalDemocracy)
 ### Two-factor CFA model
 
 ``` r
+
 mod0 <- "
   ind60 =~ x1 + x2 + x3
   dem60 =~ y1 + y2 + y3 + y4
@@ -37,6 +41,7 @@ fit0 <- cfa(mod0, data = PoliticalDemocracy, std.lv = TRUE, estimator = "MLR")
 Penalized
 
 ``` r
+
 mod <- "
   ind60 =~ x1 + x2 + x3 + y1 + y2 + y3 + y4
   dem60 =~ x1 + x2 + x3 + y1 + y2 + y3 + y4
@@ -46,6 +51,7 @@ fit <- cfa(mod, data = PoliticalDemocracy, std.lv = TRUE, do.fit = FALSE)
 ```
 
 ``` r
+
 pefa_fit <- penalized_est(
     fit,
     w = .03,
@@ -53,7 +59,7 @@ pefa_fit <- penalized_est(
     se = "robust.huber.white"
 )
 summary(pefa_fit)
-#> lavaan 0.6-20 ended normally after 126 iterations
+#> lavaan 0.7-2 ended normally after 126 iterations
 #> 
 #>   Estimator                                         ML
 #>   Optimization method                           NLMINB
@@ -106,6 +112,7 @@ summary(pefa_fit)
 ```
 
 ``` r
+
 # Quick simulation to check SEs
 set.seed(1234)
 R <- 250
@@ -147,6 +154,7 @@ res_summary <- data.frame(
 ```
 
 ``` r
+
 print(res_summary, digits = 2)
 #>           param emp_sd mean_se
 #> 1     ind60=~x1 0.0380  0.0393
@@ -174,6 +182,7 @@ print(res_summary, digits = 2)
 ```
 
 ``` r
+
 # meat <- lavInspect(pefa_fit, "information.first.order")
 # bread <- attr(pefa_fit, "hessian")
 # vc_pefa <- solve(bread) %*% meat %*% solve(bread) / 75
@@ -187,6 +196,7 @@ print(res_summary, digits = 2)
 ## Penalize non-invariance
 
 ``` r
+
 lconfig_mod_un <- "
     # Time 1
     dem60 =~ .l1_1 * y1 + .l2_1 * y2 + .l3_1 * y3 + .l4_1 * y4
@@ -282,6 +292,7 @@ parameterEstimates(pen_fit)
 Compared to scalar invariance model
 
 ``` r
+
 lscalar_mod <- "
     # Time 1
     dem60 =~ .l1 * y1 + .l2 * y2 + .l3 * y3 + .l4 * y4

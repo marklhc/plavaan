@@ -1,13 +1,15 @@
 # Approximate Invariance with Penalized Estimation
 
 ``` r
+
 library(plavaan)
 library(lavaan)
-#> This is lavaan 0.6-20
+#> This is lavaan 0.7-2
 #> lavaan is FREE software! Please report any bugs.
 ```
 
 ``` r
+
 # Load the PoliticalDemocracy data
 data("PoliticalDemocracy", package = "lavaan")
 # Configural invariance (pretend y7 is not available in dem65),
@@ -32,6 +34,7 @@ Penalized estimation can be used to achieve approximate invariance by
 penalizing the differences in intercepts and loadings across groups.
 
 ``` r
+
 parTable(fit_dry)
 #>    id   lhs op   rhs user block group free ustart exo label plabel start   est
 #> 1   1 dem60 =~    y1    1     1     1    1     NA   0         .p1. 2.224 2.224
@@ -72,7 +75,7 @@ fit_pen <- penalized_est(
   se = "robust.huber.white"
 )
 summary(fit_pen)
-#> lavaan 0.6-20 ended normally after 90 iterations
+#> lavaan 0.7-2 ended normally after 90 iterations
 #> 
 #>   Estimator                                         ML
 #>   Optimization method                           NLMINB
@@ -142,6 +145,7 @@ intercepts difference are minimized, depending on the penalty weight
 ## Compared to Results from Mplus (version 9.0)
 
 ``` r
+
 # export to Mplus
 write.table(PoliticalDemocracy,
             file = "inst/mplus/PoliticalDemocracy.dat",

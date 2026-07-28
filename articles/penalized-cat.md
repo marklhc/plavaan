@@ -1,9 +1,10 @@
 # Penalized Estimation with Ordinal Data and Multiple Groups
 
 ``` r
+
 library(plavaan)
 library(lavaan)
-#> This is lavaan 0.6-20
+#> This is lavaan 0.7-2
 #> lavaan is FREE software! Please report any bugs.
 data(HolzingerSwineford1939)
 ```
@@ -13,6 +14,7 @@ data(HolzingerSwineford1939)
 First, we convert the continuous variables to ordinal with 3 categories:
 
 ``` r
+
 # Select the 9 cognitive test variables
 hs_data <- HolzingerSwineford1939[, c("school", "x1", "x2", "x3", "x4", 
                                        "x5", "x6", "x7", "x8", "x9")]
@@ -43,6 +45,7 @@ head(hs_data)
 Now fit the model across the two schools:
 
 ``` r
+
 mod_base <- "
   visual =~ x1 + x2 + x3
   textual =~ x4 + x5 + x6
@@ -60,7 +63,7 @@ mod_base <- "
 fit_mg <- cfa(mod_base, data = hs_data, ordered = TRUE, std.lv = TRUE,
               parameterization = "theta", group = "school")
 summary(fit_mg, fit.measures = TRUE)
-#> lavaan 0.6-20 ended normally after 179 iterations
+#> lavaan 0.7-2 ended normally after 179 iterations
 #> 
 #>   Estimator                                       DWLS
 #>   Optimization method                           NLMINB
@@ -74,7 +77,7 @@ summary(fit_mg, fit.measures = TRUE)
 #>                                               Standard      Scaled
 #>   Test Statistic                                71.775      99.182
 #>   Degrees of freedom                                48          48
-#>   P-value (Chi-square)                           0.015       0.000
+#>   P-value (Unknown)                                 NA       0.000
 #>   Scaling correction factor                                  0.798
 #>   Shift parameter                                            9.213
 #>     simple second-order correction                                
@@ -86,7 +89,7 @@ summary(fit_mg, fit.measures = TRUE)
 #> 
 #>   Test statistic                              1706.441    1175.245
 #>   Degrees of freedom                                72          72
-#>   P-value                                        0.000       0.000
+#>   P-value                                           NA       0.000
 #>   Scaling correction factor                                  1.481
 #> 
 #> User Model versus Baseline Model:
@@ -107,13 +110,23 @@ summary(fit_mg, fit.measures = TRUE)
 #>                                                                   
 #>   Robust RMSEA                                               0.143
 #>   90 Percent confidence interval - lower                     0.098
-#>   90 Percent confidence interval - upper                     0.187
+#>   90 Percent confidence interval - upper                     0.186
 #>   P-value H_0: Robust RMSEA <= 0.050                         0.001
 #>   P-value H_0: Robust RMSEA >= 0.080                         0.987
 #> 
 #> Standardized Root Mean Square Residual:
 #> 
 #>   SRMR                                           0.087       0.087
+#> 
+#> Goodness of Fit Index:
+#> 
+#>   Goodness of Fit Index (GFI)                    0.983            
+#>   90 Percent confidence interval - lower         0.964            
+#>   90 Percent confidence interval - upper         0.996            
+#>                                                                   
+#>   Robust GFI                                                 0.902
+#>   90 Percent confidence interval - lower                     0.844
+#>   90 Percent confidence interval - upper                     0.951
 #> 
 #> Parameter Estimates:
 #> 
@@ -276,6 +289,7 @@ the DWLS estimator, which is scaled differently than ML-based functions
 and is generally smaller based on experience.
 
 ``` r
+
 fit_mg@optim$fx
 #> [1] 0.1192268
 ```
@@ -283,6 +297,7 @@ fit_mg@optim$fx
 ### Strict and partial invariance models
 
 ``` r
+
 # Strict invariance: constrain loadings, thresholds, and residual variances
 fit_strict <- cfa(mod_base, data = hs_data, ordered = TRUE, std.lv = TRUE,
                   parameterization = "theta", group = "school",
@@ -290,48 +305,48 @@ fit_strict <- cfa(mod_base, data = hs_data, ordered = TRUE, std.lv = TRUE,
 
 # Score test
 lavTestScore(fit_strict)
-#> Warning: lavaan->lavTestScore():  
-#>    se is not `standard'; not implemented yet; falling back to ordinary score 
-#>    test
 #> $test
 #> 
 #> total score test:
 #> 
-#>    test     X2 df p.value
-#> 1 score 18.231 27   0.896
+#>             test     X2     df p.value
+#> 1          score 18.231 27.000   0.896
+#> 2   score.scaled 17.168 27.000   0.927
+#> 3 score.adjusted 12.843 20.199   0.891
+#> 4   score.robust 23.327 27.000   0.667
 #> 
 #> $uni
 #> 
 #> univariate score tests:
 #> 
-#>      lhs op   rhs    X2 df p.value
-#> 1   .p1. == .p64. 0.345  1   0.557
-#> 2   .p2. == .p65. 0.730  1   0.393
-#> 3   .p3. == .p66. 0.027  1   0.869
-#> 4   .p4. == .p67. 0.110  1   0.740
-#> 5   .p5. == .p68. 0.310  1   0.578
-#> 6   .p6. == .p69. 0.049  1   0.824
-#> 7   .p7. == .p70. 0.995  1   0.319
-#> 8   .p8. == .p71. 0.003  1   0.960
-#> 9   .p9. == .p72. 0.769  1   0.380
-#> 10 .p19. == .p82. 1.308  1   0.253
-#> 11 .p20. == .p83. 1.308  1   0.253
-#> 12 .p21. == .p84. 2.439  1   0.118
-#> 13 .p22. == .p85. 2.439  1   0.118
-#> 14 .p23. == .p86. 0.000  1   0.986
-#> 15 .p24. == .p87. 0.000  1   0.986
-#> 16 .p25. == .p88. 0.082  1   0.774
-#> 17 .p26. == .p89. 0.082  1   0.774
-#> 18 .p27. == .p90. 0.415  1   0.519
-#> 19 .p28. == .p91. 0.415  1   0.519
-#> 20 .p29. == .p92. 1.428  1   0.232
-#> 21 .p30. == .p93. 1.428  1   0.232
-#> 22 .p31. == .p94. 0.158  1   0.691
-#> 23 .p32. == .p95. 0.158  1   0.691
-#> 24 .p33. == .p96. 0.802  1   0.371
-#> 25 .p34. == .p97. 0.802  1   0.371
-#> 26 .p35. == .p98. 4.157  1   0.041
-#> 27 .p36. == .p99. 4.157  1   0.041
+#>      lhs op   rhs    X2 df p.value X2.scaled p.value.scaled
+#> 1   .p1. == .p64. 0.345  1   0.557     0.305          0.580
+#> 2   .p2. == .p65. 0.730  1   0.393     0.443          0.506
+#> 3   .p3. == .p66. 0.027  1   0.869     0.024          0.877
+#> 4   .p4. == .p67. 0.110  1   0.740     0.177          0.674
+#> 5   .p5. == .p68. 0.310  1   0.578     0.599          0.439
+#> 6   .p6. == .p69. 0.049  1   0.824     0.059          0.808
+#> 7   .p7. == .p70. 0.995  1   0.319     1.150          0.284
+#> 8   .p8. == .p71. 0.003  1   0.960     0.003          0.960
+#> 9   .p9. == .p72. 0.769  1   0.380     0.694          0.405
+#> 10 .p19. == .p82. 1.308  1   0.253     1.491          0.222
+#> 11 .p20. == .p83. 1.308  1   0.253     1.491          0.222
+#> 12 .p21. == .p84. 2.439  1   0.118     2.954          0.086
+#> 13 .p22. == .p85. 2.439  1   0.118     2.954          0.086
+#> 14 .p23. == .p86. 0.000  1   0.986     0.001          0.981
+#> 15 .p24. == .p87. 0.000  1   0.986     0.001          0.981
+#> 16 .p25. == .p88. 0.082  1   0.774     0.149          0.700
+#> 17 .p26. == .p89. 0.082  1   0.774     0.149          0.700
+#> 18 .p27. == .p90. 0.415  1   0.519     0.750          0.386
+#> 19 .p28. == .p91. 0.415  1   0.519     0.750          0.386
+#> 20 .p29. == .p92. 1.428  1   0.232     2.014          0.156
+#> 21 .p30. == .p93. 1.428  1   0.232     2.014          0.156
+#> 22 .p31. == .p94. 0.158  1   0.691     0.219          0.640
+#> 23 .p32. == .p95. 0.158  1   0.691     0.219          0.640
+#> 24 .p33. == .p96. 0.802  1   0.371     0.965          0.326
+#> 25 .p34. == .p97. 0.802  1   0.371     0.965          0.326
+#> 26 .p35. == .p98. 4.157  1   0.041     4.138          0.042
+#> 27 .p36. == .p99. 4.157  1   0.041     4.138          0.042
 ```
 
 Only item 9 showed non-invariant thresholds, based on the score test.
@@ -344,6 +359,7 @@ mean and variance only identified in the first group, without fitting
 (`do.fit = FALSE`):
 
 ``` r
+
 mod_un <- "
   visual =~ x1 + x2 + x3
   textual =~ x4 + x5 + x6
@@ -372,6 +388,7 @@ fit_mg_nofit <- cfa(mod_base, data = hs_data, ordered = TRUE, std.lv = TRUE,
 Examine the parameter table to identify loadings and thresholds:
 
 ``` r
+
 pt <- parTable(fit_mg_nofit)
 # Show loadings
 pt[pt$op == "=~", c("lhs", "op", "rhs", "group", "free")]
@@ -397,6 +414,7 @@ pt[pt$op == "=~", c("lhs", "op", "rhs", "group", "free")]
 ```
 
 ``` r
+
 # Show thresholds
 pt[pt$op == "|", c("lhs", "op", "rhs", "group", "free")]
 #>    lhs op rhs group free
@@ -441,6 +459,7 @@ pt[pt$op == "|", c("lhs", "op", "rhs", "group", "free")]
 Identify parameter IDs for loadings and thresholds in each group:
 
 ``` r
+
 # Loadings: group 1 (Pasteur) and group 2 (Grant-White)
 load_g1 <- pt$free[pt$op == "=~" & pt$group == 1 & pt$free > 0]
 load_g2 <- pt$free[pt$op == "=~" & pt$group == 2 & pt$free > 0]
@@ -472,6 +491,7 @@ Fit the penalized model with penalties on differences in loadings and
 thresholds:
 
 ``` r
+
 fit_pen_mg <- penalized_est(
     fit_mg_nofit,
     w = 0.03,
@@ -481,7 +501,7 @@ fit_pen_mg <- penalized_est(
     )
 )
 summary(fit_pen_mg)
-#> lavaan 0.6-20 ended normally after 152 iterations
+#> lavaan 0.7-2 ended normally after 152 iterations
 #> 
 #>   Estimator                                       DWLS
 #>   Optimization method                           NLMINB
@@ -627,6 +647,7 @@ Here are the estimated loadings and thresholds, and we can calculate the
 effective number of parameters that differ across groups:
 
 ``` r
+
 # Loadings
 load_ests_g1 <- as.numeric(coef(fit_pen_mg)[load_g1])
 load_ests_g2 <- as.numeric(coef(fit_pen_mg)[load_g2])

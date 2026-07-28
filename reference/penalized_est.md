@@ -109,7 +109,7 @@ should be interpreted with caution.
 
 ``` r
 library(lavaan)
-#> This is lavaan 0.6-20
+#> This is lavaan 0.7-2
 #> lavaan is FREE software! Please report any bugs.
 
 # Define a longitudinal factor model with PoliticalDemocracy data
@@ -153,7 +153,7 @@ pen_fit <- penalized_est(
 
 # Compare parameter estimates
 summary(pen_fit)
-#> lavaan 0.6-20 ended normally after 103 iterations
+#> lavaan 0.7-2 ended normally after 103 iterations
 #> 
 #>   Estimator                                         ML
 #>   Optimization method                           NLMINB

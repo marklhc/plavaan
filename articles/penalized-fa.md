@@ -1,9 +1,10 @@
 # Penalized Estimation of Cross-Loadings and Unique Covariances
 
 ``` r
+
 library(plavaan)
 library(lavaan)
-#> This is lavaan 0.6-20
+#> This is lavaan 0.7-2
 #> lavaan is FREE software! Please report any bugs.
 data(PoliticalDemocracy)
 ```
@@ -13,6 +14,7 @@ data(PoliticalDemocracy)
 ### Two-factor CFA model
 
 ``` r
+
 mod0 <- "
   ind60 =~ x1 + x2 + x3
   dem60 =~ y1 + y2 + y3 + y4
@@ -24,6 +26,7 @@ fit0 <- cfa(mod0, data = PoliticalDemocracy, std.lv = TRUE)
 ### Two-factor EFA model (unidentified)
 
 ``` r
+
 mod <- "
   ind60 =~ x1 + x2 + x3 + y1 + y2 + y3 + y4
   dem60 =~ x1 + x2 + x3 + y1 + y2 + y3 + y4
@@ -38,6 +41,7 @@ The cross-loadings are the parameters 4 to 10 in the parameter table
 (see the `free` column).
 
 ``` r
+
 parTable(fit)
 #>    id   lhs op   rhs user block group free ustart exo label plabel start   est
 #> 1   1 ind60 =~    x1    1     1     1    1     NA   0         .p1. 0.951 0.951
@@ -67,13 +71,14 @@ parTable(fit)
 ```
 
 ``` r
+
 pefa_fit <- penalized_est(
     fit,
     w = .03,
     pen_par_id = 4:10
 )
 summary(pefa_fit)
-#> lavaan 0.6-20 ended normally after 126 iterations
+#> lavaan 0.7-2 ended normally after 126 iterations
 #> 
 #>   Estimator                                         ML
 #>   Optimization method                           NLMINB
@@ -127,6 +132,7 @@ summary(pefa_fit)
 ### Two-factor EFA model with unique covariances
 
 ``` r
+
 mod2 <- "
   ind60 =~ x1 + x2 + x3 + y1 + y2 + y3 + y4
   dem60 =~ x1 + x2 + x3 + y1 + y2 + y3 + y4
@@ -147,6 +153,7 @@ The unique covariances are the parameters 15 to 35 in the parameter
 table (see the `free` column).
 
 ``` r
+
 parTable(fit2)
 #>    id   lhs op   rhs user block group free ustart exo label plabel start   est
 #> 1   1 ind60 =~    x1    1     1     1    1     NA   0         .p1. 0.951 0.951
@@ -197,13 +204,14 @@ parTable(fit2)
 ```
 
 ``` r
+
 pefa_fit2 <- penalized_est(
     fit2,
     w = .03,
     pen_par_id = c(4:10, 15:35)
 )
 summary(pefa_fit2)
-#> lavaan 0.6-20 ended normally after 195 iterations
+#> lavaan 0.7-2 ended normally after 182 iterations
 #> 
 #>   Estimator                                         ML
 #>   Optimization method                           NLMINB
@@ -284,9 +292,10 @@ approximate the “effective” number of cross-loadings and unique
 covariances by:
 
 ``` r
+
 pen_ests <- as.numeric(coef(pefa_fit2)[c(4:10, 15:35)])
 sum(l0a(pen_ests))
-#> [1] 1.564463
+#> [1] 1.564465
 ```
 
 So out of 28 parameters penalized, only about 1.6 (or close to 2) are
@@ -298,6 +307,7 @@ First, the model without cross-loadings and concurrent unique
 covariances
 
 ``` r
+
 mod3 <- "
     ind60 =~ NA * x1 + x2 + x3
     dem60 =~ NA * l1 * y1 + l2 * y2 + l3 * y3 + l4 * y4
@@ -328,6 +338,7 @@ fit3_base <- cfa(mod3, data = PoliticalDemocracy)
 ```
 
 ``` r
+
 # Lavaan example of Political Democracy
 mod3_un <- "
     ind60 =~ NA * x1 + x2 + x3 + y1 + y2 + y3 + y4
@@ -363,6 +374,7 @@ fit3 <- cfa(
 ```
 
 ``` r
+
 pt3 <- parTable(fit3)
 # Provide better starting values
 pt3$start[c(4:10, 35:55)] <- 0
@@ -381,6 +393,7 @@ Parameter IDs:
 - Intercepts across time: 27 to 34
 
 ``` r
+
 pefa_fit3 <- penalized_est(
     fit3_2,
     w = .03,
@@ -392,7 +405,7 @@ pefa_fit3 <- penalized_est(
 )
 #> Warning in trans(x): NaNs produced
 summary(pefa_fit3, standardized = TRUE)
-#> lavaan 0.6-20 ended normally after 219 iterations
+#> lavaan 0.7-2 ended normally after 226 iterations
 #> 
 #>   Estimator                                         ML
 #>   Optimization method                           NLMINB
@@ -408,30 +421,30 @@ summary(pefa_fit3, standardized = TRUE)
 #>                    Estimate   Std.lv  Std.all
 #>   ind60 =~                                   
 #>     x1                0.753    0.753    1.038
-#>     x2                1.660    1.660    1.108
+#>     x2                1.661    1.661    1.108
 #>     x3                1.421    1.421    1.020
 #>     y1               -0.001   -0.001   -0.000
 #>     y2               -0.001   -0.001   -0.000
-#>     y3                0.479    0.479    0.141
+#>     y3                0.480    0.480    0.141
 #>     y4                0.623    0.623    0.191
 #>   dem60 =~                                   
 #>     x1                0.574    0.702    0.967
-#>     x2                1.205    1.473    0.983
-#>     x3                0.983    1.202    0.863
-#>     y1                1.772    2.167    0.836
+#>     x2                1.205    1.474    0.983
+#>     x3                0.983    1.203    0.863
+#>     y1                1.771    2.167    0.836
 #>     y2                2.446    2.992    0.763
 #>     y3                2.205    2.697    0.796
-#>     y4                2.572    3.145    0.965
+#>     y4                2.571    3.146    0.965
 #>   dem65 =~                                   
 #>     y5                1.768    1.992    0.772
-#>     y6                2.439    2.747    0.801
+#>     y6                2.438    2.747    0.801
 #>     y7                2.250    2.535    0.798
 #>     y8                2.535    2.856    0.875
 #> 
 #> Regressions:
 #>                    Estimate   Std.lv  Std.all
 #>   dem60 ~                                    
-#>     ind60            -0.704   -0.576   -0.576
+#>     ind60            -0.705   -0.576   -0.576
 #>   dem65 ~                                    
 #>     ind60             0.316    0.281    0.281
 #>     dem60             1.005    1.091    1.091
@@ -513,20 +526,22 @@ We can again compute the “effective” number of cross-loadings and unique
 covariances that are non-zero:
 
 ``` r
+
 pen_ests2 <- as.numeric(coef(pefa_fit3)[c(4:10, 35:55)])
 sum(l0a(pen_ests2))
-#> [1] 5.1989
+#> [1] 5.198932
 ```
 
 And the “effective” number of loadings and intercepts that differ across
 time:
 
 ``` r
+
 ld_ests <- as.numeric(coef(pefa_fit3)[11:18])
 int_ests <- as.numeric(coef(pefa_fit3)[27:34])
 ld_mat <- matrix(ld_ests, nrow = 2, byrow = TRUE)
 int_mat <- matrix(int_ests, nrow = 2, byrow = TRUE)
 composite_pair_loss(ld_mat, fun = l0a) +
     composite_pair_loss(int_mat, fun = l0a)
-#> [1] 0.3263673
+#> [1] 0.3263055
 ```

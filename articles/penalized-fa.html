@@ -7,8 +7,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>Penalized Estimation of Cross-Loadings and Unique Covariances • plavaan</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Penalized Estimation of Cross-Loadings and Unique Covariances">
 </head>
@@ -62,7 +62,7 @@
       <h1>Penalized Estimation of Cross-Loadings and Unique Covariances</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/marklhc/plavaan/blob/main/vignettes/penalized-fa.Rmd" class="external-link"><code>vignettes/penalized-fa.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/marklhc/plavaan/blob/v0.0.1/vignettes/penalized-fa.Rmd" class="external-link"><code>vignettes/penalized-fa.Rmd</code></a></small>
       <div class="d-none name"><code>penalized-fa.Rmd</code></div>
     </div>
 
@@ -71,7 +71,7 @@
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://marklhc.github.io/plavaan/">plavaan</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://lavaan.ugent.be" class="external-link">lavaan</a></span><span class="op">)</span></span>
-<span><span class="co">#&gt; This is lavaan 0.6-20</span></span>
+<span><span class="co">#&gt; This is lavaan 0.7-2</span></span>
 <span><span class="co">#&gt; lavaan is FREE software! Please report any bugs.</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">PoliticalDemocracy</span><span class="op">)</span></span></code></pre></div>
 <div class="section level2">
@@ -138,7 +138,7 @@
 <span>    pen_par_id <span class="op">=</span> <span class="fl">4</span><span class="op">:</span><span class="fl">10</span></span>
 <span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">pefa_fit</span><span class="op">)</span></span>
-<span><span class="co">#&gt; lavaan 0.6-20 ended normally after 126 iterations</span></span>
+<span><span class="co">#&gt; lavaan 0.7-2 ended normally after 126 iterations</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;   Estimator                                         ML</span></span>
 <span><span class="co">#&gt;   Optimization method                           NLMINB</span></span>
@@ -268,7 +268,7 @@ table (see the <code>free</code> column).</p>
 <span>    pen_par_id <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">4</span><span class="op">:</span><span class="fl">10</span>, <span class="fl">15</span><span class="op">:</span><span class="fl">35</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">pefa_fit2</span><span class="op">)</span></span>
-<span><span class="co">#&gt; lavaan 0.6-20 ended normally after 195 iterations</span></span>
+<span><span class="co">#&gt; lavaan 0.7-2 ended normally after 182 iterations</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;   Estimator                                         ML</span></span>
 <span><span class="co">#&gt;   Optimization method                           NLMINB</span></span>
@@ -348,7 +348,7 @@ covariances by:</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pen_ests</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">pefa_fit2</span><span class="op">)</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">4</span><span class="op">:</span><span class="fl">10</span>, <span class="fl">15</span><span class="op">:</span><span class="fl">35</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="../reference/loss.html">l0a</a></span><span class="op">(</span><span class="va">pen_ests</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 1.564463</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] 1.564465</span></span></code></pre></div>
 <p>So out of 28 parameters penalized, only about 1.6 (or close to 2) are
 effectively non-zero.</p>
 </div>
@@ -448,7 +448,7 @@ covariances</p>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; Warning in trans(x): NaNs produced</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">pefa_fit3</span>, standardized <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="co">#&gt; lavaan 0.6-20 ended normally after 219 iterations</span></span>
+<span><span class="co">#&gt; lavaan 0.7-2 ended normally after 226 iterations</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;   Estimator                                         ML</span></span>
 <span><span class="co">#&gt;   Optimization method                           NLMINB</span></span>
@@ -464,30 +464,30 @@ covariances</p>
 <span><span class="co">#&gt;                    Estimate   Std.lv  Std.all</span></span>
 <span><span class="co">#&gt;   ind60 =~                                   </span></span>
 <span><span class="co">#&gt;     x1                0.753    0.753    1.038</span></span>
-<span><span class="co">#&gt;     x2                1.660    1.660    1.108</span></span>
+<span><span class="co">#&gt;     x2                1.661    1.661    1.108</span></span>
 <span><span class="co">#&gt;     x3                1.421    1.421    1.020</span></span>
 <span><span class="co">#&gt;     y1               -0.001   -0.001   -0.000</span></span>
 <span><span class="co">#&gt;     y2               -0.001   -0.001   -0.000</span></span>
-<span><span class="co">#&gt;     y3                0.479    0.479    0.141</span></span>
+<span><span class="co">#&gt;     y3                0.480    0.480    0.141</span></span>
 <span><span class="co">#&gt;     y4                0.623    0.623    0.191</span></span>
 <span><span class="co">#&gt;   dem60 =~                                   </span></span>
 <span><span class="co">#&gt;     x1                0.574    0.702    0.967</span></span>
-<span><span class="co">#&gt;     x2                1.205    1.473    0.983</span></span>
-<span><span class="co">#&gt;     x3                0.983    1.202    0.863</span></span>
-<span><span class="co">#&gt;     y1                1.772    2.167    0.836</span></span>
+<span><span class="co">#&gt;     x2                1.205    1.474    0.983</span></span>
+<span><span class="co">#&gt;     x3                0.983    1.203    0.863</span></span>
+<span><span class="co">#&gt;     y1                1.771    2.167    0.836</span></span>
 <span><span class="co">#&gt;     y2                2.446    2.992    0.763</span></span>
 <span><span class="co">#&gt;     y3                2.205    2.697    0.796</span></span>
-<span><span class="co">#&gt;     y4                2.572    3.145    0.965</span></span>
+<span><span class="co">#&gt;     y4                2.571    3.146    0.965</span></span>
 <span><span class="co">#&gt;   dem65 =~                                   </span></span>
 <span><span class="co">#&gt;     y5                1.768    1.992    0.772</span></span>
-<span><span class="co">#&gt;     y6                2.439    2.747    0.801</span></span>
+<span><span class="co">#&gt;     y6                2.438    2.747    0.801</span></span>
 <span><span class="co">#&gt;     y7                2.250    2.535    0.798</span></span>
 <span><span class="co">#&gt;     y8                2.535    2.856    0.875</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Regressions:</span></span>
 <span><span class="co">#&gt;                    Estimate   Std.lv  Std.all</span></span>
 <span><span class="co">#&gt;   dem60 ~                                    </span></span>
-<span><span class="co">#&gt;     ind60            -0.704   -0.576   -0.576</span></span>
+<span><span class="co">#&gt;     ind60            -0.705   -0.576   -0.576</span></span>
 <span><span class="co">#&gt;   dem65 ~                                    </span></span>
 <span><span class="co">#&gt;     ind60             0.316    0.281    0.281</span></span>
 <span><span class="co">#&gt;     dem60             1.005    1.091    1.091</span></span>
@@ -568,7 +568,7 @@ unique covariances that are non-zero:</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pen_ests2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">pefa_fit3</span><span class="op">)</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">4</span><span class="op">:</span><span class="fl">10</span>, <span class="fl">35</span><span class="op">:</span><span class="fl">55</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="../reference/loss.html">l0a</a></span><span class="op">(</span><span class="va">pen_ests2</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 5.1989</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] 5.198932</span></span></code></pre></div>
 <p>And the “effective” number of loadings and intercepts that differ
 across time:</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
@@ -578,7 +578,7 @@ across time:</p>
 <span><span class="va">int_mat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="va">int_ests</span>, nrow <span class="op">=</span> <span class="fl">2</span>, byrow <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/composite_pair_loss.html">composite_pair_loss</a></span><span class="op">(</span><span class="va">ld_mat</span>, fun <span class="op">=</span> <span class="va">l0a</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="../reference/composite_pair_loss.html">composite_pair_loss</a></span><span class="op">(</span><span class="va">int_mat</span>, fun <span class="op">=</span> <span class="va">l0a</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 0.3263673</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] 0.3263055</span></span></code></pre></div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
@@ -591,7 +591,7 @@ across time:</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer>

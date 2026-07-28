@@ -64,9 +64,9 @@ The function works by:
 # Example with a simple matrix
 x <- matrix(runif(12), nrow = 4)
 composite_pair_loss(x, fun = alf)
-#> [1] 5.148134
+#> [1] 5.075207
 
 # Example with log transformation and L2 loss
 composite_pair_loss(x, fun = function(x) x^2, trans = log)
-#> [1] 36.73551
+#> [1] 35.18578
 ```

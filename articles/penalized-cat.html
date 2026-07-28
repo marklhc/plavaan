@@ -7,8 +7,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>Penalized Estimation with Ordinal Data and Multiple Groups • plavaan</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Penalized Estimation with Ordinal Data and Multiple Groups">
 </head>
@@ -62,7 +62,7 @@
       <h1>Penalized Estimation with Ordinal Data and Multiple Groups</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/marklhc/plavaan/blob/main/vignettes/penalized-cat.Rmd" class="external-link"><code>vignettes/penalized-cat.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/marklhc/plavaan/blob/v0.0.1/vignettes/penalized-cat.Rmd" class="external-link"><code>vignettes/penalized-cat.Rmd</code></a></small>
       <div class="d-none name"><code>penalized-cat.Rmd</code></div>
     </div>
 
@@ -71,7 +71,7 @@
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://marklhc.github.io/plavaan/">plavaan</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://lavaan.ugent.be" class="external-link">lavaan</a></span><span class="op">)</span></span>
-<span><span class="co">#&gt; This is lavaan 0.6-20</span></span>
+<span><span class="co">#&gt; This is lavaan 0.7-2</span></span>
 <span><span class="co">#&gt; lavaan is FREE software! Please report any bugs.</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">HolzingerSwineford1939</span><span class="op">)</span></span></code></pre></div>
 <div class="section level2">
@@ -126,7 +126,7 @@ categories:</p>
 <span><span class="va">fit_mg</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/lavaan/man/cfa.html" class="external-link">cfa</a></span><span class="op">(</span><span class="va">mod_base</span>, data <span class="op">=</span> <span class="va">hs_data</span>, ordered <span class="op">=</span> <span class="cn">TRUE</span>, std.lv <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>              parameterization <span class="op">=</span> <span class="st">"theta"</span>, group <span class="op">=</span> <span class="st">"school"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">fit_mg</span>, fit.measures <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="co">#&gt; lavaan 0.6-20 ended normally after 179 iterations</span></span>
+<span><span class="co">#&gt; lavaan 0.7-2 ended normally after 179 iterations</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;   Estimator                                       DWLS</span></span>
 <span><span class="co">#&gt;   Optimization method                           NLMINB</span></span>
@@ -140,7 +140,7 @@ categories:</p>
 <span><span class="co">#&gt;                                               Standard      Scaled</span></span>
 <span><span class="co">#&gt;   Test Statistic                                71.775      99.182</span></span>
 <span><span class="co">#&gt;   Degrees of freedom                                48          48</span></span>
-<span><span class="co">#&gt;   P-value (Chi-square)                           0.015       0.000</span></span>
+<span><span class="co">#&gt;   P-value (Unknown)                                 NA       0.000</span></span>
 <span><span class="co">#&gt;   Scaling correction factor                                  0.798</span></span>
 <span><span class="co">#&gt;   Shift parameter                                            9.213</span></span>
 <span><span class="co">#&gt;     simple second-order correction                                </span></span>
@@ -152,7 +152,7 @@ categories:</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;   Test statistic                              1706.441    1175.245</span></span>
 <span><span class="co">#&gt;   Degrees of freedom                                72          72</span></span>
-<span><span class="co">#&gt;   P-value                                        0.000       0.000</span></span>
+<span><span class="co">#&gt;   P-value                                           NA       0.000</span></span>
 <span><span class="co">#&gt;   Scaling correction factor                                  1.481</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; User Model versus Baseline Model:</span></span>
@@ -173,13 +173,23 @@ categories:</p>
 <span><span class="co">#&gt;                                                                   </span></span>
 <span><span class="co">#&gt;   Robust RMSEA                                               0.143</span></span>
 <span><span class="co">#&gt;   90 Percent confidence interval - lower                     0.098</span></span>
-<span><span class="co">#&gt;   90 Percent confidence interval - upper                     0.187</span></span>
+<span><span class="co">#&gt;   90 Percent confidence interval - upper                     0.186</span></span>
 <span><span class="co">#&gt;   P-value H_0: Robust RMSEA &lt;= 0.050                         0.001</span></span>
 <span><span class="co">#&gt;   P-value H_0: Robust RMSEA &gt;= 0.080                         0.987</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Standardized Root Mean Square Residual:</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;   SRMR                                           0.087       0.087</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Goodness of Fit Index:</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;   Goodness of Fit Index (GFI)                    0.983            </span></span>
+<span><span class="co">#&gt;   90 Percent confidence interval - lower         0.964            </span></span>
+<span><span class="co">#&gt;   90 Percent confidence interval - upper         0.996            </span></span>
+<span><span class="co">#&gt;                                                                   </span></span>
+<span><span class="co">#&gt;   Robust GFI                                                 0.902</span></span>
+<span><span class="co">#&gt;   90 Percent confidence interval - lower                     0.844</span></span>
+<span><span class="co">#&gt;   90 Percent confidence interval - upper                     0.951</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Parameter Estimates:</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -352,48 +362,48 @@ and is generally smaller based on experience.</p>
 <span></span>
 <span><span class="co"># Score test</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/lavaan/man/lavTestScore.html" class="external-link">lavTestScore</a></span><span class="op">(</span><span class="va">fit_strict</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: lavaan-&gt;lavTestScore():  </span></span>
-<span><span class="co">#&gt;    se is not `standard'; not implemented yet; falling back to ordinary score </span></span>
-<span><span class="co">#&gt;    test</span></span>
 <span><span class="co">#&gt; $test</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; total score test:</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;    test     X2 df p.value</span></span>
-<span><span class="co">#&gt; 1 score 18.231 27   0.896</span></span>
+<span><span class="co">#&gt;             test     X2     df p.value</span></span>
+<span><span class="co">#&gt; 1          score 18.231 27.000   0.896</span></span>
+<span><span class="co">#&gt; 2   score.scaled 17.168 27.000   0.927</span></span>
+<span><span class="co">#&gt; 3 score.adjusted 12.843 20.199   0.891</span></span>
+<span><span class="co">#&gt; 4   score.robust 23.327 27.000   0.667</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $uni</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; univariate score tests:</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;      lhs op   rhs    X2 df p.value</span></span>
-<span><span class="co">#&gt; 1   .p1. == .p64. 0.345  1   0.557</span></span>
-<span><span class="co">#&gt; 2   .p2. == .p65. 0.730  1   0.393</span></span>
-<span><span class="co">#&gt; 3   .p3. == .p66. 0.027  1   0.869</span></span>
-<span><span class="co">#&gt; 4   .p4. == .p67. 0.110  1   0.740</span></span>
-<span><span class="co">#&gt; 5   .p5. == .p68. 0.310  1   0.578</span></span>
-<span><span class="co">#&gt; 6   .p6. == .p69. 0.049  1   0.824</span></span>
-<span><span class="co">#&gt; 7   .p7. == .p70. 0.995  1   0.319</span></span>
-<span><span class="co">#&gt; 8   .p8. == .p71. 0.003  1   0.960</span></span>
-<span><span class="co">#&gt; 9   .p9. == .p72. 0.769  1   0.380</span></span>
-<span><span class="co">#&gt; 10 .p19. == .p82. 1.308  1   0.253</span></span>
-<span><span class="co">#&gt; 11 .p20. == .p83. 1.308  1   0.253</span></span>
-<span><span class="co">#&gt; 12 .p21. == .p84. 2.439  1   0.118</span></span>
-<span><span class="co">#&gt; 13 .p22. == .p85. 2.439  1   0.118</span></span>
-<span><span class="co">#&gt; 14 .p23. == .p86. 0.000  1   0.986</span></span>
-<span><span class="co">#&gt; 15 .p24. == .p87. 0.000  1   0.986</span></span>
-<span><span class="co">#&gt; 16 .p25. == .p88. 0.082  1   0.774</span></span>
-<span><span class="co">#&gt; 17 .p26. == .p89. 0.082  1   0.774</span></span>
-<span><span class="co">#&gt; 18 .p27. == .p90. 0.415  1   0.519</span></span>
-<span><span class="co">#&gt; 19 .p28. == .p91. 0.415  1   0.519</span></span>
-<span><span class="co">#&gt; 20 .p29. == .p92. 1.428  1   0.232</span></span>
-<span><span class="co">#&gt; 21 .p30. == .p93. 1.428  1   0.232</span></span>
-<span><span class="co">#&gt; 22 .p31. == .p94. 0.158  1   0.691</span></span>
-<span><span class="co">#&gt; 23 .p32. == .p95. 0.158  1   0.691</span></span>
-<span><span class="co">#&gt; 24 .p33. == .p96. 0.802  1   0.371</span></span>
-<span><span class="co">#&gt; 25 .p34. == .p97. 0.802  1   0.371</span></span>
-<span><span class="co">#&gt; 26 .p35. == .p98. 4.157  1   0.041</span></span>
-<span><span class="co">#&gt; 27 .p36. == .p99. 4.157  1   0.041</span></span></code></pre></div>
+<span><span class="co">#&gt;      lhs op   rhs    X2 df p.value X2.scaled p.value.scaled</span></span>
+<span><span class="co">#&gt; 1   .p1. == .p64. 0.345  1   0.557     0.305          0.580</span></span>
+<span><span class="co">#&gt; 2   .p2. == .p65. 0.730  1   0.393     0.443          0.506</span></span>
+<span><span class="co">#&gt; 3   .p3. == .p66. 0.027  1   0.869     0.024          0.877</span></span>
+<span><span class="co">#&gt; 4   .p4. == .p67. 0.110  1   0.740     0.177          0.674</span></span>
+<span><span class="co">#&gt; 5   .p5. == .p68. 0.310  1   0.578     0.599          0.439</span></span>
+<span><span class="co">#&gt; 6   .p6. == .p69. 0.049  1   0.824     0.059          0.808</span></span>
+<span><span class="co">#&gt; 7   .p7. == .p70. 0.995  1   0.319     1.150          0.284</span></span>
+<span><span class="co">#&gt; 8   .p8. == .p71. 0.003  1   0.960     0.003          0.960</span></span>
+<span><span class="co">#&gt; 9   .p9. == .p72. 0.769  1   0.380     0.694          0.405</span></span>
+<span><span class="co">#&gt; 10 .p19. == .p82. 1.308  1   0.253     1.491          0.222</span></span>
+<span><span class="co">#&gt; 11 .p20. == .p83. 1.308  1   0.253     1.491          0.222</span></span>
+<span><span class="co">#&gt; 12 .p21. == .p84. 2.439  1   0.118     2.954          0.086</span></span>
+<span><span class="co">#&gt; 13 .p22. == .p85. 2.439  1   0.118     2.954          0.086</span></span>
+<span><span class="co">#&gt; 14 .p23. == .p86. 0.000  1   0.986     0.001          0.981</span></span>
+<span><span class="co">#&gt; 15 .p24. == .p87. 0.000  1   0.986     0.001          0.981</span></span>
+<span><span class="co">#&gt; 16 .p25. == .p88. 0.082  1   0.774     0.149          0.700</span></span>
+<span><span class="co">#&gt; 17 .p26. == .p89. 0.082  1   0.774     0.149          0.700</span></span>
+<span><span class="co">#&gt; 18 .p27. == .p90. 0.415  1   0.519     0.750          0.386</span></span>
+<span><span class="co">#&gt; 19 .p28. == .p91. 0.415  1   0.519     0.750          0.386</span></span>
+<span><span class="co">#&gt; 20 .p29. == .p92. 1.428  1   0.232     2.014          0.156</span></span>
+<span><span class="co">#&gt; 21 .p30. == .p93. 1.428  1   0.232     2.014          0.156</span></span>
+<span><span class="co">#&gt; 22 .p31. == .p94. 0.158  1   0.691     0.219          0.640</span></span>
+<span><span class="co">#&gt; 23 .p32. == .p95. 0.158  1   0.691     0.219          0.640</span></span>
+<span><span class="co">#&gt; 24 .p33. == .p96. 0.802  1   0.371     0.965          0.326</span></span>
+<span><span class="co">#&gt; 25 .p34. == .p97. 0.802  1   0.371     0.965          0.326</span></span>
+<span><span class="co">#&gt; 26 .p35. == .p98. 4.157  1   0.041     4.138          0.042</span></span>
+<span><span class="co">#&gt; 27 .p36. == .p99. 4.157  1   0.041     4.138          0.042</span></span></code></pre></div>
 <p>Only item 9 showed non-invariant thresholds, based on the score
 test.</p>
 </div>
@@ -532,7 +542,7 @@ thresholds:</p>
 <span>    <span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">fit_pen_mg</span><span class="op">)</span></span>
-<span><span class="co">#&gt; lavaan 0.6-20 ended normally after 152 iterations</span></span>
+<span><span class="co">#&gt; lavaan 0.7-2 ended normally after 152 iterations</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;   Estimator                                       DWLS</span></span>
 <span><span class="co">#&gt;   Optimization method                           NLMINB</span></span>
@@ -731,7 +741,7 @@ data-driven assessment of measurement invariance for ordinal data.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer>

@@ -11,6 +11,7 @@ described in Robitzsch (2023) and similar to the approach described in
 You can install the development version of plavaan like so:
 
 ``` r
+
 install.packages("plavaan")
 ```
 
@@ -20,6 +21,7 @@ This is a basic example to obtain penalized cross-loadings in a
 confirmatory factor analysis model:
 
 ``` r
+
 library(lavaan)
 #> This is lavaan 0.6-20
 #> lavaan is FREE software! Please report any bugs.

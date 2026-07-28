@@ -2,22 +2,22 @@
 
 ## Authors
 
-- **Hok Chio (Mark) Lai**. Author, maintainer, copyright holder.
+- **Hok Chio (Mark) Lai**. Author, maintainer.
   [](https://orcid.org/0000-0002-9196-7406)
 
 ## Citation
 
 Source:
-[`DESCRIPTION`](https://github.com/marklhc/plavaan/blob/main/DESCRIPTION)
+[`DESCRIPTION`](https://github.com/marklhc/plavaan/blob/v0.0.1/DESCRIPTION)
 
-Lai H (2025). *plavaan: Penalized Estimation for Latent Variable Models
+Lai H (2026). *plavaan: Penalized Estimation for Latent Variable Models
 with 'lavaan'*. R package version 0.0.1,
 <https://marklhc.github.io/plavaan/>.
 
     @Manual{,
       title = {plavaan: Penalized Estimation for Latent Variable Models with 'lavaan'},
       author = {Hok Chio (Mark) Lai},
-      year = {2025},
+      year = {2026},
       note = {R package version 0.0.1},
       url = {https://marklhc.github.io/plavaan/},
     }
