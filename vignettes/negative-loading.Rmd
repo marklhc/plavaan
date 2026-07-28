@@ -1,0 +1,62 @@
+---
+title: "Negative Loadings"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Negative Loadings}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+In an earlier version of the package, the log transformation was applied to all loadings when computing the penalty. This caused problems when some loadings were negative, as the log transformation is undefined for non-positive values. Currently, we revert to the identity transformation for all loadings, so that negative loadings are allowed. This vignette simply keeps a record.
+
+```{r setup}
+library(plavaan)
+library(lavaan)
+```
+
+```{r}
+# Load the PoliticalDemocracy data
+data("PoliticalDemocracy", package = "lavaan")
+# Recode y2 and y6 to have negative loadings
+PoliticalDemocracy$y2 <- -PoliticalDemocracy$y2
+PoliticalDemocracy$y6 <- -PoliticalDemocracy$y6
+# Configural invariance (pretend y7 is not available in dem65),
+# and freely estimated latent means and variances
+config_mod <- "
+  dem60 =~ y1 + y2 + y3 + y4
+  dem65 =~ y5 + y6 +      y8
+  dem60 ~~ dem65
+  dem60 ~~ 1 * dem60
+  dem65 ~~ NA * dem65
+  dem60 ~ 0
+  dem65 ~ NA * 1
+  y1 ~~ y5
+  y2 ~~ y6
+  y4 ~~ y8
+"
+fit_dry <- cfa(config_mod, data = PoliticalDemocracy, auto.fix.first = FALSE,
+               do.fit = FALSE)
+```
+
+Penalized estimation can be used to achieve approximate invariance by penalizing
+the differences in intercepts and loadings across groups.
+
+```{r}
+parTable(fit_dry)
+# Create matrix to indicate the same item loadings across groups/time in columns for
+# penalization on the pairwise differences
+ld_mat <- rbind(1:4, c(5:6, NA, 7))
+int_mat <- rbind(21:24, c(25:26, NA, 27))
+fit_pen <- penalized_est(
+  fit_dry, w = .03, pen_diff_id = list(loadings = ld_mat, intercepts = int_mat),
+  se = "robust.huber.white"
+)
+summary(fit_pen)
+```

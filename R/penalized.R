@@ -9,7 +9,10 @@ penalized_obj <- function(x, obj_fn, w, pen_fn, pen_par_id, diff_configs) {
     if (!is.null(diff_configs)) {
         pen_diff <- lapply(diff_configs, function(cfg) {
             x_mat <- matrix(x[cfg$mat], nrow = nrow(cfg$mat), ncol = ncol(cfg$mat))
-            x_trans <- as.matrix(cfg$trans(x_mat))
+            # A value-driven NaN here (e.g. log() of a non-positive loading
+            # during optimization) is expected and handled via na.rm = TRUE
+            # below, so suppress R's low-level "NaNs produced" warning.
+            x_trans <- suppressWarnings(as.matrix(cfg$trans(x_mat)))
             
             # Use pre-computed combn_idx and rescale_val
             diffs <- x_trans[cfg$combn_idx[1, ], , drop = FALSE] - 
@@ -39,8 +42,7 @@ penalized_obj <- function(x, obj_fn, w, pen_fn, pen_par_id, diff_configs) {
 #'   [lavaan::partable()], with only the free elements.
 #' @param pen_diff_id List of matrices containing parameter IDs. For each matrix,
 #'   the penalty is applied to the pairwise differences of parameters in the same
-#'   column indicated by the IDs. For matrices with names starting with "loading",
-#'   the log transformation is applied before computing differences.
+#'   column indicated by the IDs.
 #' @param pen_fn A character string (`"l0a"` or `"alf"`) or a function that computes
 #'   the penalty. Default is `"l0a"`.
 #' @param pen_gr A function that computes the gradient of the penalty function.
@@ -51,6 +53,9 @@ penalized_obj <- function(x, obj_fn, w, pen_fn, pen_par_id, diff_configs) {
 #'   which is the same as used in the `"mlr"` estimator).
 #' @param opt_control A list of control parameters passed to [stats::nlminb()].
 #'   Default includes `eval.max = 2e4`, `iter.max = 1e4`, and `abs.tol = 1e-20`.
+#' @param start Numeric vector of starting values for the optimizer, or `NULL`
+#'   (default) to use lavaan's default starting values. If supplied, its length
+#'   must match the number of free parameters in the model.
 #'
 #' @section Warning:
 #' The returned object is not fitted using standard ML. Standard errors reported
@@ -130,7 +135,8 @@ penalized_est <- function(
     pen_fn = "l0a",
     pen_gr = NULL,
     se = "none",
-    opt_control = list()
+    opt_control = list(),
+    start = NULL
 ) {
     # Define default control parameters
     control_defaults <- list(
@@ -143,6 +149,14 @@ penalized_est <- function(
     control <- modifyList(control_defaults, opt_control)
 
     ff <- lavaan::lav_export_estimation(x)
+    if (is.null(start)) {
+        start <- ff$starting_values
+    } else if (length(start) != length(ff$starting_values)) {
+        stop(
+            "start must have length ", length(ff$starting_values),
+            " (number of free parameters), but has length ", length(start), "."
+        )
+    }
     if (pen_fn %in% c("l0a", "alf")) {
         pen_gr <- switch(
             pen_fn,
@@ -162,8 +176,8 @@ penalized_est <- function(
             is_loading <- grepl("^loading", nm)
             
             # Pre-assign transformations
-            trans <- if (is_loading) log else identity
-            gr_trans <- if (is_loading) function(x) 1/x else function(x) rep(1, length(x))
+            trans <- identity
+            gr_trans <- function(x) rep(1, length(x))
             
             # Pre-compute combinatorics and rescaling
             nrow_x <- nrow(mat)
@@ -215,7 +229,7 @@ penalized_est <- function(
         NULL  # Let nlminb compute numerical gradient
     }
     opt <- nlminb(
-        ff$starting_values,
+        start,
         objective = f1,
         gradient = gr1,
         control = control
@@ -291,7 +305,12 @@ penalized_gr <- function(x, gr_fn, w, pen_gr, pen_par_id, diff_configs, ...) {
     
     if (!is.null(diff_configs)) {
         pen_diff_gr <- lapply(diff_configs, function(cfg) {
-            x_mat <- as.matrix(cfg$trans(matrix(x[cfg$mat], nrow = nrow(cfg$mat))))
+            # As in penalized_obj(): a value-driven NaN from cfg$trans (e.g.
+            # log() of a non-positive loading) is expected here and is
+            # explicitly handled below, so suppress R's warning.
+            x_mat <- suppressWarnings(
+                as.matrix(cfg$trans(matrix(x[cfg$mat], nrow = nrow(cfg$mat))))
+            )
             
             diffs <- x_mat[cfg$combn_idx[1, ], , drop = FALSE] - 
                      x_mat[cfg$combn_idx[2, ], , drop = FALSE]
@@ -307,12 +326,43 @@ penalized_gr <- function(x, gr_fn, w, pen_gr, pen_par_id, diff_configs, ...) {
                 grad[i, ] <- colSums(g1, na.rm = TRUE) - colSums(g2, na.rm = TRUE)
             }
             
-            grad[which(is.na(x_mat))] <- NA
+            # Only mark cells as NA where cfg$mat itself is structurally NA
+            # (e.g. an indicator missing from one group/time point). Do NOT
+            # use is.na(x_mat) for this: is.na() also matches NaN, which
+            # would wrongly overwrite value-driven NaNs (e.g. from log() of a
+            # non-positive loading) with plain NA and hide them from the
+            # check below.
+            grad[is.na(cfg$mat)] <- NA
             grad_vec <- as.vector(grad) * cfg$rescale_val * cfg$gr_trans(x[cfg$mat])
             
             # Re-map back to the full parameter vector space (hot_gr equivalent inline)
+            # `cfg$mat` may contain *structural* NAs (e.g. an indicator missing
+            # from one group/time point) -- those positions are dropped here.
+            # Separately, `grad_vec` can contain *value-driven* NaNs at
+            # positions where `cfg$mat` is valid, e.g. when `cfg$trans` is
+            # `log` and the current parameter estimate is negative or zero.
+            # These two cases must be tracked separately: silently using
+            # `na.omit()` on both and assuming they line up (as before) breaks
+            # as soon as a value-driven NaN appears among otherwise valid
+            # indices, misaligning the replacement vector.
+            idx <- as.numeric(cfg$mat)
+            structural_valid <- !is.na(idx)
+            value_nan <- is.nan(grad_vec[structural_valid])
+            if (any(value_nan)) {
+                warning(
+                    "Gradient of the loading-difference penalty is undefined ",
+                    "(NaN) for ", sum(value_nan), " parameter(s), likely because ",
+                    "log() was applied to a non-positive loading estimate. ",
+                    "These contributions are set to 0; consider using ",
+                    "better starting values or reviewing sign/identification ",
+                    "of the affected loadings.",
+                    call. = FALSE
+                )
+            }
+            grad_vec_valid <- grad_vec[structural_valid]
+            grad_vec_valid[value_nan] <- 0
             full_grad <- 0 * x
-            full_grad[na.omit(as.numeric(cfg$mat))] <- na.omit(grad_vec)
+            full_grad[idx[structural_valid]] <- grad_vec_valid
             full_grad
         })
         out <- out + w * Reduce(`+`, pen_diff_gr)

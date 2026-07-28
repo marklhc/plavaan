@@ -28,7 +28,7 @@ confirmatory factor analysis model:
 
 ``` r
 library(lavaan)
-#> This is lavaan 0.6-21
+#> This is lavaan 0.7-2
 #> lavaan is FREE software! Please report any bugs.
 library(plavaan)
 data(HolzingerSwineford1939)
@@ -81,7 +81,7 @@ fit_pen <- penalized_est(
   pen_fn = "l0a"  # approximate L0 penalty
 )
 summary(fit_pen)
-#> lavaan 0.6-21 ended normally after 113 iterations
+#> lavaan 0.7-2 ended normally after 113 iterations
 #> 
 #>   Estimator                                         ML
 #>   Optimization method                           NLMINB
