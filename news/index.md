@@ -2,6 +2,8 @@
 
 ## plavaan 0.0.2
 
+CRAN release: 2026-07-28
+
 - Added
   [`penalized_est_multistart()`](https://marklhc.github.io/plavaan/reference/penalized_est_multistart.md)
   and support for custom optimizer starting values via `start` in

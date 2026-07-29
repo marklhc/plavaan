@@ -8,7 +8,7 @@
 ## Citation
 
 Source:
-[`DESCRIPTION`](https://github.com/marklhc/plavaan/blob/main/DESCRIPTION)
+[`DESCRIPTION`](https://github.com/marklhc/plavaan/blob/v0.0.2/DESCRIPTION)
 
 Lai H (2026). *plavaan: Penalized Estimation for Latent Variable Models
 with 'lavaan'*. R package version 0.0.2,
