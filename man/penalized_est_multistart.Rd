@@ -13,6 +13,8 @@ penalized_est_multistart(
   pen_gr = NULL,
   se = "none",
   opt_control = list(),
+  eps = 0.01,
+  telescoping_control = list(eps_1 = 1, eps_end = 1e-05, eps_steps = 20),
   n_starts = 10,
   starts = NULL,
   keep_all = FALSE,
@@ -48,6 +50,14 @@ which is the same as used in the \code{"mlr"} estimator).}
 \item{opt_control}{A list of control parameters passed to \code{\link[stats:nlminb]{stats::nlminb()}}.
 Default includes \code{eval.max = 2e4}, \code{iter.max = 1e4}, and \code{abs.tol = 1e-20}.}
 
+\item{eps}{A positive numeric scalar used by the built-in penalties, or
+\code{"telescoping"} to fit a sequence of decreasing epsilon values. Default is
+\code{.01}. This argument does not alter custom \code{pen_fn} or \code{pen_gr} functions.}
+
+\item{telescoping_control}{A named list controlling telescoping, with
+\code{eps_1} (default \code{1}), \code{eps_end} (default \code{1e-5}), and \code{eps_steps} (default
+\code{20}).}
+
 \item{n_starts}{Integer. Number of random starting vectors to try. The first
 start is always lavaan's default (unperturbed), so multistart is never worse
 than a single \code{\link[=penalized_est]{penalized_est()}} call. Default is 10.}
@@ -63,15 +73,15 @@ attribute for inspection of alternative local solutions. Default is \code{FALSE}
 Default is \code{FALSE}.}
 }
 \value{
-A lavaan model object (same shape as [penalized_est()]'s return), with
-  additional attributes:
+A lavaan model object (same shape as \code{\link[=penalized_est]{penalized_est()}}'s return), with
+additional attributes:
 
 \describe{
-  \item{`multistart`}{A data frame with one row per start, containing columns
-    `start_id`, `objective` (final penalized objective value), and
-    `converged` (logical). Rows are sorted by ascending objective.}
-  \item{`all_fits`}{If `keep_all = TRUE`, a named list of all fitted lavaan
-    objects, one per starting vector.}
+\item{\code{multistart}}{A data frame with one row per start, containing columns
+\code{start_id}, \code{objective} (final penalized objective value), and
+\code{converged} (logical). Rows are sorted by ascending objective.}
+\item{\code{all_fits}}{If \code{keep_all = TRUE}, a named list of all fitted lavaan
+objects, one per starting vector.}
 }
 }
 \description{

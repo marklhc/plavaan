@@ -4,9 +4,9 @@
 # - Lower bound: small fraction of observed variance (prevents near-zero)
 # - Upper bound: multiple of observed variance (prevents explosive values)
 variance_bounds <- function(obs_var) {
-    lower <- max(1e-6, 0.2 * obs_var)
-    upper <- 2 * obs_var
-    c(lower, upper)
+  lower <- max(1e-6, 0.2 * obs_var)
+  upper <- 2 * obs_var
+  c(lower, upper)
 }
 
 #' Generate Random Starting Values for Penalized Estimation
@@ -55,88 +55,91 @@ variance_bounds <- function(obs_var) {
 #' @noRd
 #' @importFrom stats runif setNames
 random_start <- function(x, n = 1) {
-    ff <- lavaan::lav_export_estimation(x)
-    base <- ff$starting_values
-    pt <- lavaan::parTable(x)
+  ff <- lavaan::lav_export_estimation(x)
+  base <- ff$starting_values
+  pt <- lavaan::parTable(x)
 
-    # Filter to free parameters (same order as base vector)
-    free_pt <- pt[pt$free > 0, ]
-    n_params <- length(base)
+  # Filter to free parameters (same order as base vector)
+  free_pt <- pt[pt$free > 0, ]
+  n_params <- length(base)
 
-    if (nrow(free_pt) != n_params) {
-        stop(
-            "Number of free parameters (", nrow(free_pt),
-            ") doesn't match starting values length (", n_params, ")."
-        )
-    }
-
-    # Get observed variances for bounds and correlation-to-covariance conversion
-    sample_cov <- tryCatch(
-        lavaan::lavInspect(x, "cov.ov"),
-        error = function(e) lavaan::lavInspect(x, "sample.cov")
+  if (nrow(free_pt) != n_params) {
+    stop(
+      "Number of free parameters (",
+      nrow(free_pt),
+      ") doesn't match starting values length (",
+      n_params,
+      ")."
     )
-    obs_variances <- setNames(diag(sample_cov), rownames(sample_cov))
+  }
 
-    # Build a variance lookup by variable name. Include ALL variance entries
-    # (both free and fixed) so that latent factor variances (e.g., from std.lv = TRUE)
-    # are available for covariance perturbation.
-    all_var_mask <- pt$op == "~~" & pt$lhs == pt$rhs
-    var_lookup <- setNames(pt$est[all_var_mask], pt$lhs[all_var_mask])
+  # Get observed variances for bounds and correlation-to-covariance conversion
+  sample_cov <- tryCatch(
+    lavaan::lavInspect(x, "cov.ov"),
+    error = function(e) lavaan::lavInspect(x, "sample.cov")
+  )
+  obs_variances <- setNames(diag(sample_cov), rownames(sample_cov))
 
-    # For variable names present in both the parameter table and observed covariance,
-    # update the variance estimate to the maximum of the two (base estimate and
-    # observed variance) for safety against non-positive-definite matrices.
-    for (vn in intersect(names(obs_variances), names(var_lookup))) {
-        var_lookup[vn] <- max(var_lookup[vn], obs_variances[vn], na.rm = TRUE)
+  # Build a variance lookup by variable name. Include ALL variance entries
+  # (both free and fixed) so that latent factor variances (e.g., from std.lv = TRUE)
+  # are available for covariance perturbation.
+  all_var_mask <- pt$op == "~~" & pt$lhs == pt$rhs
+  var_lookup <- setNames(pt$est[all_var_mask], pt$lhs[all_var_mask])
+
+  # For variable names present in both the parameter table and observed covariance,
+  # update the variance estimate to the maximum of the two (base estimate and
+  # observed variance) for safety against non-positive-definite matrices.
+  for (vn in intersect(names(obs_variances), names(var_lookup))) {
+    var_lookup[vn] <- max(var_lookup[vn], obs_variances[vn], na.rm = TRUE)
+  }
+
+  result <- t(replicate(n, base))
+
+  if (n <= 1) {
+    return(result)
+  }
+
+  for (i in seq_len(n_params)) {
+    op <- free_pt$op[i]
+    lhs <- free_pt$lhs[i]
+    rhs <- free_pt$rhs[i]
+
+    if (op == "=~") {
+      # Factor loadings: leave at base value (no perturbation)
+      next
+    } else if (op == "~1") {
+      # Intercepts/means: leave at base value (no perturbation)
+      next
+    } else if (op == "~") {
+      # Regression coefficients: random correlation scaled by variances
+      lhs_sd <- sqrt(abs(var_lookup[lhs]))
+      rhs_sd <- sqrt(abs(var_lookup[rhs]))
+      # Guard against NA (shouldn't happen, but safety first)
+      if (!is.na(lhs_sd) && !is.na(rhs_sd)) {
+        result[-1, i] <- base[i] + runif(n - 1, -0.5, 0.5) * lhs_sd * rhs_sd
+      } else {
+        # Fallback: just jitter by small fraction of base
+        result[-1, i] <- base[i] * (1 + runif(n - 1, -0.2, 0.2))
+      }
+    } else if (op == "~~" & lhs != rhs) {
+      # Covariances between exogenous vars: random correlation scaled by variances
+      lhs_sd <- sqrt(abs(var_lookup[lhs]))
+      rhs_sd <- sqrt(abs(var_lookup[rhs]))
+      if (!is.na(lhs_sd) && !is.na(rhs_sd)) {
+        result[-1, i] <- base[i] + runif(n - 1, -0.5, 0.5) * lhs_sd * rhs_sd
+      } else {
+        result[-1, i] <- base[i] * (1 + runif(n - 1, -0.2, 0.2))
+      }
+    } else if (op == "~~" & lhs == rhs) {
+      # Variances: draw uniformly within bounds based on observed variance
+      obs_var <- var_lookup[lhs]
+      lb <- variance_bounds(obs_var)[1]
+      ub <- variance_bounds(obs_var)[2]
+      result[-1, i] <- runif(n - 1, lb, ub)
     }
+  }
 
-    result <- t(replicate(n, base))
-
-    if (n <= 1) {
-        return(result)
-    }
-
-    for (i in seq_len(n_params)) {
-        op <- free_pt$op[i]
-        lhs <- free_pt$lhs[i]
-        rhs <- free_pt$rhs[i]
-
-        if (op == "=~") {
-            # Factor loadings: leave at base value (no perturbation)
-            next
-        } else if (op == "~1") {
-            # Intercepts/means: leave at base value (no perturbation)
-            next
-        } else if (op == "~") {
-            # Regression coefficients: random correlation scaled by variances
-            lhs_sd <- sqrt(abs(var_lookup[lhs]))
-            rhs_sd <- sqrt(abs(var_lookup[rhs]))
-            # Guard against NA (shouldn't happen, but safety first)
-            if (!is.na(lhs_sd) && !is.na(rhs_sd)) {
-                result[-1, i] <- base[i] + runif(n - 1, -0.5, 0.5) * lhs_sd * rhs_sd
-            } else {
-                # Fallback: just jitter by small fraction of base
-                result[-1, i] <- base[i] * (1 + runif(n - 1, -0.2, 0.2))
-            }
-        } else if (op == "~~" & lhs != rhs) {
-            # Covariances between exogenous vars: random correlation scaled by variances
-            lhs_sd <- sqrt(abs(var_lookup[lhs]))
-            rhs_sd <- sqrt(abs(var_lookup[rhs]))
-            if (!is.na(lhs_sd) && !is.na(rhs_sd)) {
-                result[-1, i] <- base[i] + runif(n - 1, -0.5, 0.5) * lhs_sd * rhs_sd
-            } else {
-                result[-1, i] <- base[i] * (1 + runif(n - 1, -0.2, 0.2))
-            }
-        } else if (op == "~~" & lhs == rhs) {
-            # Variances: draw uniformly within bounds based on observed variance
-            obs_var <- var_lookup[lhs]
-            lb <- variance_bounds(obs_var)[1]
-            ub <- variance_bounds(obs_var)[2]
-            result[-1, i] <- runif(n - 1, lb, ub)
-        }
-    }
-
-    result
+  result
 }
 
 #' Multistart Penalized Estimation
@@ -192,108 +195,128 @@ random_start <- function(x, n = 1) {
 #' @seealso [penalized_est]
 #' @export
 penalized_est_multistart <- function(
-    x, w, pen_par_id = NULL, pen_diff_id = NULL,
-    pen_fn = "l0a", pen_gr = NULL, se = "none", opt_control = list(),
-    n_starts = 10, starts = NULL,
-    keep_all = FALSE, verbose = FALSE
+  x,
+  w,
+  pen_par_id = NULL,
+  pen_diff_id = NULL,
+  pen_fn = "l0a",
+  pen_gr = NULL,
+  se = "none",
+  opt_control = list(),
+  eps = .01,
+  telescoping_control = list(eps_1 = 1, eps_end = 1e-5, eps_steps = 20),
+  n_starts = 10,
+  starts = NULL,
+  keep_all = FALSE,
+  verbose = FALSE
 ) {
-    # Generate or validate starting values
-    if (is.null(starts)) {
-        all_starts <- random_start(x, n = n_starts)
+  # Generate or validate starting values
+  if (is.null(starts)) {
+    all_starts <- random_start(x, n = n_starts)
+  } else {
+    # Convert list to matrix if needed
+    if (is.list(starts)) {
+      starts <- do.call(rbind, lapply(starts, as.numeric))
+    }
+    if (!is.matrix(starts)) {
+      starts <- matrix(starts, nrow = 1)
+    }
+    message(
+      "Custom starting values provided (",
+      nrow(starts),
+      " starts). Ignoring n_starts."
+    )
+    all_starts <- starts
+  }
+
+  n_total <- nrow(all_starts)
+  results <- vector("list", n_total)
+  records <- vector("list", n_total)
+
+  for (i in seq_len(n_total)) {
+    if (verbose) {
+      message(sprintf("Start %d / %d...", i, n_total))
+    }
+
+    fit <- tryCatch(
+      penalized_est(
+        x = x,
+        w = w,
+        pen_par_id = pen_par_id,
+        pen_diff_id = pen_diff_id,
+        pen_fn = pen_fn,
+        pen_gr = pen_gr,
+        se = se,
+        opt_control = opt_control,
+        eps = eps,
+        telescoping_control = telescoping_control,
+        start = all_starts[i, ]
+      ),
+      error = function(e) NULL
+    )
+
+    if (is.null(fit)) {
+      records[[i]] <- data.frame(
+        start_id = i,
+        objective = NA_real_,
+        converged = FALSE,
+        stringsAsFactors = FALSE
+      )
+      results[[i]] <- NULL
+      if (verbose) {
+        message(sprintf("  Start %d: failed", i))
+      }
     } else {
-        # Convert list to matrix if needed
-        if (is.list(starts)) {
-            starts <- do.call(rbind, lapply(starts, as.numeric))
-        }
-        if (!is.matrix(starts)) {
-            starts <- matrix(starts, nrow = 1)
-        }
-        message(
-            "Custom starting values provided (", nrow(starts),
-            " starts). Ignoring n_starts."
-        )
-        all_starts <- starts
+      obj_val <- fit@optim$fx
+      conv <- fit@optim$converged
+      records[[i]] <- data.frame(
+        start_id = i,
+        objective = obj_val,
+        converged = conv,
+        stringsAsFactors = FALSE
+      )
+      results[[i]] <- fit
+      if (verbose) {
+        status <- if (conv) "converged" else "did not converge"
+        message(sprintf("  Start %d: %s, objective = %.6f", i, status, obj_val))
+      }
     }
+  }
 
-    n_total <- nrow(all_starts)
-    results <- vector("list", n_total)
-    records <- vector("list", n_total)
+  # Combine records and sort by objective (NA last via default behavior)
+  ms_table <- do.call(rbind, records)
 
-    for (i in seq_len(n_total)) {
-        if (verbose) {
-            message(sprintf("Start %d / %d...", i, n_total))
-        }
-
-        fit <- tryCatch(
-            penalized_est(
-                x = x, w = w, pen_par_id = pen_par_id, pen_diff_id = pen_diff_id,
-                pen_fn = pen_fn, pen_gr = pen_gr, se = se, opt_control = opt_control,
-                start = all_starts[i, ]
-            ),
-            error = function(e) NULL
-        )
-
-        if (is.null(fit)) {
-            records[[i]] <- data.frame(
-                start_id = i,
-                objective = NA_real_,
-                converged = FALSE,
-                stringsAsFactors = FALSE
-            )
-            results[[i]] <- NULL
-            if (verbose) {
-                message(sprintf("  Start %d: failed", i))
-            }
-        } else {
-            obj_val <- fit@optim$fx
-            conv <- fit@optim$converged
-            records[[i]] <- data.frame(
-                start_id = i,
-                objective = obj_val,
-                converged = conv,
-                stringsAsFactors = FALSE
-            )
-            results[[i]] <- fit
-            if (verbose) {
-                status <- if (conv) "converged" else "did not converge"
-                message(sprintf("  Start %d: %s, objective = %.6f", i, status, obj_val))
-            }
-        }
+  # Find best: among converged runs, pick the lowest objective.
+  # Table is sorted by ascending objective afterward.
+  converged_idx <- which(ms_table$converged)
+  if (length(converged_idx) > 0) {
+    best_conv <- converged_idx[which.min(ms_table$objective[converged_idx])]
+  } else {
+    # No convergence -- warn and pick lowest objective among all runs
+    warning(
+      "None of the ",
+      n_total,
+      " optimization runs converged. Returning the run with the lowest objective."
+    )
+    valid_idx <- which(!is.na(ms_table$objective))
+    if (length(valid_idx) == 0) {
+      stop("All starts failed. No fit to return.")
     }
+    best_conv <- valid_idx[which.min(ms_table$objective[valid_idx])]
+  }
 
-    # Combine records and sort by objective (NA last via default behavior)
-    ms_table <- do.call(rbind, records)
+  best_start_id <- ms_table$start_id[best_conv]
+  ms_table <- ms_table[order(ms_table$objective), ]
+  best_fit <- results[[best_start_id]]
 
-    # Find best: among converged runs, pick the lowest objective.
-    # Table is sorted by ascending objective afterward.
-    converged_idx <- which(ms_table$converged)
-    if (length(converged_idx) > 0) {
-        best_conv <- converged_idx[which.min(ms_table$objective[converged_idx])]
-    } else {
-        # No convergence -- warn and pick lowest objective among all runs
-        warning(
-            "None of the ", n_total,
-            " optimization runs converged. Returning the run with the lowest objective."
-        )
-        valid_idx <- which(!is.na(ms_table$objective))
-        if (length(valid_idx) == 0) {
-            stop("All starts failed. No fit to return.")
-        }
-        best_conv <- valid_idx[which.min(ms_table$objective[valid_idx])]
-    }
+  # Attach multistart summary table
+  attr(best_fit, "multistart") <- ms_table
 
-    best_start_id <- ms_table$start_id[best_conv]
-    ms_table <- ms_table[order(ms_table$objective), ]
-    best_fit <- results[[best_start_id]]
+  # Optionally attach all fits
+  if (keep_all) {
+    named_fits <- setNames(results, paste0("start_", seq_len(n_total)))
+    attr(best_fit, "all_fits") <- named_fits
+  }
 
-    # Attach multistart summary table
-    attr(best_fit, "multistart") <- ms_table
-
-    # Optionally attach all fits
-    if (keep_all) {
-        named_fits <- setNames(results, paste0("start_", seq_len(n_total)))
-        attr(best_fit, "all_fits") <- named_fits
-    }
-
-    best_fit
+  best_fit
 }
