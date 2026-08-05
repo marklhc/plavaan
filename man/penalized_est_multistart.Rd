@@ -14,7 +14,8 @@ penalized_est_multistart(
   se = "none",
   opt_control = list(),
   eps = 0.01,
-  telescoping_control = list(eps_1 = 1, eps_end = 1e-05, eps_steps = 20),
+  telescoping_control = list(eps_1 = 1, eps_end = 1e-05, eps_steps = 20, warm_start =
+    FALSE),
   n_starts = 10,
   starts = NULL,
   keep_all = FALSE,
@@ -55,8 +56,10 @@ Default includes \code{eval.max = 2e4}, \code{iter.max = 1e4}, and \code{abs.tol
 \code{.01}. This argument does not alter custom \code{pen_fn} or \code{pen_gr} functions.}
 
 \item{telescoping_control}{A named list controlling telescoping, with
-\code{eps_1} (default \code{1}), \code{eps_end} (default \code{1e-5}), and \code{eps_steps} (default
-\code{20}).}
+\code{eps_1} (default \code{1}), \code{eps_end} (default \code{1e-5}), \code{eps_steps} (default
+\code{20}), and \code{warm_start} (default \code{FALSE}). When \code{warm_start} is \code{FALSE},
+every epsilon stage uses the original starting values; when \code{TRUE}, each
+stage after the first uses the preceding stage's estimates.}
 
 \item{n_starts}{Integer. Number of random starting vectors to try. The first
 start is always lavaan's default (unperturbed), so multistart is never worse

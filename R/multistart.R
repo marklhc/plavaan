@@ -204,7 +204,12 @@ penalized_est_multistart <- function(
   se = "none",
   opt_control = list(),
   eps = .01,
-  telescoping_control = list(eps_1 = 1, eps_end = 1e-5, eps_steps = 20),
+  telescoping_control = list(
+    eps_1 = 1,
+    eps_end = 1e-5,
+    eps_steps = 20,
+    warm_start = FALSE
+  ),
   n_starts = 10,
   starts = NULL,
   keep_all = FALSE,

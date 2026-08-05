@@ -232,6 +232,85 @@ test_that("penalized_est telescopes epsilon values", {
   expect_gte(telescoping$eps[nrow(telescoping)], 0.1)
 })
 
+test_that("telescoping reuses original starts by default", {
+  fit_un2 <- cfa(
+    small_model,
+    data = PoliticalDemocracy,
+    std.lv = TRUE,
+    do.fit = FALSE
+  )
+  pt <- parTable(fit_un2)
+  load_60 <- pt$free[pt$op == "=~" & pt$lhs == "dem60"]
+  load_65 <- pt$free[pt$op == "=~" & pt$lhs == "dem65"]
+  penalty <- list(loadings = rbind(load_60, load_65))
+  control <- list(eps_1 = 1, eps_end = 0.1, eps_steps = 2)
+  start <- lavaan::lav_export_estimation(fit_un2)$starting_values
+
+  fit_telescope <- penalized_est(
+    fit_un2,
+    w = 0.03,
+    pen_diff_id = penalty,
+    start = start,
+    eps = "telescoping",
+    telescoping_control = control
+  )
+  fit_final <- penalized_est(
+    fit_un2,
+    w = 0.03,
+    pen_diff_id = penalty,
+    start = start,
+    eps = 0.1
+  )
+
+  expect_equal(fit_telescope@optim$fx, fit_final@optim$fx, tolerance = 1e-8)
+  expect_equal(fit_telescope@optim$x, fit_final@optim$x, tolerance = 1e-8)
+})
+
+test_that("telescoping warm_start uses preceding estimates", {
+  fit_un2 <- cfa(
+    small_model,
+    data = PoliticalDemocracy,
+    std.lv = TRUE,
+    do.fit = FALSE
+  )
+  pt <- parTable(fit_un2)
+  load_60 <- pt$free[pt$op == "=~" & pt$lhs == "dem60"]
+  load_65 <- pt$free[pt$op == "=~" & pt$lhs == "dem65"]
+  penalty <- list(loadings = rbind(load_60, load_65))
+  start <- lavaan::lav_export_estimation(fit_un2)$starting_values
+
+  fit_first <- penalized_est(
+    fit_un2,
+    w = 0.03,
+    pen_diff_id = penalty,
+    start = start,
+    eps = 1
+  )
+  fit_telescope <- penalized_est(
+    fit_un2,
+    w = 0.03,
+    pen_diff_id = penalty,
+    start = start,
+    eps = "telescoping",
+    telescoping_control = list(
+      eps_1 = 1,
+      eps_end = 0.1,
+      eps_steps = 2,
+      warm_start = TRUE
+    )
+  )
+  fit_final <- penalized_est(
+    fit_un2,
+    w = 0.03,
+    pen_diff_id = penalty,
+    start = fit_first@optim$x,
+    eps = 0.1
+  )
+
+  expect_equal(fit_telescope@optim$fx, fit_final@optim$fx, tolerance = 1e-8)
+  expect_equal(fit_telescope@optim$x, fit_final@optim$x, tolerance = 1e-8)
+})
+
 test_that("penalized_est validates eps", {
   fit_un2 <- cfa(
     small_model,
@@ -252,6 +331,15 @@ test_that("penalized_est validates eps", {
       telescoping_control = list(eps_1 = 1e-5, eps_end = 1, eps_steps = 2)
     ),
     "telescoping_control"
+  )
+  expect_error(
+    penalized_est(
+      fit_un2,
+      w = 0.03,
+      eps = "telescoping",
+      telescoping_control = list(warm_start = 1)
+    ),
+    "warm_start"
   )
 })
 
@@ -299,7 +387,7 @@ test_that("multistart forwards telescoping epsilon", {
   load_60 <- pt$free[pt$op == "=~" & pt$lhs == "dem60"]
   load_65 <- pt$free[pt$op == "=~" & pt$lhs == "dem65"]
   penalty <- list(loadings = rbind(load_60, load_65))
-  control <- list(eps_1 = 1, eps_end = 0.1, eps_steps = 3)
+  control <- list(eps_1 = 1, eps_end = 0.1, eps_steps = 3, warm_start = TRUE)
 
   fit_ms <- penalized_est_multistart(
     fit_un2,

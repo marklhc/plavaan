@@ -60,8 +60,10 @@ penalized_obj <- function(x, obj_fn, w, pen_fn, pen_par_id, diff_configs) {
 #'   `"telescoping"` to fit a sequence of decreasing epsilon values. Default is
 #'   `.01`. This argument does not alter custom `pen_fn` or `pen_gr` functions.
 #' @param telescoping_control A named list controlling telescoping, with
-#'   `eps_1` (default `1`), `eps_end` (default `1e-5`), and `eps_steps` (default
-#'   `20`).
+#'   `eps_1` (default `1`), `eps_end` (default `1e-5`), `eps_steps` (default
+#'   `20`), and `warm_start` (default `FALSE`). When `warm_start` is `FALSE`,
+#'   every epsilon stage uses the original starting values; when `TRUE`, each
+#'   stage after the first uses the preceding stage's estimates.
 #'
 #' @section Warning:
 #' The returned object is not fitted using standard ML. Standard errors reported
@@ -84,11 +86,12 @@ penalized_obj <- function(x, obj_fn, w, pen_fn, pen_par_id, diff_configs) {
 #' optimization does not converge (convergence code != 0), a warning is issued.
 #'
 #' With `eps = "telescoping"`, the model is fit along a log-spaced sequence from
-#' `telescoping_control$eps_1` to `telescoping_control$eps_end`. Each stage uses
-#' the preceding solution as its starting values. The sequence stops when the
-#' largest absolute change between consecutive parameter vectors is at most
-#' `5e-4`. The returned object has a `"telescoping"` attribute with stage
-#' diagnostics.
+#' `telescoping_control$eps_1` to `telescoping_control$eps_end`. By default,
+#' each stage uses the original starting values; set
+#' `telescoping_control$warm_start = TRUE` to initialize later stages from the
+#' preceding solution. The sequence stops when the largest absolute change
+#' between consecutive parameter vectors is at most `5e-4`. The returned object
+#' has a `"telescoping"` attribute with stage diagnostics.
 #'
 #' @seealso \code{\link[lavaan]{lavaan}}, \code{\link[stats]{nlminb}}
 #'
@@ -151,18 +154,24 @@ penalized_est <- function(
   opt_control = list(),
   start = NULL,
   eps = .01,
-  telescoping_control = list(eps_1 = 1, eps_end = 1e-5, eps_steps = 20)
+  telescoping_control = list(
+    eps_1 = 1,
+    eps_end = 1e-5,
+    eps_steps = 20,
+    warm_start = FALSE
+  )
 ) {
   if (is.numeric(eps) && length(eps) == 1 && is.finite(eps) && eps > 0) {
     eps_seq <- eps
   } else if (identical(eps, "telescoping")) {
     telescoping_control <- modifyList(
-      list(eps_1 = 1, eps_end = 1e-5, eps_steps = 20),
+      list(eps_1 = 1, eps_end = 1e-5, eps_steps = 20, warm_start = FALSE),
       telescoping_control
     )
     eps_1 <- telescoping_control$eps_1
     eps_end <- telescoping_control$eps_end
     eps_steps <- telescoping_control$eps_steps
+    warm_start <- telescoping_control$warm_start
     if (
       !is.numeric(eps_1) ||
         length(eps_1) != 1 ||
@@ -177,11 +186,14 @@ penalized_est <- function(
         !is.finite(eps_steps) ||
         eps_steps < 1 ||
         eps_steps != as.integer(eps_steps) ||
-        eps_1 < eps_end
+        eps_1 < eps_end ||
+        !is.logical(warm_start) ||
+        length(warm_start) != 1 ||
+        is.na(warm_start)
     ) {
       stop(
-        "telescoping_control must contain positive eps_1 >= eps_end and ",
-        "an integer eps_steps >= 1."
+        "telescoping_control must contain positive eps_1 >= eps_end, an ",
+        "integer eps_steps >= 1, and a non-missing logical warm_start."
       )
     }
     eps_seq <- exp(seq(log(eps_1), log(eps_end), length.out = eps_steps))
@@ -234,7 +246,8 @@ penalized_est <- function(
   par_changes <- numeric()
   objectives <- numeric()
   converged <- logical()
-  stage_start <- start
+  original_start <- start
+  stage_start <- original_start
   for (stage_eps in eps_seq) {
     fit <- fit_stage(stage_eps, stage_start)
     if (any(!is.finite(fit@optim$x))) {
@@ -257,7 +270,11 @@ penalized_est <- function(
     if (!is.na(change) && change <= 5e-4) {
       break
     }
-    stage_start <- fit@optim$x
+    if (identical(eps, "telescoping") && warm_start) {
+      stage_start <- fit@optim$x
+    } else {
+      stage_start <- original_start
+    }
   }
   if (identical(eps, "telescoping")) {
     attr(out, "telescoping") <- data.frame(

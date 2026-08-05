@@ -15,7 +15,8 @@ penalized_est(
   opt_control = list(),
   start = NULL,
   eps = 0.01,
-  telescoping_control = list(eps_1 = 1, eps_end = 1e-05, eps_steps = 20)
+  telescoping_control = list(eps_1 = 1, eps_end = 1e-05, eps_steps = 20, warm_start =
+    FALSE)
 )
 }
 \arguments{
@@ -56,8 +57,10 @@ must match the number of free parameters in the model.}
 \code{.01}. This argument does not alter custom \code{pen_fn} or \code{pen_gr} functions.}
 
 \item{telescoping_control}{A named list controlling telescoping, with
-\code{eps_1} (default \code{1}), \code{eps_end} (default \code{1e-5}), and \code{eps_steps} (default
-\code{20}).}
+\code{eps_1} (default \code{1}), \code{eps_end} (default \code{1e-5}), \code{eps_steps} (default
+\code{20}), and \code{warm_start} (default \code{FALSE}). When \code{warm_start} is \code{FALSE},
+every epsilon stage uses the original starting values; when \code{TRUE}, each
+stage after the first uses the preceding stage's estimates.}
 }
 \value{
 A lavaan model object updated with the penalized parameter estimates.
@@ -82,11 +85,12 @@ penalized estimation. The degrees of freedom may also be inaccurate. If the
 optimization does not converge (convergence code != 0), a warning is issued.
 
 With \code{eps = "telescoping"}, the model is fit along a log-spaced sequence from
-\code{telescoping_control$eps_1} to \code{telescoping_control$eps_end}. Each stage uses
-the preceding solution as its starting values. The sequence stops when the
-largest absolute change between consecutive parameter vectors is at most
-\code{5e-4}. The returned object has a \code{"telescoping"} attribute with stage
-diagnostics.
+\code{telescoping_control$eps_1} to \code{telescoping_control$eps_end}. By default,
+each stage uses the original starting values; set
+\code{telescoping_control$warm_start = TRUE} to initialize later stages from the
+preceding solution. The sequence stops when the largest absolute change
+between consecutive parameter vectors is at most \code{5e-4}. The returned object
+has a \code{"telescoping"} attribute with stage diagnostics.
 }
 \section{Warning}{
 
