@@ -81,7 +81,8 @@ fit_multi <- penalized_est_multistart(
     ),
     pen_fn = "l0a",
     n_starts = 10,
-    verbose = TRUE
+    verbose = TRUE,
+    eps = .0001
 )
 
 # Inspect the spread of objective values across starts

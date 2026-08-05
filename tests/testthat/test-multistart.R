@@ -38,96 +38,51 @@ test_that("random_start n=1 returns only base vector", {
   expect_equal(nrow(starts), 1)
 })
 
-test_that("random_start variances fall within bounds", {
-  set.seed(42)
-  starts <- random_start(fit_un, n = 20)
+test_that("random_start perturbs only directly penalized parameters", {
+  set.seed(219)
   pt <- lavaan::parTable(fit_un)
-  free_pt <- pt[pt$free > 0, ]
-
-  # Variance parameter indices (lhs == rhs, op == "~~")
-  var_idx <- which(free_pt$op == "~~" & free_pt$lhs == free_pt$rhs)
-  if (length(var_idx) > 0) {
-    obs_variances <- diag(lavaan::lavInspect(fit_un, "cov.ov"))
-
-    for (j in var_idx) {
-      lhs <- free_pt$lhs[j]
-      # Same logic as in random_start: use max of base and observed variance
-      base_val <- starts[1, j] # First row is unperturbed base
-      eff_var <- max(base_val, obs_variances[lhs], na.rm = TRUE)
-      lb <- max(1e-6, 0.2 * eff_var)
-      ub <- 2 * eff_var
-      vals <- starts[-1, j]
-
-      expect_true(all(vals >= lb & vals <= ub))
-    }
-  }
-})
-
-test_that("random_start preserves loadings and intercepts at base", {
-  set.seed(42)
-  starts <- random_start(fit_un, n = 5)
-  pt <- lavaan::parTable(fit_un)
-  free_pt <- pt[pt$free > 0, ]
-
-  # Factor loading indices (leave at base for all rows)
-  load_idx <- which(free_pt$op == "=~")
-  for (row in seq_len(nrow(starts))) {
-    expect_equal(
-      starts[row, load_idx],
-      free_pt$est[load_idx],
-      tolerance = 1e-12
-    )
-  }
-
-  # Intercept indices (small_model has none, but test structure is correct)
-  int_idx <- which(free_pt$op == "~1")
-  if (length(int_idx) > 0) {
-    for (row in seq_len(nrow(starts))) {
-      expect_equal(
-        starts[row, int_idx],
-        free_pt$est[int_idx],
-        tolerance = 1e-12
-      )
-    }
-  }
-})
-
-test_that("random_start covariate perturbations correspond to r in [-0.5, 0.5]", {
-  set.seed(42)
-  starts <- random_start(fit_un, n = 50)
-  pt <- lavaan::parTable(fit_un)
-  free_pt <- pt[pt$free > 0, ]
-
-  # Build variance lookup same way as random_start does:
-  obs_variances <- setNames(
-    diag(lavaan::lavInspect(fit_un, "cov.ov")),
-    rownames(lavaan::lavInspect(fit_un, "cov.ov"))
-  )
+  load_idx <- pt$free[pt$op == "=~"]
+  pen_ids <- load_idx[seq_len(2)]
+  starts <- random_start(fit_un, n = 20, pen_par_id = pen_ids)
   base <- starts[1, ]
+  unpenalized <- setdiff(seq_along(base), pen_ids)
 
-  # Covariance indices (lhs != rhs)
-  cov_idx <- which(free_pt$op == "~~" & free_pt$lhs != free_pt$rhs)
-  if (length(cov_idx) > 0) {
-    for (j in cov_idx) {
-      lhs <- free_pt$lhs[j]
-      rhs <- free_pt$rhs[j]
+  expect_equal(starts[-1, unpenalized, drop = FALSE],
+    matrix(base[unpenalized], nrow = 19, ncol = length(unpenalized), byrow = TRUE)
+  )
+  expect_true(any(starts[-1, pen_ids] != base[pen_ids]))
+})
 
-      # Build variance lookup same as random_start(): ALL "~~" self-params,
-      # including fixed factor variances (std.lv = TRUE), not just free ones
-      all_var_mask <- pt$op == "~~" & pt$lhs == pt$rhs
-      var_lookup <- setNames(pt$est[all_var_mask], pt$lhs[all_var_mask])
-      for (vn in intersect(names(obs_variances), names(var_lookup))) {
-        var_lookup[vn] <- max(var_lookup[vn], obs_variances[vn], na.rm = TRUE)
-      }
+test_that("random_start uses non-missing difference-penalty IDs", {
+  set.seed(746)
+  pt <- lavaan::parTable(fit_un)
+  load_60 <- pt$free[pt$op == "=~" & pt$lhs == "dem60"]
+  load_65 <- pt$free[pt$op == "=~" & pt$lhs == "dem65"]
+  penalty <- list(loadings = rbind(load_60, c(load_65[1:2], NA, load_65[4])))
+  pen_ids <- sort(unique(as.numeric(penalty$loadings[!is.na(penalty$loadings)])))
+  starts <- random_start(fit_un, n = 20, pen_diff_id = penalty)
+  base <- starts[1, ]
+  unpenalized <- setdiff(seq_along(base), pen_ids)
 
-      sigma_lhs <- sqrt(abs(var_lookup[lhs]))
-      sigma_rhs <- sqrt(abs(var_lookup[rhs]))
-      perturbations <- starts[-1, j] - starts[1, j]
-      correlations <- perturbations / (sigma_lhs * sigma_rhs)
+  expect_equal(starts[-1, unpenalized, drop = FALSE],
+    matrix(base[unpenalized], nrow = 19, ncol = length(unpenalized), byrow = TRUE)
+  )
+  expect_true(any(starts[-1, pen_ids] != base[pen_ids]))
+})
 
-      expect_true(all(correlations >= -0.5 & correlations <= 0.5))
-    }
-  }
+test_that("random_start validates penalty parameter IDs", {
+  expect_error(
+    random_start(fit_un, n = 2, pen_par_id = 0),
+    "positive integer free-parameter indices"
+  )
+  expect_error(
+    random_start(fit_un, n = 2, pen_par_id = 1.5),
+    "positive integer free-parameter indices"
+  )
+  expect_error(
+    random_start(fit_un, n = 2, pen_diff_id = list(c(1, 2))),
+    "list of matrices"
+  )
 })
 
 # ---------------------------------------------------------------------------

@@ -11,14 +11,17 @@ variance_bounds <- function(obs_var) {
 
 #' Generate Random Starting Values for Penalized Estimation
 #'
-#' Generates random starting vectors for use with [penalized_est()], perturbing
-#' lavaan's default starting values by parameter type. The first row is always
-#' the unperturbed base vector. Subsequent rows apply type-specific random
-#' perturbations mirroring (but not identical to) lavaan's `rstarts` scheme.
+#' Generates random starting vectors for use with [penalized_est()]. The first
+#' row is always the unperturbed base vector. Subsequent rows perturb only free
+#' parameters participating in `pen_par_id` or `pen_diff_id`; all other
+#' parameters retain their base values.
 #'
 #' @param x A fitted lavaan model object.
 #' @param n Integer. Number of starting vectors to generate (including the base).
 #'   Default is 1, which returns only the base vector.
+#' @param pen_par_id Integer vector of directly penalized free-parameter IDs.
+#' @param pen_diff_id List of matrices of free-parameter IDs used for
+#'   difference penalties. Structural `NA` entries are ignored.
 #'
 #' @return A matrix with `n` rows (one per starting vector) and one column per
 #'   free parameter. Column order matches `lavaan::coef(x)` /
@@ -26,38 +29,43 @@ variance_bounds <- function(obs_var) {
 #'   unperturbed base vector.
 #'
 #' @details
-#' Perturbation rules by parameter type (from `parTable`):
-#'
-#' \describe{
-#'   \item{Factor loadings (`op == "=~"`)}: Left at base value. Lavaan itself
-#'     does not randomize ordinary loadings in `rstarts`.
-#'   \item{Regression coefficients (`op == "~"`, excluding intercepts)}: A random
-#'     correlation \(r \sim U(-0.5, 0.5)\) is drawn and converted to the
-#'     covariance scale via \(r \times \sqrt{\hat{\sigma}_{lhs}^2 \hat{\sigma}_{rhs}^2}\),
-#'     using base residual variance estimates. This deviation from lavaan's
-#'     `rstarts` (which fixes regression coefficients at 0) is intentional: in
-#'     penalized estimation, zero-starts may collide with the penalty in
-#'     unhelpful ways.
-#'   \item{Covariances between exogenous variables (`op == "~~"`, `lhs != rhs`)}:
-#'     Same treatment as regression coefficients (random correlation scaled by
-#'     variances).
-#'   \item{(Residual) variances (`op == "~~"`, `lhs == rhs`)}: Drawn uniformly
-#'     between bounds computed from the observed variance of the corresponding
-#'     variable. Lower bound is ~0.2 * observed variance (min 1e-6), upper bound
-#'     is ~2 * observed variance, mirroring lavaan's bounded estimation.
-#'   \item{Intercepts/means (`op == "~1"`)}: Left at base value. Lavaan does not
-#'     randomize intercepts.
-#' }
+#' Only parameters involved in a penalty are eligible for perturbation. Eligible
+#' loadings and intercepts are jittered by 20% of their base magnitude (with a
+#' minimum scale of 0.1). Eligible regression coefficients and covariances use a
+#' random correlation-scale perturbation, and eligible variances are drawn within
+#' bounds based on observed variances. Restricting perturbations this way preserves
+#' the base values of nuisance covariance parameters and avoids invalid starts.
 #'
 #' Set a seed with `set.seed()` before calling for reproducibility.
 #'
 #' @keywords internal
 #' @noRd
 #' @importFrom stats runif setNames
-random_start <- function(x, n = 1) {
+random_start <- function(x, n = 1, pen_par_id = NULL, pen_diff_id = NULL) {
   ff <- lavaan::lav_export_estimation(x)
   base <- ff$starting_values
   pt <- lavaan::parTable(x)
+
+  diff_ids <- if (is.null(pen_diff_id)) {
+    numeric()
+  } else {
+    if (!is.list(pen_diff_id) || !all(vapply(pen_diff_id, is.matrix, logical(1)))) {
+      stop("pen_diff_id must be a list of matrices.")
+    }
+    unlist(pen_diff_id, use.names = FALSE)
+  }
+  pen_ids <- c(pen_par_id, diff_ids)
+  pen_ids <- pen_ids[!is.na(pen_ids)]
+  if (length(pen_ids) > 0) {
+    if (
+      !is.numeric(pen_ids) || any(!is.finite(pen_ids)) ||
+        any(pen_ids <= 0) || any(pen_ids != as.integer(pen_ids)) ||
+        any(pen_ids > length(base))
+    ) {
+      stop("Penalty parameter IDs must be positive integer free-parameter indices.")
+    }
+    pen_ids <- unique(as.integer(pen_ids))
+  }
 
   # Filter to free parameters (same order as base vector)
   free_pt <- pt[pt$free > 0, ]
@@ -99,17 +107,14 @@ random_start <- function(x, n = 1) {
     return(result)
   }
 
-  for (i in seq_len(n_params)) {
+  for (i in pen_ids) {
     op <- free_pt$op[i]
     lhs <- free_pt$lhs[i]
     rhs <- free_pt$rhs[i]
 
-    if (op == "=~") {
-      # Factor loadings: leave at base value (no perturbation)
-      next
-    } else if (op == "~1") {
-      # Intercepts/means: leave at base value (no perturbation)
-      next
+    if (op == "=~" || op == "~1") {
+      scale <- max(abs(base[i]), 0.1)
+      result[-1, i] <- base[i] + runif(n - 1, -0.2, 0.2) * scale
     } else if (op == "~") {
       # Regression coefficients: random correlation scaled by variances
       lhs_sd <- sqrt(abs(var_lookup[lhs]))
@@ -150,8 +155,8 @@ random_start <- function(x, n = 1) {
 #'
 #' @inheritParams penalized_est
 #' @param n_starts Integer. Number of random starting vectors to try. The first
-#'   start is always lavaan's default (unperturbed), so multistart is never worse
-#'   than a single [penalized_est()] call. Default is 10.
+#'   start is always lavaan's default (unperturbed). Later random starts perturb
+#'   only parameters participating in `pen_par_id` or `pen_diff_id`. Default is 10.
 #' @param starts Matrix or list of numeric vectors, each with length equal to the
 #'   number of free parameters. If supplied, random generation is bypassed entirely
 #'   and `n_starts` is ignored. A message is printed noting this.
@@ -177,14 +182,13 @@ random_start <- function(x, n = 1) {
 #' starting values. Multistart optimization mitigates this risk by trying several
 #' starts and selecting the best.
 #'
-#' Starting-value generation mirrors lavaan's `rstarts` scheme but with one key
-#' deviation: regression coefficients are randomized (not fixed at 0 as in
-#' lavaan), because zero-starts may collide with the penalty function in ways
-#' that hinder convergence toward the global optimum. Perturbation rules by
-#' parameter type follow the same logic as [lavaan::lavOptions]`rstarts`: factor
-#' loadings and intercepts stay at base values, variances are drawn within bounds
-#' based on observed variance, and regression/covariance parameters receive a
-#' random correlation perturbation scaled to the covariance scale.
+#' Random starts perturb only the free parameters participating in `pen_par_id`
+#' or `pen_diff_id`; all nuisance parameters retain lavaan's base values. This
+#' targets the non-convex penalized surface while preserving a valid covariance
+#' structure from the supplied model start. Eligible loadings and intercepts are
+#' jittered around their base values, eligible variances are drawn within bounds
+#' based on observed variance, and eligible regression/covariance parameters
+#' receive a random correlation-scale perturbation.
 #'
 #' Execution is sequential. For parallel execution, call [penalized_est()] with
 #' `start = ...` directly and use `future.apply`, `parallel`, or similar.
@@ -217,7 +221,12 @@ penalized_est_multistart <- function(
 ) {
   # Generate or validate starting values
   if (is.null(starts)) {
-    all_starts <- random_start(x, n = n_starts)
+    all_starts <- random_start(
+      x,
+      n = n_starts,
+      pen_par_id = pen_par_id,
+      pen_diff_id = pen_diff_id
+    )
   } else {
     # Convert list to matrix if needed
     if (is.list(starts)) {
