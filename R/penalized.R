@@ -213,14 +213,20 @@ penalized_est <- function(
   ) {
     stop("pen_fn must be 'l0a', 'alf', or a function.")
   }
-  if (identical(pen_fn_name, "l0a") && !is.null(pen_gr)) {
-    message(
-      "pen_gr is ignored when pen_fn is 'l0a'; using the built-in gradient function."
-    )
-  } else if (identical(pen_fn_name, "alf") && !is.null(pen_gr)) {
-    message(
-      "pen_gr is ignored when pen_fn is 'alf'; using the built-in gradient function."
-    )
+  if (identical(pen_fn_name, "l0a")) {
+    pen_gr <- gr_l0a
+    if (!is.null(pen_gr)) {
+      message(
+        "pen_gr is ignored when pen_fn is 'l0a'; using the built-in gradient function."
+      )
+    }
+  } else if (identical(pen_fn_name, "alf")) {
+    pen_gr <- gr_alf
+    if (!is.null(pen_gr)) {
+      message(
+        "pen_gr is ignored when pen_fn is 'alf'; using the built-in gradient function."
+      )
+    }
   }
 
   fit_stage <- function(stage_eps, stage_start) {
@@ -228,14 +234,10 @@ penalized_est <- function(
     pen_gr_stage <- pen_gr
     if (identical(pen_fn_name, "l0a")) {
       pen_fn_stage <- function(z) l0a(z, eps = stage_eps)
-      if (is.null(pen_gr_stage)) {
-        pen_gr_stage <- function(z) gr_l0a(z, eps = stage_eps)
-      }
+      pen_gr_stage <- function(z) gr_l0a(z, eps = stage_eps)
     } else if (identical(pen_fn_name, "alf")) {
       pen_fn_stage <- function(z) alf(z, eps = stage_eps)
-      if (is.null(pen_gr_stage)) {
-        pen_gr_stage <- function(z) gr_alf(z, eps = stage_eps)
-      }
+      pen_gr_stage <- function(z) gr_alf(z, eps = stage_eps)
     }
     penalized_est_stage(
       x = x,
