@@ -320,7 +320,7 @@ penalized_est_stage <- function(
       "."
     )
   }
-  if (!is.function(pen_fn) && pen_fn %in% c("l0a", "alf")) {
+  if (is.character(pen_fn) && length(pen_fn) == 1 && pen_fn %in% c("l0a", "alf")) {
     if (is.null(pen_gr)) {
       pen_gr <- switch(
         pen_fn,
@@ -331,7 +331,7 @@ penalized_est_stage <- function(
     pen_fn <- get(pen_fn)
   }
 
-  if (!is.function(pen_fn) && !pen_fn %in% c("l0a", "alf")) {
+  if (!is.function(pen_fn) && !(is.character(pen_fn) && length(pen_fn) == 1 && pen_fn %in% c("l0a", "alf"))) {
     stop("pen_fn must be 'l0a', 'alf', or a function.")
   }
   diff_configs <- NULL
