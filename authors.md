@@ -8,16 +8,16 @@
 ## Citation
 
 Source:
-[`DESCRIPTION`](https://github.com/marklhc/plavaan/blob/v0.0.2/DESCRIPTION)
+[`DESCRIPTION`](https://github.com/marklhc/plavaan/blob/main/DESCRIPTION)
 
 Lai H (2026). *plavaan: Penalized Estimation for Latent Variable Models
-with 'lavaan'*. R package version 0.0.2,
+with 'lavaan'*. R package version 0.0.2.9000,
 <https://marklhc.github.io/plavaan/>.
 
     @Manual{,
       title = {plavaan: Penalized Estimation for Latent Variable Models with 'lavaan'},
       author = {Hok Chio (Mark) Lai},
       year = {2026},
-      note = {R package version 0.0.2},
+      note = {R package version 0.0.2.9000},
       url = {https://marklhc.github.io/plavaan/},
     }

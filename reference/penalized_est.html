@@ -15,7 +15,7 @@ the optimized parameter estimates."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">plavaan</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.2.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -46,7 +46,7 @@ the optimized parameter estimates."></head><body>
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Penalized Parameter Estimation for Longitudinal CFA Models</h1>
-      <small class="dont-index">Source: <a href="https://github.com/marklhc/plavaan/blob/v0.0.2/R/penalized.R" class="external-link"><code>R/penalized.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/marklhc/plavaan/blob/main/R/penalized.R" class="external-link"><code>R/penalized.R</code></a></small>
       <div class="d-none name"><code>penalized_est.Rd</code></div>
     </div>
 
@@ -69,7 +69,10 @@ the optimized parameter estimates.</p>
 <span>  pen_gr <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  se <span class="op">=</span> <span class="st">"none"</span>,</span>
 <span>  opt_control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span>  start <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  start <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  eps <span class="op">=</span> <span class="fl">0.01</span>,</span>
+<span>  telescoping_control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>eps_1 <span class="op">=</span> <span class="fl">1</span>, eps_end <span class="op">=</span> <span class="fl">1e-05</span>, eps_steps <span class="op">=</span> <span class="fl">20</span>, warm_start <span class="op">=</span></span>
+<span>    <span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -126,12 +129,27 @@ Default includes <code>eval.max = 2e4</code>, <code>iter.max = 1e4</code>, and <
 (default) to use lavaan's default starting values. If supplied, its length
 must match the number of free parameters in the model.</p></dd>
 
+
+<dt id="arg-eps">eps<a class="anchor" aria-label="anchor" href="#arg-eps"></a></dt>
+<dd><p>A positive numeric scalar used by the built-in penalties, or
+<code>"telescoping"</code> to fit a sequence of decreasing epsilon values. Default is
+<code>.01</code>. This argument does not alter custom <code>pen_fn</code> or <code>pen_gr</code> functions.</p></dd>
+
+
+<dt id="arg-telescoping-control">telescoping_control<a class="anchor" aria-label="anchor" href="#arg-telescoping-control"></a></dt>
+<dd><p>A named list controlling telescoping, with
+<code>eps_1</code> (default <code>1</code>), <code>eps_end</code> (default <code>1e-5</code>), <code>eps_steps</code> (default
+<code>20</code>), and <code>warm_start</code> (default <code>FALSE</code>). When <code>warm_start</code> is <code>FALSE</code>,
+every epsilon stage uses the original starting values; when <code>TRUE</code>, each
+stage after the first uses the preceding stage's estimates.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A lavaan model object updated with the penalized parameter estimates.
-The returned object includes an attribute <code>opt_info</code> containing the
-optimization information returned by <code><a href="https://rdrr.io/r/stats/nlminb.html" class="external-link">nlminb()</a></code>.</p>
+With <code>eps = "telescoping"</code>, it includes a <code>"telescoping"</code> data frame with
+per-stage epsilon values, parameter changes, objective values, and
+convergence indicators.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -142,6 +160,13 @@ returned object was not "fitted" (<code>do.fit = FALSE</code>) to avoid users
 interpreting the standard errors, which are generally not valid with
 penalized estimation. The degrees of freedom may also be inaccurate. If the
 optimization does not converge (convergence code != 0), a warning is issued.</p>
+<p>With <code>eps = "telescoping"</code>, the model is fit along a log-spaced sequence from
+<code>telescoping_control$eps_1</code> to <code>telescoping_control$eps_end</code>. By default,
+each stage uses the original starting values; set
+<code>telescoping_control$warm_start = TRUE</code> to initialize later stages from the
+preceding solution. The sequence stops when the largest absolute change
+between consecutive parameter vectors is at most <code>5e-4</code>. The returned object
+has a <code>"telescoping"</code> attribute with stage diagnostics.</p>
     </div>
     <div class="section level2">
     <h2 id="warning">Warning<a class="anchor" aria-label="anchor" href="#warning"></a></h2>
@@ -201,6 +226,7 @@ experimental sandwich approximation and should be interpreted with caution.</p>
 <span class="r-in"><span>    <span class="op">)</span>,</span></span>
 <span class="r-in"><span>    pen_fn <span class="op">=</span> <span class="st">"l0a"</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> pen_gr is ignored when pen_fn is 'l0a'; using the built-in gradient function.</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Compare parameter estimates</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">pen_fit</span><span class="op">)</span></span></span>

@@ -11,7 +11,7 @@ when using non-convex penalties (l0a, alf), which can lead to local optima."></h
 
     <a class="navbar-brand me-2" href="../index.html">plavaan</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.2.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -42,7 +42,7 @@ when using non-convex penalties (l0a, alf), which can lead to local optima."></h
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Multistart Penalized Estimation</h1>
-      <small class="dont-index">Source: <a href="https://github.com/marklhc/plavaan/blob/v0.0.2/R/multistart.R" class="external-link"><code>R/multistart.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/marklhc/plavaan/blob/main/R/multistart.R" class="external-link"><code>R/multistart.R</code></a></small>
       <div class="d-none name"><code>penalized_est_multistart.Rd</code></div>
     </div>
 
@@ -63,6 +63,9 @@ when using non-convex penalties (<code>l0a</code>, <code>alf</code>), which can 
 <span>  pen_gr <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  se <span class="op">=</span> <span class="st">"none"</span>,</span>
 <span>  opt_control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  eps <span class="op">=</span> <span class="fl">0.01</span>,</span>
+<span>  telescoping_control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>eps_1 <span class="op">=</span> <span class="fl">1</span>, eps_end <span class="op">=</span> <span class="fl">1e-05</span>, eps_steps <span class="op">=</span> <span class="fl">20</span>, warm_start <span class="op">=</span></span>
+<span>    <span class="cn">FALSE</span><span class="op">)</span>,</span>
 <span>  n_starts <span class="op">=</span> <span class="fl">10</span>,</span>
 <span>  starts <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  keep_all <span class="op">=</span> <span class="cn">FALSE</span>,</span>
@@ -118,10 +121,24 @@ which is the same as used in the <code>"mlr"</code> estimator).</p></dd>
 Default includes <code>eval.max = 2e4</code>, <code>iter.max = 1e4</code>, and <code>abs.tol = 1e-20</code>.</p></dd>
 
 
+<dt id="arg-eps">eps<a class="anchor" aria-label="anchor" href="#arg-eps"></a></dt>
+<dd><p>A positive numeric scalar used by the built-in penalties, or
+<code>"telescoping"</code> to fit a sequence of decreasing epsilon values. Default is
+<code>.01</code>. This argument does not alter custom <code>pen_fn</code> or <code>pen_gr</code> functions.</p></dd>
+
+
+<dt id="arg-telescoping-control">telescoping_control<a class="anchor" aria-label="anchor" href="#arg-telescoping-control"></a></dt>
+<dd><p>A named list controlling telescoping, with
+<code>eps_1</code> (default <code>1</code>), <code>eps_end</code> (default <code>1e-5</code>), <code>eps_steps</code> (default
+<code>20</code>), and <code>warm_start</code> (default <code>FALSE</code>). When <code>warm_start</code> is <code>FALSE</code>,
+every epsilon stage uses the original starting values; when <code>TRUE</code>, each
+stage after the first uses the preceding stage's estimates.</p></dd>
+
+
 <dt id="arg-n-starts">n_starts<a class="anchor" aria-label="anchor" href="#arg-n-starts"></a></dt>
 <dd><p>Integer. Number of random starting vectors to try. The first
-start is always lavaan's default (unperturbed), so multistart is never worse
-than a single <code><a href="penalized_est.html">penalized_est()</a></code> call. Default is 10.</p></dd>
+start is always lavaan's default (unperturbed). Later random starts perturb
+only parameters participating in <code>pen_par_id</code> or <code>pen_diff_id</code>. Default is 10.</p></dd>
 
 
 <dt id="arg-starts">starts<a class="anchor" aria-label="anchor" href="#arg-starts"></a></dt>
@@ -142,16 +159,16 @@ Default is <code>FALSE</code>.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A lavaan model object (same shape as [penalized_est()]'s return), with
-  additional attributes:</p>
-<dl><dt>`multistart`</dt>
+    <p>A lavaan model object (same shape as <code><a href="penalized_est.html">penalized_est()</a></code>'s return), with
+additional attributes:</p>
+<dl><dt><code>multistart</code></dt>
 <dd><p>A data frame with one row per start, containing columns
-    `start_id`, `objective` (final penalized objective value), and
-    `converged` (logical). Rows are sorted by ascending objective.</p></dd>
+<code>start_id</code>, <code>objective</code> (final penalized objective value), and
+<code>converged</code> (logical). Rows are sorted by ascending objective.</p></dd>
 
-  <dt>`all_fits`</dt>
-<dd><p>If `keep_all = TRUE`, a named list of all fitted lavaan
-    objects, one per starting vector.</p></dd>
+<dt><code>all_fits</code></dt>
+<dd><p>If <code>keep_all = TRUE</code>, a named list of all fitted lavaan
+objects, one per starting vector.</p></dd>
 
 
 </dl></div>
@@ -161,14 +178,13 @@ Default is <code>FALSE</code>.</p></dd>
 where the optimizer can settle in different local solutions depending on
 starting values. Multistart optimization mitigates this risk by trying several
 starts and selecting the best.</p>
-<p>Starting-value generation mirrors lavaan's <code>rstarts</code> scheme but with one key
-deviation: regression coefficients are randomized (not fixed at 0 as in
-lavaan), because zero-starts may collide with the penalty function in ways
-that hinder convergence toward the global optimum. Perturbation rules by
-parameter type follow the same logic as <a href="https://rdrr.io/pkg/lavaan/man/lavOptions.html" class="external-link">lavaan::lavOptions</a><code>rstarts</code>: factor
-loadings and intercepts stay at base values, variances are drawn within bounds
-based on observed variance, and regression/covariance parameters receive a
-random correlation perturbation scaled to the covariance scale.</p>
+<p>Random starts perturb only the free parameters participating in <code>pen_par_id</code>
+or <code>pen_diff_id</code>; all nuisance parameters retain lavaan's base values. This
+targets the non-convex penalized surface while preserving a valid covariance
+structure from the supplied model start. Eligible loadings and intercepts are
+jittered around their base values, eligible variances are drawn within bounds
+based on observed variance, and eligible regression/covariance parameters
+receive a random correlation-scale perturbation.</p>
 <p>Execution is sequential. For parallel execution, call <code><a href="penalized_est.html">penalized_est()</a></code> with
 <code>start = ...</code> directly and use <code>future.apply</code>, <code>parallel</code>, or similar.</p>
 <p>Users should set their own seed with <code><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed()</a></code> for reproducibility. This

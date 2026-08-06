@@ -58,6 +58,7 @@ pefa_fit <- penalized_est(
     pen_par_id = 4:10,
     se = "robust.huber.white"
 )
+#> pen_gr is ignored when pen_fn is 'l0a'; using the built-in gradient function.
 summary(pefa_fit)
 #> lavaan 0.7-2 ended normally after 126 iterations
 #> 
@@ -252,6 +253,7 @@ pen_fit <- penalized_est(
     pen_diff_id = list(loadings = ld_id, intercepts = int_id),
     se = "robust.huber.white"
 )
+#> pen_gr is ignored when pen_fn is 'l0a'; using the built-in gradient function.
 parameterEstimates(pen_fit)
 #>      lhs op   rhs label    est    se      z pvalue ci.lower ci.upper
 #> 1  dem60 =~    y1 .l1_1  2.098 0.208 10.088  0.000    1.690    2.506

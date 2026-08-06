@@ -59,6 +59,7 @@ fit_single <- penalized_est(
     ),
     pen_fn = "l0a"
 )
+#> pen_gr is ignored when pen_fn is 'l0a'; using the built-in gradient function.
 
 fit_single@optim$fx
 #> [1] 0.2100911
@@ -86,42 +87,53 @@ fit_multi <- penalized_est_multistart(
     ),
     pen_fn = "l0a",
     n_starts = 10,
-    verbose = TRUE
+    verbose = TRUE,
+    eps = .0001
 )
 #> Start 1 / 10...
-#>   Start 1: converged, objective = 0.210091
+#> pen_gr is ignored when pen_fn is 'l0a'; using the built-in gradient function.
+#>   Start 1: converged, objective = 0.279207
 #> Start 2 / 10...
-#>   Start 2: converged, objective = 0.210091
+#> pen_gr is ignored when pen_fn is 'l0a'; using the built-in gradient function.
+#>   Start 2: converged, objective = 0.279207
 #> Start 3 / 10...
-#>   Start 3: converged, objective = 0.210091
+#> pen_gr is ignored when pen_fn is 'l0a'; using the built-in gradient function.
+#>   Start 3: converged, objective = 0.279207
 #> Start 4 / 10...
-#>   Start 4: converged, objective = 0.219434
+#> pen_gr is ignored when pen_fn is 'l0a'; using the built-in gradient function.
+#>   Start 4: converged, objective = 0.279207
 #> Start 5 / 10...
-#>   Start 5: converged, objective = 0.210091
+#> pen_gr is ignored when pen_fn is 'l0a'; using the built-in gradient function.
+#>   Start 5: converged, objective = 0.279207
 #> Start 6 / 10...
-#>   Start 6: converged, objective = 0.210091
+#> pen_gr is ignored when pen_fn is 'l0a'; using the built-in gradient function.
+#>   Start 6: converged, objective = 0.279207
 #> Start 7 / 10...
-#>   Start 7: converged, objective = 0.219434
+#> pen_gr is ignored when pen_fn is 'l0a'; using the built-in gradient function.
+#>   Start 7: converged, objective = 0.279207
 #> Start 8 / 10...
-#>   Start 8: converged, objective = 0.219434
+#> pen_gr is ignored when pen_fn is 'l0a'; using the built-in gradient function.
+#>   Start 8: converged, objective = 0.279207
 #> Start 9 / 10...
-#>   Start 9: converged, objective = 0.210091
+#> pen_gr is ignored when pen_fn is 'l0a'; using the built-in gradient function.
+#>   Start 9: converged, objective = 0.279207
 #> Start 10 / 10...
-#>   Start 10: converged, objective = 0.219653
+#> pen_gr is ignored when pen_fn is 'l0a'; using the built-in gradient function.
+#>   Start 10: converged, objective = 0.279207
 
 # Inspect the spread of objective values across starts
 attr(fit_multi, "multistart")
 #>    start_id objective converged
-#> 9         9 0.2100911      TRUE
-#> 1         1 0.2100911      TRUE
-#> 5         5 0.2100911      TRUE
-#> 2         2 0.2100911      TRUE
-#> 3         3 0.2100911      TRUE
-#> 6         6 0.2100911      TRUE
-#> 8         8 0.2194339      TRUE
-#> 7         7 0.2194339      TRUE
-#> 4         4 0.2194339      TRUE
-#> 10       10 0.2196531      TRUE
+#> 2         2 0.2792071      TRUE
+#> 3         3 0.2792071      TRUE
+#> 7         7 0.2792071      TRUE
+#> 8         8 0.2792071      TRUE
+#> 5         5 0.2792071      TRUE
+#> 4         4 0.2792071      TRUE
+#> 6         6 0.2792071      TRUE
+#> 10       10 0.2792071      TRUE
+#> 1         1 0.2792071      TRUE
+#> 9         9 0.2792071      TRUE
 ```
 
 The `multistart` attribute is a data frame with one row per start,
@@ -148,6 +160,11 @@ fit_all <- penalized_est_multistart(
     n_starts = 5,
     keep_all = TRUE
 )
+#> pen_gr is ignored when pen_fn is 'l0a'; using the built-in gradient function.
+#> pen_gr is ignored when pen_fn is 'l0a'; using the built-in gradient function.
+#> pen_gr is ignored when pen_fn is 'l0a'; using the built-in gradient function.
+#> pen_gr is ignored when pen_fn is 'l0a'; using the built-in gradient function.
+#> pen_gr is ignored when pen_fn is 'l0a'; using the built-in gradient function.
 
 # Extract loadings from the top-3 solutions for comparison
 all_fits <- attr(fit_all, "all_fits")
@@ -159,17 +176,17 @@ loadings_top3 <- lapply(head(all_fits[ms_table$start_id[1:3]], 3), function(f) {
 })
 names(loadings_top3) <- paste0("Start ", ms_table$start_id[1:3])
 loadings_top3
+#> $`Start 1`
+#> dem60=~y1 dem60=~y2 dem60=~y3 dem60=~y4 
+#>    2.0980    2.8300    2.5609    2.9006 
+#> 
 #> $`Start 2`
 #> dem60=~y1 dem60=~y2 dem60=~y3 dem60=~y4 
 #>    2.0980    2.8300    2.5609    2.9006 
 #> 
 #> $`Start 5`
 #> dem60=~y1 dem60=~y2 dem60=~y3 dem60=~y4 
-#>    2.0980    2.8300    2.5609    2.9006 
-#> 
-#> $`Start 4`
-#> dem60=~y1 dem60=~y2 dem60=~y3 dem60=~y4 
-#>    2.0980    2.8300    2.5609    2.9006
+#>    2.0981    2.8300    2.5609    2.9006
 ```
 
 ## Using custom starting values
@@ -195,6 +212,8 @@ fit_custom <- penalized_est_multistart(
     starts = my_starts
 )
 #> Custom starting values provided (2 starts). Ignoring n_starts.
+#> pen_gr is ignored when pen_fn is 'l0a'; using the built-in gradient function.
+#> pen_gr is ignored when pen_fn is 'l0a'; using the built-in gradient function.
 
 attr(fit_custom, "multistart")
 #>   start_id objective converged
@@ -216,6 +235,11 @@ fit_repro <- penalized_est_multistart(
     pen_diff_id = list(loadings = rbind(load_60, load_65)),
     n_starts = 5
 )
+#> pen_gr is ignored when pen_fn is 'l0a'; using the built-in gradient function.
+#> pen_gr is ignored when pen_fn is 'l0a'; using the built-in gradient function.
+#> pen_gr is ignored when pen_fn is 'l0a'; using the built-in gradient function.
+#> pen_gr is ignored when pen_fn is 'l0a'; using the built-in gradient function.
+#> pen_gr is ignored when pen_fn is 'l0a'; using the built-in gradient function.
 ```
 
 ## Parallel execution

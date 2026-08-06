@@ -77,6 +77,7 @@ pefa_fit <- penalized_est(
     w = .03,
     pen_par_id = 4:10
 )
+#> pen_gr is ignored when pen_fn is 'l0a'; using the built-in gradient function.
 summary(pefa_fit)
 #> lavaan 0.7-2 ended normally after 126 iterations
 #> 
@@ -210,6 +211,7 @@ pefa_fit2 <- penalized_est(
     w = .03,
     pen_par_id = c(4:10, 15:35)
 )
+#> pen_gr is ignored when pen_fn is 'l0a'; using the built-in gradient function.
 summary(pefa_fit2)
 #> lavaan 0.7-2 ended normally after 182 iterations
 #> 
@@ -403,6 +405,7 @@ pefa_fit3 <- penalized_est(
         intercepts = rbind(27:30, 31:34)
     )
 )
+#> pen_gr is ignored when pen_fn is 'l0a'; using the built-in gradient function.
 summary(pefa_fit3, standardized = TRUE)
 #> lavaan 0.7-2 ended normally after 190 iterations
 #> 

@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">plavaan</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.2.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -64,7 +64,7 @@
       <h1>Negative Loadings</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/marklhc/plavaan/blob/v0.0.2/vignettes/negative-loading.Rmd" class="external-link"><code>vignettes/negative-loading.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/marklhc/plavaan/blob/main/vignettes/negative-loading.Rmd" class="external-link"><code>vignettes/negative-loading.Rmd</code></a></small>
       <div class="d-none name"><code>negative-loading.Rmd</code></div>
     </div>
 
@@ -175,6 +175,7 @@ penalizing the differences in intercepts and loadings across groups.</p>
 <span>  <span class="va">fit_dry</span>, w <span class="op">=</span> <span class="fl">.03</span>, pen_diff_id <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>loadings <span class="op">=</span> <span class="va">ld_mat</span>, intercepts <span class="op">=</span> <span class="va">int_mat</span><span class="op">)</span>,</span>
 <span>  se <span class="op">=</span> <span class="st">"robust.huber.white"</span></span>
 <span><span class="op">)</span></span>
+<span><span class="co">#&gt; pen_gr is ignored when pen_fn is 'l0a'; using the built-in gradient function.</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">fit_pen</span><span class="op">)</span></span>
 <span><span class="co">#&gt; lavaan 0.7-2 ended normally after 113 iterations</span></span>
 <span><span class="co">#&gt; </span></span>

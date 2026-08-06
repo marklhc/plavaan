@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">plavaan</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.2.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -38,9 +38,14 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Changelog</h1>
-      <small>Source: <a href="https://github.com/marklhc/plavaan/blob/v0.0.2/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
+      <small>Source: <a href="https://github.com/marklhc/plavaan/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="development version" id="plavaan-development-version">plavaan (development version)<a class="anchor" aria-label="anchor" href="#plavaan-development-version"></a></h2>
+<ul><li>
+<code><a href="../reference/penalized_est.html">penalized_est()</a></code> gains <code>eps</code> control for built-in penalties, including <code>eps = "telescoping"</code> over a decreasing epsilon sequence. Telescoping reuses the original starting values by default; set <code>telescoping_control = list(warm_start = TRUE)</code> to warm-start later stages from prior estimates.</li>
+</ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.0.2" id="plavaan-002">plavaan 0.0.2<a class="anchor" aria-label="anchor" href="#plavaan-002"></a></h2><p class="text-muted">CRAN release: 2026-07-28</p>
 <ul><li>Added <code><a href="../reference/penalized_est_multistart.html">penalized_est_multistart()</a></code> and support for custom optimizer starting values via <code>start</code> in <code><a href="../reference/penalized_est.html">penalized_est()</a></code>.</li>

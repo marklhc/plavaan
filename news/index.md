@@ -1,5 +1,14 @@
 # Changelog
 
+## plavaan (development version)
+
+- [`penalized_est()`](https://marklhc.github.io/plavaan/reference/penalized_est.md)
+  gains `eps` control for built-in penalties, including
+  `eps = "telescoping"` over a decreasing epsilon sequence. Telescoping
+  reuses the original starting values by default; set
+  `telescoping_control = list(warm_start = TRUE)` to warm-start later
+  stages from prior estimates.
+
 ## plavaan 0.0.2
 
 CRAN release: 2026-07-28

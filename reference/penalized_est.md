@@ -18,7 +18,10 @@ penalized_est(
   pen_gr = NULL,
   se = "none",
   opt_control = list(),
-  start = NULL
+  start = NULL,
+  eps = 0.01,
+  telescoping_control = list(eps_1 = 1, eps_end = 1e-05, eps_steps = 20, warm_start =
+    FALSE)
 )
 ```
 
@@ -77,12 +80,27 @@ penalized_est(
   (default) to use lavaan's default starting values. If supplied, its
   length must match the number of free parameters in the model.
 
+- eps:
+
+  A positive numeric scalar used by the built-in penalties, or
+  `"telescoping"` to fit a sequence of decreasing epsilon values.
+  Default is `.01`. This argument does not alter custom `pen_fn` or
+  `pen_gr` functions.
+
+- telescoping_control:
+
+  A named list controlling telescoping, with `eps_1` (default `1`),
+  `eps_end` (default `1e-5`), `eps_steps` (default `20`), and
+  `warm_start` (default `FALSE`). When `warm_start` is `FALSE`, every
+  epsilon stage uses the original starting values; when `TRUE`, each
+  stage after the first uses the preceding stage's estimates.
+
 ## Value
 
 A lavaan model object updated with the penalized parameter estimates.
-The returned object includes an attribute `opt_info` containing the
-optimization information returned by
-[`nlminb()`](https://rdrr.io/r/stats/nlminb.html).
+With `eps = "telescoping"`, it includes a `"telescoping"` data frame
+with per-stage epsilon values, parameter changes, objective values, and
+convergence indicators.
 
 ## Details
 
@@ -95,6 +113,14 @@ the standard errors, which are generally not valid with penalized
 estimation. The degrees of freedom may also be inaccurate. If the
 optimization does not converge (convergence code != 0), a warning is
 issued.
+
+With `eps = "telescoping"`, the model is fit along a log-spaced sequence
+from `telescoping_control$eps_1` to `telescoping_control$eps_end`. By
+default, each stage uses the original starting values; set
+`telescoping_control$warm_start = TRUE` to initialize later stages from
+the preceding solution. The sequence stops when the largest absolute
+change between consecutive parameter vectors is at most `5e-4`. The
+returned object has a `"telescoping"` attribute with stage diagnostics.
 
 ## Warning
 
@@ -155,6 +181,7 @@ pen_fit <- penalized_est(
     ),
     pen_fn = "l0a"
 )
+#> pen_gr is ignored when pen_fn is 'l0a'; using the built-in gradient function.
 
 # Compare parameter estimates
 summary(pen_fit)
