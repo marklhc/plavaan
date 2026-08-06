@@ -213,6 +213,15 @@ penalized_est <- function(
   ) {
     stop("pen_fn must be 'l0a', 'alf', or a function.")
   }
+  if (identical(pen_fn_name, "l0a") && !is.null(pen_gr)) {
+    message(
+      "pen_gr is ignored when pen_fn is 'l0a'; using the built-in gradient function."
+    )
+  } else if (identical(pen_fn_name, "alf") && !is.null(pen_gr)) {
+    message(
+      "pen_gr is ignored when pen_fn is 'alf'; using the built-in gradient function."
+    )
+  }
 
   fit_stage <- function(stage_eps, stage_start) {
     pen_fn_stage <- pen_fn
@@ -242,13 +251,15 @@ penalized_est <- function(
   }
 
   out <- NULL
-  eps_used <- numeric()
-  par_changes <- numeric()
-  objectives <- numeric()
-  converged <- logical()
+  stage_count <- 0L
+  eps_used <- numeric(length(eps_seq))
+  par_changes <- numeric(length(eps_seq))
+  objectives <- numeric(length(eps_seq))
+  converged <- logical(length(eps_seq))
   original_start <- start
   stage_start <- original_start
   for (stage_eps in eps_seq) {
+    stage_count <- stage_count + 1L
     fit <- fit_stage(stage_eps, stage_start)
     if (any(!is.finite(fit@optim$x))) {
       stop(
@@ -262,10 +273,10 @@ penalized_est <- function(
     } else {
       max(abs(fit@optim$x - out@optim$x))
     }
-    eps_used <- c(eps_used, stage_eps)
-    par_changes <- c(par_changes, change)
-    objectives <- c(objectives, fit@optim$fx)
-    converged <- c(converged, fit@optim$converged)
+    eps_used[stage_count] <- stage_eps
+    par_changes[stage_count] <- change
+    objectives[stage_count] <- fit@optim$fx
+    converged[stage_count] <- fit@optim$converged
     out <- fit
     if (!is.na(change) && change <= 5e-4) {
       break
@@ -278,13 +289,76 @@ penalized_est <- function(
   }
   if (identical(eps, "telescoping")) {
     attr(out, "telescoping") <- data.frame(
-      eps = eps_used,
-      max_abs_change = par_changes,
-      objective = objectives,
-      converged = converged
+      eps = eps_used[seq_len(stage_count)],
+      max_abs_change = par_changes[seq_len(stage_count)],
+      objective = objectives[seq_len(stage_count)],
+      converged = converged[seq_len(stage_count)]
     )
   }
   out
+}
+
+resolve_penalty_functions <- function(pen_fn, pen_gr = NULL) {
+  if (is.character(pen_fn) && length(pen_fn) == 1) {
+    if (!pen_fn %in% c("l0a", "alf")) {
+      stop("pen_fn must be 'l0a', 'alf', or a function.")
+    }
+    if (is.null(pen_gr)) {
+      pen_gr <- switch(pen_fn, l0a = gr_l0a, alf = gr_alf)
+    }
+    pen_fn <- get(pen_fn, envir = parent.frame())
+  }
+  if (!is.function(pen_fn)) {
+    stop("pen_fn must be 'l0a', 'alf', or a function.")
+  }
+  if (!is.null(pen_gr) && !is.function(pen_gr)) {
+    stop("pen_gr must be a function or NULL.")
+  }
+  list(pen_fn = pen_fn, pen_gr = pen_gr)
+}
+
+make_diff_configs <- function(pen_diff_id) {
+  if (is.null(pen_diff_id)) {
+    return(NULL)
+  }
+  lapply(pen_diff_id, function(mat) {
+    nrow_x <- nrow(mat)
+    if (nrow_x < 2) {
+      combn_idx <- matrix(integer(), nrow = 2, ncol = 0)
+      rescale_val <- 0
+    } else {
+      combn_idx <- combn(nrow_x, 2)
+      rescale_val <- (nrow_x - 1) / ncol(combn_idx)
+    }
+    grad_idx <- lapply(seq_len(nrow_x), function(i) {
+      list(
+        idx1 = which(combn_idx[1, ] == i),
+        idx2 = which(combn_idx[2, ] == i)
+      )
+    })
+    list(
+      mat = mat,
+      trans = identity,
+      gr_trans = function(x) rep(1, length(x)),
+      combn_idx = combn_idx,
+      rescale_val = rescale_val,
+      grad_idx = grad_idx
+    )
+  })
+}
+
+make_penalized_fit <- function(x, opt) {
+  x_opt <- x@Options
+  x_opt$start <- opt$par
+  x_opt$do.fit <- FALSE
+  x_opt$se <- "none"
+  out <- lavaan::lavaan(
+    lavaan::partable(x),
+    slotOptions = x_opt,
+    slotSampleStats = x@SampleStats,
+    slotData = x@Data
+  )
+  add_nlminb_info(out, opt)
 }
 
 penalized_est_stage <- function(
@@ -320,63 +394,20 @@ penalized_est_stage <- function(
       "."
     )
   }
-  if (is.character(pen_fn) && length(pen_fn) == 1 && pen_fn %in% c("l0a", "alf")) {
-    if (is.null(pen_gr)) {
-      pen_gr <- switch(
-        pen_fn,
-        l0a = gr_l0a,
-        alf = gr_alf
-      )
-    }
-    pen_fn <- get(pen_fn)
+  penalty <- resolve_penalty_functions(pen_fn, pen_gr)
+  pen_fn <- penalty[[1]]
+  pen_gr <- penalty[[2]]
+  diff_configs <- make_diff_configs(pen_diff_id)
+  objective_fn <- function(pars) {
+    ff$objective_function(pars, lavaan_model = x)
   }
-
-  if (!is.function(pen_fn) && !(is.character(pen_fn) && length(pen_fn) == 1 && pen_fn %in% c("l0a", "alf"))) {
-    stop("pen_fn must be 'l0a', 'alf', or a function.")
-  }
-  diff_configs <- NULL
-  if (!is.null(pen_diff_id)) {
-    diff_configs <- lapply(seq_along(pen_diff_id), function(i) {
-      mat <- pen_diff_id[[i]]
-
-      # Pre-assign transformations
-      trans <- identity
-      gr_trans <- function(x) rep(1, length(x))
-
-      # Pre-compute combinatorics and rescaling
-      nrow_x <- nrow(mat)
-      if (nrow_x < 2) {
-        combn_idx <- matrix(integer(), nrow = 2, ncol = 0)
-        rescale_val <- 0
-      } else {
-        combn_idx <- combn(nrow_x, 2)
-        rescale_val <- (nrow_x - 1) / ncol(combn_idx)
-      }
-
-      # Pre-compute gradient row indices to avoid which() loops later
-      grad_idx <- lapply(seq_len(nrow_x), function(i) {
-        list(
-          idx1 = which(combn_idx[1, ] == i),
-          idx2 = which(combn_idx[2, ] == i)
-        )
-      })
-
-      list(
-        mat = mat,
-        trans = trans,
-        gr_trans = gr_trans,
-        combn_idx = combn_idx,
-        rescale_val = rescale_val,
-        grad_idx = grad_idx
-      )
-    })
+  gradient_fn <- if (!is.null(pen_gr)) {
+    function(pars) ff$gradient_function(pars, lavaan_model = x)
   }
   f1 <- function(v) {
     penalized_obj(
       v,
-      obj_fn = function(pars) {
-        ff$objective_function(pars, lavaan_model = x)
-      },
+      obj_fn = objective_fn,
       w = w,
       pen_fn = pen_fn,
       pen_par_id = pen_par_id,
@@ -387,7 +418,7 @@ penalized_est_stage <- function(
     function(v) {
       penalized_gr(
         v,
-        gr_fn = function(pars) ff$gradient_function(pars, lavaan_model = x),
+        gr_fn = gradient_fn,
         w = w,
         pen_gr = pen_gr,
         pen_par_id = pen_par_id,
@@ -409,19 +440,7 @@ penalized_est_stage <- function(
       "or adjusting optimization control parameters."
     )
   }
-  x_opt <- x@Options
-  x_opt$start <- opt$par
-  x_opt$do.fit <- FALSE
-  x_opt$se <- "none"
-  out <- lavaan::lavaan(
-    lavaan::partable(x),
-    slotOptions = x_opt,
-    slotSampleStats = x@SampleStats,
-    slotData = x@Data
-    # do.fit = FALSE,
-    # start = opt$par
-  )
-  out <- add_nlminb_info(out, opt)
+  out <- make_penalized_fit(x, opt)
   if (!se %in% c("none", "robust.huber.white")) {
     warning(
       "se must be either 'none' or 'robust.huber.white'. ",
@@ -439,16 +458,7 @@ penalized_est_stage <- function(
         "(likely due to a singular or nearly-singular Hessian). ",
         "Standard errors are not available."
       )
-      x_opt$start <- opt$par
-      x_opt$do.fit <- FALSE
-      x_opt$se <- "none"
-      out <- lavaan::lavaan(
-        lavaan::partable(x),
-        slotOptions = x_opt,
-        slotSampleStats = x@SampleStats,
-        slotData = x@Data
-      )
-      out <- add_nlminb_info(out, opt)
+      out <- make_penalized_fit(x, opt)
     }
   }
   out
