@@ -470,7 +470,7 @@ add_nlminb_info <- function(fit, opt) {
   fit@optim$x <- opt$par
   fit@optim$fx <- opt$objective
   fit@optim$iterations <- opt$iterations
-  fit@optim$converged <- as.logical(1 - opt$convergence)
+  fit@optim$converged <- opt$convergence == 0
   fit@optim$control <- opt$control
   fit@optim$dx <- opt$gradient
   fit@optim$npar <- length(opt$par)
