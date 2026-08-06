@@ -439,7 +439,7 @@ penalized_est_stage <- function(
         "(likely due to a singular or nearly-singular Hessian). ",
         "Standard errors are not available."
       )
-      out <- x_opt$start <- opt$par
+      x_opt$start <- opt$par
       x_opt$do.fit <- FALSE
       x_opt$se <- "none"
       out <- lavaan::lavaan(
