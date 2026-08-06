@@ -13,7 +13,10 @@ penalized_est(
   pen_gr = NULL,
   se = "none",
   opt_control = list(),
-  start = NULL
+  start = NULL,
+  eps = 0.01,
+  telescoping_control = list(eps_1 = 1, eps_end = 1e-05, eps_steps = 20, warm_start =
+    FALSE)
 )
 }
 \arguments{
@@ -48,11 +51,22 @@ Default includes \code{eval.max = 2e4}, \code{iter.max = 1e4}, and \code{abs.tol
 \item{start}{Numeric vector of starting values for the optimizer, or \code{NULL}
 (default) to use lavaan's default starting values. If supplied, its length
 must match the number of free parameters in the model.}
+
+\item{eps}{A positive numeric scalar used by the built-in penalties, or
+\code{"telescoping"} to fit a sequence of decreasing epsilon values. Default is
+\code{.01}. This argument does not alter custom \code{pen_fn} or \code{pen_gr} functions.}
+
+\item{telescoping_control}{A named list controlling telescoping, with
+\code{eps_1} (default \code{1}), \code{eps_end} (default \code{1e-5}), \code{eps_steps} (default
+\code{20}), and \code{warm_start} (default \code{FALSE}). When \code{warm_start} is \code{FALSE},
+every epsilon stage uses the original starting values; when \code{TRUE}, each
+stage after the first uses the preceding stage's estimates.}
 }
 \value{
 A lavaan model object updated with the penalized parameter estimates.
-The returned object includes an attribute \code{opt_info} containing the
-optimization information returned by \code{nlminb()}.
+With \code{eps = "telescoping"}, it includes a \code{"telescoping"} data frame with
+per-stage epsilon values, parameter changes, objective values, and
+convergence indicators.
 }
 \description{
 Performs penalized estimation on a lavaan model object by optimizing a
@@ -69,6 +83,14 @@ returned object was not "fitted" (\code{do.fit = FALSE}) to avoid users
 interpreting the standard errors, which are generally not valid with
 penalized estimation. The degrees of freedom may also be inaccurate. If the
 optimization does not converge (convergence code != 0), a warning is issued.
+
+With \code{eps = "telescoping"}, the model is fit along a log-spaced sequence from
+\code{telescoping_control$eps_1} to \code{telescoping_control$eps_end}. By default,
+each stage uses the original starting values; set
+\code{telescoping_control$warm_start = TRUE} to initialize later stages from the
+preceding solution. The sequence stops when the largest absolute change
+between consecutive parameter vectors is at most \code{5e-4}. The returned object
+has a \code{"telescoping"} attribute with stage diagnostics.
 }
 \section{Warning}{
 

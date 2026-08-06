@@ -13,6 +13,9 @@ penalized_est_multistart(
   pen_gr = NULL,
   se = "none",
   opt_control = list(),
+  eps = 0.01,
+  telescoping_control = list(eps_1 = 1, eps_end = 1e-05, eps_steps = 20, warm_start =
+    FALSE),
   n_starts = 10,
   starts = NULL,
   keep_all = FALSE,
@@ -48,9 +51,19 @@ which is the same as used in the \code{"mlr"} estimator).}
 \item{opt_control}{A list of control parameters passed to \code{\link[stats:nlminb]{stats::nlminb()}}.
 Default includes \code{eval.max = 2e4}, \code{iter.max = 1e4}, and \code{abs.tol = 1e-20}.}
 
+\item{eps}{A positive numeric scalar used by the built-in penalties, or
+\code{"telescoping"} to fit a sequence of decreasing epsilon values. Default is
+\code{.01}. This argument does not alter custom \code{pen_fn} or \code{pen_gr} functions.}
+
+\item{telescoping_control}{A named list controlling telescoping, with
+\code{eps_1} (default \code{1}), \code{eps_end} (default \code{1e-5}), \code{eps_steps} (default
+\code{20}), and \code{warm_start} (default \code{FALSE}). When \code{warm_start} is \code{FALSE},
+every epsilon stage uses the original starting values; when \code{TRUE}, each
+stage after the first uses the preceding stage's estimates.}
+
 \item{n_starts}{Integer. Number of random starting vectors to try. The first
-start is always lavaan's default (unperturbed), so multistart is never worse
-than a single \code{\link[=penalized_est]{penalized_est()}} call. Default is 10.}
+start is always lavaan's default (unperturbed). Later random starts perturb
+only parameters participating in \code{pen_par_id} or \code{pen_diff_id}. Default is 10.}
 
 \item{starts}{Matrix or list of numeric vectors, each with length equal to the
 number of free parameters. If supplied, random generation is bypassed entirely
@@ -63,15 +76,15 @@ attribute for inspection of alternative local solutions. Default is \code{FALSE}
 Default is \code{FALSE}.}
 }
 \value{
-A lavaan model object (same shape as [penalized_est()]'s return), with
-  additional attributes:
+A lavaan model object (same shape as \code{\link[=penalized_est]{penalized_est()}}'s return), with
+additional attributes:
 
 \describe{
-  \item{`multistart`}{A data frame with one row per start, containing columns
-    `start_id`, `objective` (final penalized objective value), and
-    `converged` (logical). Rows are sorted by ascending objective.}
-  \item{`all_fits`}{If `keep_all = TRUE`, a named list of all fitted lavaan
-    objects, one per starting vector.}
+\item{\code{multistart}}{A data frame with one row per start, containing columns
+\code{start_id}, \code{objective} (final penalized objective value), and
+\code{converged} (logical). Rows are sorted by ascending objective.}
+\item{\code{all_fits}}{If \code{keep_all = TRUE}, a named list of all fitted lavaan
+objects, one per starting vector.}
 }
 }
 \description{
@@ -85,14 +98,13 @@ where the optimizer can settle in different local solutions depending on
 starting values. Multistart optimization mitigates this risk by trying several
 starts and selecting the best.
 
-Starting-value generation mirrors lavaan's \code{rstarts} scheme but with one key
-deviation: regression coefficients are randomized (not fixed at 0 as in
-lavaan), because zero-starts may collide with the penalty function in ways
-that hinder convergence toward the global optimum. Perturbation rules by
-parameter type follow the same logic as \link[lavaan:lavOptions]{lavaan::lavOptions}\code{rstarts}: factor
-loadings and intercepts stay at base values, variances are drawn within bounds
-based on observed variance, and regression/covariance parameters receive a
-random correlation perturbation scaled to the covariance scale.
+Random starts perturb only the free parameters participating in \code{pen_par_id}
+or \code{pen_diff_id}; all nuisance parameters retain lavaan's base values. This
+targets the non-convex penalized surface while preserving a valid covariance
+structure from the supplied model start. Eligible loadings and intercepts are
+jittered around their base values, eligible variances are drawn within bounds
+based on observed variance, and eligible regression/covariance parameters
+receive a random correlation-scale perturbation.
 
 Execution is sequential. For parallel execution, call \code{\link[=penalized_est]{penalized_est()}} with
 \code{start = ...} directly and use \code{future.apply}, \code{parallel}, or similar.

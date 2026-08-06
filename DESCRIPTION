@@ -1,6 +1,6 @@
 Package: plavaan
 Title: Penalized Estimation for Latent Variable Models with 'lavaan'
-Version: 0.0.2
+Version: 0.0.2.9000
 Authors@R: 
     person("Hok Chio (Mark)", "Lai", , "marklhc@gmail.com",
            role = c("aut", "cre"),

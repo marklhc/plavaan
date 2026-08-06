@@ -1,3 +1,7 @@
+# plavaan (development version)
+
+* `penalized_est()` gains `eps` control for built-in penalties, including `eps = "telescoping"` over a decreasing epsilon sequence. Telescoping reuses the original starting values by default; set `telescoping_control = list(warm_start = TRUE)` to warm-start later stages from prior estimates.
+
 # plavaan 0.0.2
 
 * Added `penalized_est_multistart()` and support for custom optimizer starting values via `start` in `penalized_est()`.
