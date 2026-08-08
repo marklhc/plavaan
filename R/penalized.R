@@ -214,19 +214,19 @@ penalized_est <- function(
     stop("pen_fn must be 'l0a', 'alf', or a function.")
   }
   if (identical(pen_fn_name, "l0a")) {
-    pen_gr <- gr_l0a
     if (!is.null(pen_gr)) {
       message(
         "pen_gr is ignored when pen_fn is 'l0a'; using the built-in gradient function."
       )
     }
+    pen_gr <- gr_l0a
   } else if (identical(pen_fn_name, "alf")) {
-    pen_gr <- gr_alf
     if (!is.null(pen_gr)) {
       message(
         "pen_gr is ignored when pen_fn is 'alf'; using the built-in gradient function."
       )
     }
+    pen_gr <- gr_alf
   }
 
   fit_stage <- function(stage_eps, stage_start) {

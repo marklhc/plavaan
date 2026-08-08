@@ -52,7 +52,8 @@ int_mat <- rbind(21:24, c(25:26, NA, 27))
 fit_pen <- penalized_est(
   fit_dry, w = .03, pen_diff_id = list(loadings = ld_mat, intercepts = int_mat),
   se = "robust.huber.white",
-  eps = "telescoping"
+  eps = "telescoping",
+  telescoping_control = list(warm_start = TRUE)
 )
 summary(fit_pen)
 ```
