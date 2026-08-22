@@ -201,6 +201,14 @@ penalized_est <- function(
     stop("eps must be a positive numeric scalar or 'telescoping'.")
   }
 
+  if (!se %in% c("none", "robust.huber.white")) {
+    warning(
+      "se must be either 'none' or 'robust.huber.white'. ",
+      "Defaulting to 'none'"
+    )
+    se <- "none"
+  }
+
   pen_fn_name <- if (is.character(pen_fn) && length(pen_fn) == 1) {
     pen_fn
   } else {
@@ -301,17 +309,8 @@ penalized_est <- function(
 }
 
 resolve_penalty_functions <- function(pen_fn, pen_gr = NULL) {
-  if (is.character(pen_fn) && length(pen_fn) == 1) {
-    if (!pen_fn %in% c("l0a", "alf")) {
-      stop("pen_fn must be 'l0a', 'alf', or a function.")
-    }
-    if (is.null(pen_gr)) {
-      pen_gr <- switch(pen_fn, l0a = gr_l0a, alf = gr_alf)
-    }
-    pen_fn <- get(pen_fn, envir = parent.frame())
-  }
   if (!is.function(pen_fn)) {
-    stop("pen_fn must be 'l0a', 'alf', or a function.")
+    stop("pen_fn must be a function.")
   }
   if (!is.null(pen_gr) && !is.function(pen_gr)) {
     stop("pen_gr must be a function or NULL.")
@@ -443,13 +442,6 @@ penalized_est_stage <- function(
     )
   }
   out <- make_penalized_fit(x, opt)
-  if (!se %in% c("none", "robust.huber.white")) {
-    warning(
-      "se must be either 'none' or 'robust.huber.white'. ",
-      "Defaulting to 'none'"
-    )
-    se <- "none"
-  }
   if (se == "robust.huber.white") {
     hess <- numDeriv::hessian(f1, opt$par)
     attr(out, "hessian") <- hess

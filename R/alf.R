@@ -72,43 +72,6 @@ hot_gr <- function(x, hot, fun, ...) {
     out
 }
 
-gr_cpl <- function(
-    x,
-    gr_fun,
-    trans = identity,
-    gr_trans = function(x) 1,
-    rescale = "df",
-    combn_idx = NULL
-) {
-    x_mat <- as.matrix(trans(x))
-    if (is.null(combn_idx)) {
-        combn_idx <- combn(nrow(x_mat), 2)
-    }
-    diffs <- x_mat[combn_idx[1, ], , drop = FALSE] -
-        x_mat[combn_idx[2, ], , drop = FALSE]
-    grad_contribs <- gr_fun(diffs)
-    grad <- matrix(0, nrow = nrow(x_mat), ncol = ncol(x_mat))
-    for (i in seq_len(nrow(x_mat))) {
-        idx1 <- which(combn_idx[1, ] == i)
-        idx2 <- which(combn_idx[2, ] == i)
-        grad[i, ] <- colSums(
-            grad_contribs[idx1, , drop = FALSE],
-            na.rm = TRUE
-        ) -
-            colSums(grad_contribs[idx2, , drop = FALSE], na.rm = TRUE)
-    }
-    grad[which(is.na(x_mat))] <- NA
-    if (rescale == "df") {
-        dof <- nrow(x_mat) - 1
-        ncombn <- ncol(combn_idx)
-        rescale <- dof / ncombn
-    }
-    if (!is.numeric(rescale)) {
-        stop("rescale must be 'df' or a numeric value.")
-    }
-    as.vector(grad) * rescale * gr_trans(as.vector(x))
-}
-
 #' Loss functions
 #'
 #' For small eps this provides a smooth,
