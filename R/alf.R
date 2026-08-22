@@ -122,7 +122,6 @@ gr_cpl <- function(
 #' @return Numeric vector of the same length as x.
 #' @name loss
 NULL
-#> NULL
 
 #' @rdname loss
 #'

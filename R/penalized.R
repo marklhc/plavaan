@@ -39,7 +39,7 @@ penalized_obj <- function(x, obj_fn, w, pen_fn, pen_par_id, diff_configs) {
 #'   terms.
 #' @param pen_par_id Integer vector of parameter IDs to apply the penalty function
 #'   directly to, in the same order as returned by `lavaan::coef()` and by
-#'   [lavaan::partable()], with only the free elements.
+#'   [lavaan::parTable()], with only the free elements.
 #' @param pen_diff_id List of matrices containing parameter IDs. For each matrix,
 #'   the penalty is applied to the pairwise differences of parameters in the same
 #'   column indicated by the IDs.
@@ -355,7 +355,7 @@ make_penalized_fit <- function(x, opt) {
   x_opt$do.fit <- FALSE
   x_opt$se <- "none"
   out <- lavaan::lavaan(
-    lavaan::partable(x),
+    lavaan::parTable(x),
     slotOptions = x_opt,
     slotSampleStats = x@SampleStats,
     slotData = x@Data
