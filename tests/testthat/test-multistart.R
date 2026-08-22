@@ -521,49 +521,47 @@ test_that("all starts failing raises warning and returns fit", {
 })
 
 # ---------------------------------------------------------------------------
-# Correctness tests: custom pen_gr should be respected
+# Correctness tests: built-in pen_fn ignores a custom pen_gr
 # ---------------------------------------------------------------------------
 
-test_that("custom pen_gr is used when pen_fn is 'l0a'", {
+test_that("built-in pen_fn ignores custom pen_gr with a message", {
   set.seed(42)
-  fit_un <- cfa(
+  fit_un2 <- cfa(
     small_model,
     data = PoliticalDemocracy,
     std.lv = TRUE,
     do.fit = FALSE
   )
 
-  pt <- parTable(fit_un)
+  pt <- parTable(fit_un2)
   load_60 <- pt$free[pt$op == "=~" & pt$lhs == "dem60"]
   load_65 <- pt$free[pt$op == "=~" & pt$lhs == "dem65"]
 
-  # Define a custom gradient function that differs from the default
-  custom_gr <- function(v) 2 * v / (v^2 + 0.01)^2 # Different from gr_l0a
+  # A custom gradient function that differs from the built-in gr_l0a
+  custom_gr <- function(v) 2 * v / (v^2 + 0.01)^2
 
-  # Fit with custom gradient
-  fit_custom <- penalized_est(
-    x = fit_un,
-    w = 0.03,
-    pen_diff_id = list(loadings = rbind(load_60, load_65)),
-    pen_fn = "l0a",
-    pen_gr = custom_gr
+  # Documented behavior: when pen_fn is the built-in "l0a", a user-supplied
+  # pen_gr is ignored (with a message) and the built-in gradient is used
+  expect_message(
+    fit_custom <- penalized_est(
+      x = fit_un2,
+      w = 0.03,
+      pen_diff_id = list(loadings = rbind(load_60, load_65)),
+      pen_fn = "l0a",
+      pen_gr = custom_gr
+    ),
+    "pen_gr is ignored"
   )
 
-  # Fit with default gradient
   fit_default <- penalized_est(
-    x = fit_un,
+    x = fit_un2,
     w = 0.03,
     pen_diff_id = list(loadings = rbind(load_60, load_65)),
-    pen_fn = "l0a",
-    pen_gr = NULL
+    pen_fn = "l0a"
   )
 
-  # The two should produce *different* results (custom vs default gradient)
-  # We verify by checking that the objective values differ (convergence depends on gradients)
-  expect_false(
-    all.equal(fit_custom@optim$fx, fit_default@optim$fx, tolerance = 1e-6) ==
-      TRUE
-  )
+  # Since the custom pen_gr was ignored, both fits must agree exactly
+  expect_equal(fit_custom@optim$fx, fit_default@optim$fx, tolerance = 1e-8)
 })
 
 # ---------------------------------------------------------------------------
