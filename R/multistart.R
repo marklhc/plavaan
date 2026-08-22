@@ -217,7 +217,8 @@ penalized_est_multistart <- function(
   n_starts = 10,
   starts = NULL,
   keep_all = FALSE,
-  verbose = FALSE
+  verbose = FALSE,
+  ...
 ) {
   # Generate or validate starting values
   if (is.null(starts)) {
@@ -264,7 +265,8 @@ penalized_est_multistart <- function(
         opt_control = opt_control,
         eps = eps,
         telescoping_control = telescoping_control,
-        start = all_starts[i, ]
+        start = all_starts[i, ],
+        ...
       ),
       error = function(e) NULL
     )

@@ -1,9 +1,9 @@
 # Penalized objective function
-penalized_obj <- function(x, obj_fn, w, pen_fn, pen_par_id, diff_configs) {
+penalized_obj <- function(x, obj_fn, w, pen_fn, pen_par_id, diff_configs, ...) {
   out <- obj_fn(x)
 
   if (!is.null(pen_par_id)) {
-    out <- out + w * sum(pen_fn(x[pen_par_id]))
+    out <- out + w * sum(pen_fn(x[pen_par_id], ...))
   }
 
   if (!is.null(diff_configs)) {
@@ -18,7 +18,7 @@ penalized_obj <- function(x, obj_fn, w, pen_fn, pen_par_id, diff_configs) {
       diffs <- x_trans[cfg$combn_idx[1, ], , drop = FALSE] -
         x_trans[cfg$combn_idx[2, ], , drop = FALSE]
 
-      sum(pen_fn(diffs), na.rm = TRUE) * cfg$rescale_val
+      sum(pen_fn(diffs, ...), na.rm = TRUE) * cfg$rescale_val
     })
     out <- out + w * sum(unlist(pen_diff))
   }
@@ -64,6 +64,9 @@ penalized_obj <- function(x, obj_fn, w, pen_fn, pen_par_id, diff_configs) {
 #'   `20`), and `warm_start` (default `FALSE`). When `warm_start` is `FALSE`,
 #'   every epsilon stage uses the original starting values; when `TRUE`, each
 #'   stage after the first uses the preceding stage's estimates.
+#' @param ... Additional arguments passed to a user-supplied `pen_fn` /
+#'   `pen_gr`. Custom penalty functions must accept `...`. Built-in penalties
+#'   (`"l0a"`, `"alf"`) ignore it.
 #'
 #' @section Warning:
 #' The returned object is not fitted using standard ML. Standard errors reported
@@ -159,7 +162,8 @@ penalized_est <- function(
     eps_end = 1e-5,
     eps_steps = 20,
     warm_start = FALSE
-  )
+  ),
+  ...
 ) {
   if (is.numeric(eps) && length(eps) == 1 && is.finite(eps) && eps > 0) {
     eps_seq <- eps
@@ -241,11 +245,11 @@ penalized_est <- function(
     pen_fn_stage <- pen_fn
     pen_gr_stage <- pen_gr
     if (identical(pen_fn_name, "l0a")) {
-      pen_fn_stage <- function(z) l0a(z, eps = stage_eps)
-      pen_gr_stage <- function(z) gr_l0a(z, eps = stage_eps)
+      pen_fn_stage <- function(z, ...) l0a(z, eps = stage_eps)
+      pen_gr_stage <- function(z, ...) gr_l0a(z, eps = stage_eps)
     } else if (identical(pen_fn_name, "alf")) {
-      pen_fn_stage <- function(z) alf(z, eps = stage_eps)
-      pen_gr_stage <- function(z) gr_alf(z, eps = stage_eps)
+      pen_fn_stage <- function(z, ...) alf(z, eps = stage_eps)
+      pen_gr_stage <- function(z, ...) gr_alf(z, eps = stage_eps)
     }
     penalized_est_stage(
       x = x,
@@ -256,7 +260,8 @@ penalized_est <- function(
       pen_gr = pen_gr_stage,
       se = se,
       opt_control = opt_control,
-      start = stage_start
+      start = stage_start,
+      ...
     )
   }
 
@@ -371,7 +376,8 @@ penalized_est_stage <- function(
   pen_gr,
   se,
   opt_control,
-  start
+  start,
+  ...
 ) {
   # Define default control parameters
   control_defaults <- list(
@@ -412,7 +418,8 @@ penalized_est_stage <- function(
       w = w,
       pen_fn = pen_fn,
       pen_par_id = pen_par_id,
-      diff_configs = diff_configs
+      diff_configs = diff_configs,
+      ...
     )
   }
   gr1 <- if (!is.null(pen_gr)) {
@@ -423,7 +430,8 @@ penalized_est_stage <- function(
         w = w,
         pen_gr = pen_gr,
         pen_par_id = pen_par_id,
-        diff_configs = diff_configs
+        diff_configs = diff_configs,
+        ...
       )
     }
   } else {
@@ -506,7 +514,7 @@ penalized_gr <- function(x, gr_fn, w, pen_gr, pen_par_id, diff_configs, ...) {
       diffs <- x_mat[cfg$combn_idx[1, ], , drop = FALSE] -
         x_mat[cfg$combn_idx[2, ], , drop = FALSE]
 
-      grad_contribs <- pen_gr(diffs)
+      grad_contribs <- pen_gr(diffs, ...)
       grad <- matrix(0, nrow = nrow(x_mat), ncol = ncol(x_mat))
 
       # Loop is now incredibly fast because indices are pre-calculated
