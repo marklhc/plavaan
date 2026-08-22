@@ -500,7 +500,6 @@ fit_pen_mg <- penalized_est(
         thresholds = rbind(thresh_g1, thresh_g2)
     )
 )
-#> pen_gr is ignored when pen_fn is 'l0a'; using the built-in gradient function.
 summary(fit_pen_mg)
 #> lavaan 0.7-2 ended normally after 207 iterations
 #> 

@@ -181,7 +181,6 @@ pen_fit <- penalized_est(
     ),
     pen_fn = "l0a"
 )
-#> pen_gr is ignored when pen_fn is 'l0a'; using the built-in gradient function.
 
 # Compare parameter estimates
 summary(pen_fit)

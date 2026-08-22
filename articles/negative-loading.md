@@ -114,7 +114,6 @@ fit_pen <- penalized_est(
   fit_dry, w = .03, pen_diff_id = list(loadings = ld_mat, intercepts = int_mat),
   se = "robust.huber.white"
 )
-#> pen_gr is ignored when pen_fn is 'l0a'; using the built-in gradient function.
 summary(fit_pen)
 #> lavaan 0.7-2 ended normally after 113 iterations
 #> 

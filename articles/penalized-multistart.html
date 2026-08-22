@@ -126,7 +126,6 @@ loadings and intercepts across time:</p>
 <span>    <span class="op">)</span>,</span>
 <span>    pen_fn <span class="op">=</span> <span class="st">"l0a"</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; pen_gr is ignored when pen_fn is 'l0a'; using the built-in gradient function.</span></span>
 <span></span>
 <span><span class="va">fit_single</span><span class="op">@</span><span class="va">optim</span><span class="op">$</span><span class="va">fx</span></span>
 <span><span class="co">#&gt; [1] 0.2100911</span></span></code></pre></div>
@@ -154,34 +153,24 @@ never do worse than the single-start baseline:</p>
 <span>    eps <span class="op">=</span> <span class="fl">.0001</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; Start 1 / 10...</span></span>
-<span><span class="co">#&gt; pen_gr is ignored when pen_fn is 'l0a'; using the built-in gradient function.</span></span>
 <span><span class="co">#&gt;   Start 1: converged, objective = 0.279207</span></span>
 <span><span class="co">#&gt; Start 2 / 10...</span></span>
-<span><span class="co">#&gt; pen_gr is ignored when pen_fn is 'l0a'; using the built-in gradient function.</span></span>
 <span><span class="co">#&gt;   Start 2: converged, objective = 0.279207</span></span>
 <span><span class="co">#&gt; Start 3 / 10...</span></span>
-<span><span class="co">#&gt; pen_gr is ignored when pen_fn is 'l0a'; using the built-in gradient function.</span></span>
 <span><span class="co">#&gt;   Start 3: converged, objective = 0.279207</span></span>
 <span><span class="co">#&gt; Start 4 / 10...</span></span>
-<span><span class="co">#&gt; pen_gr is ignored when pen_fn is 'l0a'; using the built-in gradient function.</span></span>
 <span><span class="co">#&gt;   Start 4: converged, objective = 0.279207</span></span>
 <span><span class="co">#&gt; Start 5 / 10...</span></span>
-<span><span class="co">#&gt; pen_gr is ignored when pen_fn is 'l0a'; using the built-in gradient function.</span></span>
 <span><span class="co">#&gt;   Start 5: converged, objective = 0.279207</span></span>
 <span><span class="co">#&gt; Start 6 / 10...</span></span>
-<span><span class="co">#&gt; pen_gr is ignored when pen_fn is 'l0a'; using the built-in gradient function.</span></span>
 <span><span class="co">#&gt;   Start 6: converged, objective = 0.279207</span></span>
 <span><span class="co">#&gt; Start 7 / 10...</span></span>
-<span><span class="co">#&gt; pen_gr is ignored when pen_fn is 'l0a'; using the built-in gradient function.</span></span>
 <span><span class="co">#&gt;   Start 7: converged, objective = 0.279207</span></span>
 <span><span class="co">#&gt; Start 8 / 10...</span></span>
-<span><span class="co">#&gt; pen_gr is ignored when pen_fn is 'l0a'; using the built-in gradient function.</span></span>
 <span><span class="co">#&gt;   Start 8: converged, objective = 0.279207</span></span>
 <span><span class="co">#&gt; Start 9 / 10...</span></span>
-<span><span class="co">#&gt; pen_gr is ignored when pen_fn is 'l0a'; using the built-in gradient function.</span></span>
 <span><span class="co">#&gt;   Start 9: converged, objective = 0.279207</span></span>
 <span><span class="co">#&gt; Start 10 / 10...</span></span>
-<span><span class="co">#&gt; pen_gr is ignored when pen_fn is 'l0a'; using the built-in gradient function.</span></span>
 <span><span class="co">#&gt;   Start 10: converged, objective = 0.279207</span></span>
 <span></span>
 <span><span class="co"># Inspect the spread of objective values across starts</span></span>
@@ -221,11 +210,6 @@ to inspect all solutions:</p>
 <span>    n_starts <span class="op">=</span> <span class="fl">5</span>,</span>
 <span>    keep_all <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; pen_gr is ignored when pen_fn is 'l0a'; using the built-in gradient function.</span></span>
-<span><span class="co">#&gt; pen_gr is ignored when pen_fn is 'l0a'; using the built-in gradient function.</span></span>
-<span><span class="co">#&gt; pen_gr is ignored when pen_fn is 'l0a'; using the built-in gradient function.</span></span>
-<span><span class="co">#&gt; pen_gr is ignored when pen_fn is 'l0a'; using the built-in gradient function.</span></span>
-<span><span class="co">#&gt; pen_gr is ignored when pen_fn is 'l0a'; using the built-in gradient function.</span></span>
 <span></span>
 <span><span class="co"># Extract loadings from the top-3 solutions for comparison</span></span>
 <span><span class="va">all_fits</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">fit_all</span>, <span class="st">"all_fits"</span><span class="op">)</span></span>
@@ -271,8 +255,6 @@ via <code>starts</code>:</p>
 <span>    starts <span class="op">=</span> <span class="va">my_starts</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; Custom starting values provided (2 starts). Ignoring n_starts.</span></span>
-<span><span class="co">#&gt; pen_gr is ignored when pen_fn is 'l0a'; using the built-in gradient function.</span></span>
-<span><span class="co">#&gt; pen_gr is ignored when pen_fn is 'l0a'; using the built-in gradient function.</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">fit_custom</span>, <span class="st">"multistart"</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   start_id objective converged</span></span>
@@ -290,12 +272,7 @@ your own seed before calling for reproducibility:</p>
 <span>    x <span class="op">=</span> <span class="va">fit_un</span>, w <span class="op">=</span> <span class="fl">0.03</span>,</span>
 <span>    pen_diff_id <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>loadings <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="va">load_60</span>, <span class="va">load_65</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>    n_starts <span class="op">=</span> <span class="fl">5</span></span>
-<span><span class="op">)</span></span>
-<span><span class="co">#&gt; pen_gr is ignored when pen_fn is 'l0a'; using the built-in gradient function.</span></span>
-<span><span class="co">#&gt; pen_gr is ignored when pen_fn is 'l0a'; using the built-in gradient function.</span></span>
-<span><span class="co">#&gt; pen_gr is ignored when pen_fn is 'l0a'; using the built-in gradient function.</span></span>
-<span><span class="co">#&gt; pen_gr is ignored when pen_fn is 'l0a'; using the built-in gradient function.</span></span>
-<span><span class="co">#&gt; pen_gr is ignored when pen_fn is 'l0a'; using the built-in gradient function.</span></span></code></pre></div>
+<span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="parallel-execution">Parallel execution<a class="anchor" aria-label="anchor" href="#parallel-execution"></a>

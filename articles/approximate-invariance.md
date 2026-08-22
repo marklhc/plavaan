@@ -73,11 +73,11 @@ int_mat <- rbind(21:24, c(25:26, NA, 27))
 fit_pen <- penalized_est(
   fit_dry, w = .03, pen_diff_id = list(loadings = ld_mat, intercepts = int_mat),
   se = "robust.huber.white",
-  eps = "telescoping"
+  eps = "telescoping",
+  telescoping_control = list(warm_start = TRUE)
 )
-#> pen_gr is ignored when pen_fn is 'l0a'; using the built-in gradient function.
 summary(fit_pen)
-#> lavaan 0.7-2 ended normally after 176 iterations
+#> lavaan 0.7-2 ended normally after 32 iterations
 #> 
 #>   Estimator                                         ML
 #>   Optimization method                           NLMINB
@@ -111,7 +111,7 @@ summary(fit_pen)
 #>  .y1 ~~                                               
 #>    .y5                0.939    0.454    2.070    0.038
 #>  .y2 ~~                                               
-#>    .y6                1.747    0.900    1.943    0.052
+#>    .y6                1.747    0.899    1.942    0.052
 #>  .y4 ~~                                               
 #>    .y8                0.246    0.505    0.486    0.627
 #> 
@@ -136,7 +136,7 @@ summary(fit_pen)
 #>    .y3                5.514    1.086    5.078    0.000
 #>    .y4                2.454    0.628    3.910    0.000
 #>    .y5                3.001    0.614    4.886    0.000
-#>    .y6                3.748    0.804    4.663    0.000
+#>    .y6                3.748    0.804    4.664    0.000
 #>    .y8                2.432    0.704    3.452    0.001
 ```
 

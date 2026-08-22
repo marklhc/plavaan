@@ -59,7 +59,6 @@ fit_single <- penalized_est(
     ),
     pen_fn = "l0a"
 )
-#> pen_gr is ignored when pen_fn is 'l0a'; using the built-in gradient function.
 
 fit_single@optim$fx
 #> [1] 0.2100911
@@ -91,34 +90,24 @@ fit_multi <- penalized_est_multistart(
     eps = .0001
 )
 #> Start 1 / 10...
-#> pen_gr is ignored when pen_fn is 'l0a'; using the built-in gradient function.
 #>   Start 1: converged, objective = 0.279207
 #> Start 2 / 10...
-#> pen_gr is ignored when pen_fn is 'l0a'; using the built-in gradient function.
 #>   Start 2: converged, objective = 0.279207
 #> Start 3 / 10...
-#> pen_gr is ignored when pen_fn is 'l0a'; using the built-in gradient function.
 #>   Start 3: converged, objective = 0.279207
 #> Start 4 / 10...
-#> pen_gr is ignored when pen_fn is 'l0a'; using the built-in gradient function.
 #>   Start 4: converged, objective = 0.279207
 #> Start 5 / 10...
-#> pen_gr is ignored when pen_fn is 'l0a'; using the built-in gradient function.
 #>   Start 5: converged, objective = 0.279207
 #> Start 6 / 10...
-#> pen_gr is ignored when pen_fn is 'l0a'; using the built-in gradient function.
 #>   Start 6: converged, objective = 0.279207
 #> Start 7 / 10...
-#> pen_gr is ignored when pen_fn is 'l0a'; using the built-in gradient function.
 #>   Start 7: converged, objective = 0.279207
 #> Start 8 / 10...
-#> pen_gr is ignored when pen_fn is 'l0a'; using the built-in gradient function.
 #>   Start 8: converged, objective = 0.279207
 #> Start 9 / 10...
-#> pen_gr is ignored when pen_fn is 'l0a'; using the built-in gradient function.
 #>   Start 9: converged, objective = 0.279207
 #> Start 10 / 10...
-#> pen_gr is ignored when pen_fn is 'l0a'; using the built-in gradient function.
 #>   Start 10: converged, objective = 0.279207
 
 # Inspect the spread of objective values across starts
@@ -160,11 +149,6 @@ fit_all <- penalized_est_multistart(
     n_starts = 5,
     keep_all = TRUE
 )
-#> pen_gr is ignored when pen_fn is 'l0a'; using the built-in gradient function.
-#> pen_gr is ignored when pen_fn is 'l0a'; using the built-in gradient function.
-#> pen_gr is ignored when pen_fn is 'l0a'; using the built-in gradient function.
-#> pen_gr is ignored when pen_fn is 'l0a'; using the built-in gradient function.
-#> pen_gr is ignored when pen_fn is 'l0a'; using the built-in gradient function.
 
 # Extract loadings from the top-3 solutions for comparison
 all_fits <- attr(fit_all, "all_fits")
@@ -212,8 +196,6 @@ fit_custom <- penalized_est_multistart(
     starts = my_starts
 )
 #> Custom starting values provided (2 starts). Ignoring n_starts.
-#> pen_gr is ignored when pen_fn is 'l0a'; using the built-in gradient function.
-#> pen_gr is ignored when pen_fn is 'l0a'; using the built-in gradient function.
 
 attr(fit_custom, "multistart")
 #>   start_id objective converged
@@ -235,11 +217,6 @@ fit_repro <- penalized_est_multistart(
     pen_diff_id = list(loadings = rbind(load_60, load_65)),
     n_starts = 5
 )
-#> pen_gr is ignored when pen_fn is 'l0a'; using the built-in gradient function.
-#> pen_gr is ignored when pen_fn is 'l0a'; using the built-in gradient function.
-#> pen_gr is ignored when pen_fn is 'l0a'; using the built-in gradient function.
-#> pen_gr is ignored when pen_fn is 'l0a'; using the built-in gradient function.
-#> pen_gr is ignored when pen_fn is 'l0a'; using the built-in gradient function.
 ```
 
 ## Parallel execution
