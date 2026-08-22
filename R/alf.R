@@ -9,9 +9,9 @@
 #'   (`l0a`), but users can provide custom functions as well.
 #' @param trans A transformation function to apply to `x` before computing
 #'   pairwise differences. Default is `identity` (no transformation).
-#' @param rescale Either `"df"` (default) to rescale the total loss by the degrees
-#'   of freedom (number of rows - 1), or a numeric value (likely between 0 and 1)
-#'   to multiply the total loss by.
+#' @param rescale Either `"df"` (default) to rescale the total loss by
+#'   `(nrow - 1) / ncombn(nrow, 2)`, where `nrow` is the number of rows, or a
+#'   numeric value (likely between 0 and 1) to multiply the total loss by.
 #' @param ... Additional arguments passed to the loss function `fun`.
 #'
 #' @return A numeric scalar representing the sum of losses across all pairwise

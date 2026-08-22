@@ -16,7 +16,8 @@ penalized_est(
   start = NULL,
   eps = 0.01,
   telescoping_control = list(eps_1 = 1, eps_end = 1e-05, eps_steps = 20, warm_start =
-    FALSE)
+    FALSE),
+  ...
 )
 }
 \arguments{
@@ -28,11 +29,14 @@ terms.}
 
 \item{pen_par_id}{Integer vector of parameter IDs to apply the penalty function
 directly to, in the same order as returned by \code{lavaan::coef()} and by
-\code{\link[lavaan:partable]{lavaan::partable()}}, with only the free elements.}
+\code{\link[lavaan:parTable]{lavaan::parTable()}}, with only the free elements.}
 
-\item{pen_diff_id}{List of matrices containing parameter IDs. For each matrix,
-the penalty is applied to the pairwise differences of parameters in the same
-column indicated by the IDs.}
+\item{pen_diff_id}{A named list of integer matrices of free-parameter IDs
+(same order as \code{lavaan::coef()} / the \code{free} column of \code{\link[lavaan:parTable]{lavaan::parTable()}}).
+Each matrix has one row per group or time point and one column per matched
+parameter; the penalty is the sum of pairwise row differences within each
+column, rescaled by \code{(nrow - 1) / ncombn(nrow, 2)}. Structural \code{NA} entries
+mark a parameter absent in that row and are excluded from the differences.}
 
 \item{pen_fn}{A character string (\code{"l0a"} or \code{"alf"}) or a function that computes
 the penalty. Default is \code{"l0a"}.}
@@ -61,6 +65,10 @@ must match the number of free parameters in the model.}
 \code{20}), and \code{warm_start} (default \code{FALSE}). When \code{warm_start} is \code{FALSE},
 every epsilon stage uses the original starting values; when \code{TRUE}, each
 stage after the first uses the preceding stage's estimates.}
+
+\item{...}{Additional arguments passed to a user-supplied \code{pen_fn} /
+\code{pen_gr}. Custom penalty functions must accept \code{...}. Built-in penalties
+(\code{"l0a"}, \code{"alf"}) ignore it.}
 }
 \value{
 A lavaan model object updated with the penalized parameter estimates.

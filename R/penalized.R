@@ -40,9 +40,12 @@ penalized_obj <- function(x, obj_fn, w, pen_fn, pen_par_id, diff_configs, ...) {
 #' @param pen_par_id Integer vector of parameter IDs to apply the penalty function
 #'   directly to, in the same order as returned by `lavaan::coef()` and by
 #'   [lavaan::parTable()], with only the free elements.
-#' @param pen_diff_id List of matrices containing parameter IDs. For each matrix,
-#'   the penalty is applied to the pairwise differences of parameters in the same
-#'   column indicated by the IDs.
+#' @param pen_diff_id A named list of integer matrices of free-parameter IDs
+#'   (same order as `lavaan::coef()` / the `free` column of [lavaan::parTable()]).
+#'   Each matrix has one row per group or time point and one column per matched
+#'   parameter; the penalty is the sum of pairwise row differences within each
+#'   column, rescaled by `(nrow - 1) / ncombn(nrow, 2)`. Structural `NA` entries
+#'   mark a parameter absent in that row and are excluded from the differences.
 #' @param pen_fn A character string (`"l0a"` or `"alf"`) or a function that computes
 #'   the penalty. Default is `"l0a"`.
 #' @param pen_gr A function that computes the gradient of the penalty function.

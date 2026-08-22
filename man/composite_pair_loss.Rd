@@ -17,9 +17,9 @@ The package supports the alignment loss (\code{alf}) and the approximate L0 pena
 \item{trans}{A transformation function to apply to \code{x} before computing
 pairwise differences. Default is \code{identity} (no transformation).}
 
-\item{rescale}{Either \code{"df"} (default) to rescale the total loss by the degrees
-of freedom (number of rows - 1), or a numeric value (likely between 0 and 1)
-to multiply the total loss by.}
+\item{rescale}{Either \code{"df"} (default) to rescale the total loss by
+\code{(nrow - 1) / ncombn(nrow, 2)}, where \code{nrow} is the number of rows, or a
+numeric value (likely between 0 and 1) to multiply the total loss by.}
 
 \item{...}{Additional arguments passed to the loss function \code{fun}.}
 }
