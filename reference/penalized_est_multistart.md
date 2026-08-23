@@ -24,7 +24,8 @@ penalized_est_multistart(
   n_starts = 10,
   starts = NULL,
   keep_all = FALSE,
-  verbose = FALSE
+  verbose = FALSE,
+  ...
 )
 ```
 
@@ -44,14 +45,19 @@ penalized_est_multistart(
 
   Integer vector of parameter IDs to apply the penalty function directly
   to, in the same order as returned by `lavaan::coef()` and by
-  [`lavaan::partable()`](https://rdrr.io/pkg/lavaan/man/parTable.html),
+  [`lavaan::parTable()`](https://rdrr.io/pkg/lavaan/man/parTable.html),
   with only the free elements.
 
 - pen_diff_id:
 
-  List of matrices containing parameter IDs. For each matrix, the
-  penalty is applied to the pairwise differences of parameters in the
-  same column indicated by the IDs.
+  A named list of integer matrices of free-parameter IDs (same order as
+  `lavaan::coef()` / the `free` column of
+  [`lavaan::parTable()`](https://rdrr.io/pkg/lavaan/man/parTable.html)).
+  Each matrix has one row per group or time point and one column per
+  matched parameter; the penalty is the sum of pairwise row differences
+  within each column, rescaled by `(nrow - 1) / ncombn(nrow, 2)`.
+  Structural `NA` entries mark a parameter absent in that row and are
+  excluded from the differences.
 
 - pen_fn:
 
@@ -114,6 +120,12 @@ penalized_est_multistart(
 
   Logical. If `TRUE`, print progress messages during optimization.
   Default is `FALSE`.
+
+- ...:
+
+  Additional arguments passed to a user-supplied `pen_fn` / `pen_gr`.
+  Custom penalty functions must accept `...`. Built-in penalties
+  (`"l0a"`, `"alf"`) ignore it.
 
 ## Value
 

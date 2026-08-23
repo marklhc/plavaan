@@ -29,9 +29,10 @@ composite_pair_loss(x, fun, trans = identity, rescale = "df", ...)
 
 - rescale:
 
-  Either `"df"` (default) to rescale the total loss by the degrees of
-  freedom (number of rows - 1), or a numeric value (likely between 0
-  and 1) to multiply the total loss by.
+  Either `"df"` (default) to rescale the total loss by
+  `(nrow - 1) / ncombn(nrow, 2)`, where `nrow` is the number of rows, or
+  a numeric value (likely between 0 and 1) to multiply the total loss
+  by.
 
 - ...:
 

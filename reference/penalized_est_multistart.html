@@ -69,7 +69,8 @@ when using non-convex penalties (<code>l0a</code>, <code>alf</code>), which can 
 <span>  n_starts <span class="op">=</span> <span class="fl">10</span>,</span>
 <span>  starts <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  keep_all <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  verbose <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  verbose <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -90,13 +91,16 @@ terms.</p></dd>
 <dt id="arg-pen-par-id">pen_par_id<a class="anchor" aria-label="anchor" href="#arg-pen-par-id"></a></dt>
 <dd><p>Integer vector of parameter IDs to apply the penalty function
 directly to, in the same order as returned by <code>lavaan::coef()</code> and by
-<code><a href="https://rdrr.io/pkg/lavaan/man/parTable.html" class="external-link">lavaan::partable()</a></code>, with only the free elements.</p></dd>
+<code><a href="https://rdrr.io/pkg/lavaan/man/parTable.html" class="external-link">lavaan::parTable()</a></code>, with only the free elements.</p></dd>
 
 
 <dt id="arg-pen-diff-id">pen_diff_id<a class="anchor" aria-label="anchor" href="#arg-pen-diff-id"></a></dt>
-<dd><p>List of matrices containing parameter IDs. For each matrix,
-the penalty is applied to the pairwise differences of parameters in the same
-column indicated by the IDs.</p></dd>
+<dd><p>A named list of integer matrices of free-parameter IDs
+(same order as <code>lavaan::coef()</code> / the <code>free</code> column of <code><a href="https://rdrr.io/pkg/lavaan/man/parTable.html" class="external-link">lavaan::parTable()</a></code>).
+Each matrix has one row per group or time point and one column per matched
+parameter; the penalty is the sum of pairwise row differences within each
+column, rescaled by <code>(nrow - 1) / ncombn(nrow, 2)</code>. Structural <code>NA</code> entries
+mark a parameter absent in that row and are excluded from the differences.</p></dd>
 
 
 <dt id="arg-pen-fn">pen_fn<a class="anchor" aria-label="anchor" href="#arg-pen-fn"></a></dt>
@@ -155,6 +159,12 @@ attribute for inspection of alternative local solutions. Default is <code>FALSE<
 <dt id="arg-verbose">verbose<a class="anchor" aria-label="anchor" href="#arg-verbose"></a></dt>
 <dd><p>Logical. If <code>TRUE</code>, print progress messages during optimization.
 Default is <code>FALSE</code>.</p></dd>
+
+
+<dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
+<dd><p>Additional arguments passed to a user-supplied <code>pen_fn</code> /
+<code>pen_gr</code>. Custom penalty functions must accept <code>...</code>. Built-in penalties
+(<code>"l0a"</code>, <code>"alf"</code>) ignore it.</p></dd>
 
 </dl></div>
     <div class="section level2">

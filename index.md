@@ -8,11 +8,20 @@ described in Robitzsch (2023) and similar to the approach described in
 
 ## Installation
 
-You can install the development version of plavaan like so:
+You can install the released version of plavaan from
+[CRAN](https://CRAN.R-project.org):
 
 ``` r
 
 install.packages("plavaan")
+```
+
+You can install the development version from GitHub:
+
+``` r
+
+# install.packages("devtools")
+devtools::install_github("marklhc/plavaan")
 ```
 
 ## Example
