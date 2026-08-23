@@ -7,10 +7,10 @@ plavaan is a CRAN R package that adds penalized estimation to `lavaan` (Robitzsc
 - Run all tests: `devtools::test()` (testthat edition 3). Full suite takes ~3s.
 - Run one suite: `devtools::test(filter = "multistart")`.
 - Do NOT verify test-multistart.R with `testthat::test_file()` directly: it has a top-level `skip_on_cran()`, and `test_file()` does not set `NOT_CRAN`, so the whole suite silently skips (shows `SKIP 1`). Use `devtools::test()` or `Sys.setenv(NOT_CRAN = "true")`.
-- Regenerate docs: `devtools::document()` (roxygen2 8.x) — updates `man/` and `NAMESPACE`. Never hand-edit those.
+- Regenerate docs: `devtools::document()` (roxygen2 8.1.0 pinned in DESCRIPTION) — updates `man/` and `NAMESPACE`. Never hand-edit those.
 - `README.md` is generated from `README.Rmd` — edit the `.Rmd`.
 - Before a CRAN submission: update `NEWS.md`, run `R CMD check`, update `cran-comments.md`.
-- Dependencies: `lavaan (>= 0.6-15)`, `numDeriv` (Imports); `testthat (>= 3)` (Suggests). Tests use the built-in `lavaan::PoliticalDemocracy` data; no external fixtures or services.
+- Dependencies: `lavaan (>= 0.6-15)`, `numDeriv` (Imports); `testthat (>= 3.1.7)` (Suggests — tests use `with_mocked_bindings`/`capture_warnings`). Tests use the built-in `lavaan::PoliticalDemocracy` data; no external fixtures or services.
 
 ## Architecture
 
