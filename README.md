@@ -5,6 +5,7 @@
 
 <!-- badges: start -->
 
+[![R-CMD-check](https://github.com/marklhc/plavaan/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/marklhc/plavaan/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
 The goal of plavaan is to perform penalized estimation for latent

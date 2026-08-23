@@ -16,6 +16,7 @@ knitr::opts_chunk$set(
 # plavaan
 
 <!-- badges: start -->
+[![R-CMD-check](https://github.com/marklhc/plavaan/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/marklhc/plavaan/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
 The goal of plavaan is to perform penalized estimation for latent variable models using lavaan with a differentiable penalty function, as described in Robitzsch (2023) and similar to the approach described in [Asparouhov & Muthén (2024)](https://www.statmodel.com/download/PML.pdf).
