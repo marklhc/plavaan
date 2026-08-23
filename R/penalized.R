@@ -1,9 +1,9 @@
 # Penalized objective function
-penalized_obj <- function(x, obj_fn, w, pen_fn, pen_par_id, diff_configs) {
+penalized_obj <- function(x, obj_fn, w, pen_fn, pen_par_id, diff_configs, ...) {
   out <- obj_fn(x)
 
   if (!is.null(pen_par_id)) {
-    out <- out + w * sum(pen_fn(x[pen_par_id]))
+    out <- out + w * sum(pen_fn(x[pen_par_id], ...))
   }
 
   if (!is.null(diff_configs)) {
@@ -18,7 +18,7 @@ penalized_obj <- function(x, obj_fn, w, pen_fn, pen_par_id, diff_configs) {
       diffs <- x_trans[cfg$combn_idx[1, ], , drop = FALSE] -
         x_trans[cfg$combn_idx[2, ], , drop = FALSE]
 
-      sum(pen_fn(diffs), na.rm = TRUE) * cfg$rescale_val
+      sum(pen_fn(diffs, ...), na.rm = TRUE) * cfg$rescale_val
     })
     out <- out + w * sum(unlist(pen_diff))
   }
@@ -39,10 +39,13 @@ penalized_obj <- function(x, obj_fn, w, pen_fn, pen_par_id, diff_configs) {
 #'   terms.
 #' @param pen_par_id Integer vector of parameter IDs to apply the penalty function
 #'   directly to, in the same order as returned by `lavaan::coef()` and by
-#'   [lavaan::partable()], with only the free elements.
-#' @param pen_diff_id List of matrices containing parameter IDs. For each matrix,
-#'   the penalty is applied to the pairwise differences of parameters in the same
-#'   column indicated by the IDs.
+#'   [lavaan::parTable()], with only the free elements.
+#' @param pen_diff_id A named list of integer matrices of free-parameter IDs
+#'   (same order as `lavaan::coef()` / the `free` column of [lavaan::parTable()]).
+#'   Each matrix has one row per group or time point and one column per matched
+#'   parameter; the penalty is the sum of pairwise row differences within each
+#'   column, rescaled by `(nrow - 1) / ncombn(nrow, 2)`. Structural `NA` entries
+#'   mark a parameter absent in that row and are excluded from the differences.
 #' @param pen_fn A character string (`"l0a"` or `"alf"`) or a function that computes
 #'   the penalty. Default is `"l0a"`.
 #' @param pen_gr A function that computes the gradient of the penalty function.
@@ -64,6 +67,9 @@ penalized_obj <- function(x, obj_fn, w, pen_fn, pen_par_id, diff_configs) {
 #'   `20`), and `warm_start` (default `FALSE`). When `warm_start` is `FALSE`,
 #'   every epsilon stage uses the original starting values; when `TRUE`, each
 #'   stage after the first uses the preceding stage's estimates.
+#' @param ... Additional arguments passed to a user-supplied `pen_fn` /
+#'   `pen_gr`. Custom penalty functions must accept `...`. Built-in penalties
+#'   (`"l0a"`, `"alf"`) ignore it.
 #'
 #' @section Warning:
 #' The returned object is not fitted using standard ML. Standard errors reported
@@ -159,7 +165,8 @@ penalized_est <- function(
     eps_end = 1e-5,
     eps_steps = 20,
     warm_start = FALSE
-  )
+  ),
+  ...
 ) {
   if (is.numeric(eps) && length(eps) == 1 && is.finite(eps) && eps > 0) {
     eps_seq <- eps
@@ -201,6 +208,14 @@ penalized_est <- function(
     stop("eps must be a positive numeric scalar or 'telescoping'.")
   }
 
+  if (!se %in% c("none", "robust.huber.white")) {
+    warning(
+      "se must be either 'none' or 'robust.huber.white'. ",
+      "Defaulting to 'none'"
+    )
+    se <- "none"
+  }
+
   pen_fn_name <- if (is.character(pen_fn) && length(pen_fn) == 1) {
     pen_fn
   } else {
@@ -233,11 +248,11 @@ penalized_est <- function(
     pen_fn_stage <- pen_fn
     pen_gr_stage <- pen_gr
     if (identical(pen_fn_name, "l0a")) {
-      pen_fn_stage <- function(z) l0a(z, eps = stage_eps)
-      pen_gr_stage <- function(z) gr_l0a(z, eps = stage_eps)
+      pen_fn_stage <- function(z, ...) l0a(z, eps = stage_eps)
+      pen_gr_stage <- function(z, ...) gr_l0a(z, eps = stage_eps)
     } else if (identical(pen_fn_name, "alf")) {
-      pen_fn_stage <- function(z) alf(z, eps = stage_eps)
-      pen_gr_stage <- function(z) gr_alf(z, eps = stage_eps)
+      pen_fn_stage <- function(z, ...) alf(z, eps = stage_eps)
+      pen_gr_stage <- function(z, ...) gr_alf(z, eps = stage_eps)
     }
     penalized_est_stage(
       x = x,
@@ -248,7 +263,8 @@ penalized_est <- function(
       pen_gr = pen_gr_stage,
       se = se,
       opt_control = opt_control,
-      start = stage_start
+      start = stage_start,
+      ...
     )
   }
 
@@ -301,17 +317,8 @@ penalized_est <- function(
 }
 
 resolve_penalty_functions <- function(pen_fn, pen_gr = NULL) {
-  if (is.character(pen_fn) && length(pen_fn) == 1) {
-    if (!pen_fn %in% c("l0a", "alf")) {
-      stop("pen_fn must be 'l0a', 'alf', or a function.")
-    }
-    if (is.null(pen_gr)) {
-      pen_gr <- switch(pen_fn, l0a = gr_l0a, alf = gr_alf)
-    }
-    pen_fn <- get(pen_fn, envir = parent.frame())
-  }
   if (!is.function(pen_fn)) {
-    stop("pen_fn must be 'l0a', 'alf', or a function.")
+    stop("pen_fn must be a function.")
   }
   if (!is.null(pen_gr) && !is.function(pen_gr)) {
     stop("pen_gr must be a function or NULL.")
@@ -355,7 +362,7 @@ make_penalized_fit <- function(x, opt) {
   x_opt$do.fit <- FALSE
   x_opt$se <- "none"
   out <- lavaan::lavaan(
-    lavaan::partable(x),
+    lavaan::parTable(x),
     slotOptions = x_opt,
     slotSampleStats = x@SampleStats,
     slotData = x@Data
@@ -372,7 +379,8 @@ penalized_est_stage <- function(
   pen_gr,
   se,
   opt_control,
-  start
+  start,
+  ...
 ) {
   # Define default control parameters
   control_defaults <- list(
@@ -413,7 +421,8 @@ penalized_est_stage <- function(
       w = w,
       pen_fn = pen_fn,
       pen_par_id = pen_par_id,
-      diff_configs = diff_configs
+      diff_configs = diff_configs,
+      ...
     )
   }
   gr1 <- if (!is.null(pen_gr)) {
@@ -424,7 +433,8 @@ penalized_est_stage <- function(
         w = w,
         pen_gr = pen_gr,
         pen_par_id = pen_par_id,
-        diff_configs = diff_configs
+        diff_configs = diff_configs,
+        ...
       )
     }
   } else {
@@ -443,13 +453,6 @@ penalized_est_stage <- function(
     )
   }
   out <- make_penalized_fit(x, opt)
-  if (!se %in% c("none", "robust.huber.white")) {
-    warning(
-      "se must be either 'none' or 'robust.huber.white'. ",
-      "Defaulting to 'none'"
-    )
-    se <- "none"
-  }
   if (se == "robust.huber.white") {
     hess <- numDeriv::hessian(f1, opt$par)
     attr(out, "hessian") <- hess
@@ -514,7 +517,7 @@ penalized_gr <- function(x, gr_fn, w, pen_gr, pen_par_id, diff_configs, ...) {
       diffs <- x_mat[cfg$combn_idx[1, ], , drop = FALSE] -
         x_mat[cfg$combn_idx[2, ], , drop = FALSE]
 
-      grad_contribs <- pen_gr(diffs)
+      grad_contribs <- pen_gr(diffs, ...)
       grad <- matrix(0, nrow = nrow(x_mat), ncol = ncol(x_mat))
 
       # Loop is now incredibly fast because indices are pre-calculated

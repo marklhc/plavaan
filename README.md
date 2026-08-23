@@ -5,6 +5,7 @@
 
 <!-- badges: start -->
 
+[![R-CMD-check](https://github.com/marklhc/plavaan/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/marklhc/plavaan/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
 The goal of plavaan is to perform penalized estimation for latent
@@ -15,10 +16,18 @@ described in Robitzsch (2023) and similar to the approach described in
 
 ## Installation
 
-You can install the development version of plavaan like so:
+You can install the released version of plavaan from
+[CRAN](https://CRAN.R-project.org):
 
 ``` r
 install.packages("plavaan")
+```
+
+You can install the development version from GitHub:
+
+``` r
+# install.packages("devtools")
+devtools::install_github("marklhc/plavaan")
 ```
 
 ## Example

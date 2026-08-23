@@ -506,63 +506,103 @@ test_that("all starts failing raises warning and returns fit", {
   load_65 <- pt$free[pt$op == "=~" & pt$lhs == "dem65"]
 
   # Force non-convergence with tiny iter.max
-  fit_warn <- penalized_est_multistart(
-    x = fit_un2,
-    w = 0.03,
-    pen_diff_id = list(loadings = rbind(load_60, load_65)),
-    n_starts = 3,
-    verbose = FALSE,
-    opt_control = list(iter.max = 1)
+  warns <- capture_warnings(
+    fit_warn <- penalized_est_multistart(
+      x = fit_un2,
+      w = 0.03,
+      pen_diff_id = list(loadings = rbind(load_60, load_65)),
+      n_starts = 3,
+      verbose = FALSE,
+      opt_control = list(iter.max = 1)
+    )
   )
 
   expect_true(inherits(fit_warn, "lavaan"))
   ms <- attr(fit_warn, "multistart")
   expect_equal(nrow(ms), 3)
+  # Each start warns about non-convergence, and multistart warns that it is
+  # returning the best of the non-converged runs.
+  expect_length(warns, 4)
+  expect_true(all(grepl("did not converge", warns[1:3])))
+  expect_true(grepl("None of the 3 optimization runs converged", warns[4]))
 })
 
 # ---------------------------------------------------------------------------
-# Correctness tests: custom pen_gr should be respected
+# Correctness tests: built-in pen_fn ignores a custom pen_gr
 # ---------------------------------------------------------------------------
 
-test_that("custom pen_gr is used when pen_fn is 'l0a'", {
+test_that("built-in pen_fn ignores custom pen_gr with a message", {
   set.seed(42)
-  fit_un <- cfa(
+  fit_un2 <- cfa(
     small_model,
     data = PoliticalDemocracy,
     std.lv = TRUE,
     do.fit = FALSE
   )
 
-  pt <- parTable(fit_un)
+  pt <- parTable(fit_un2)
   load_60 <- pt$free[pt$op == "=~" & pt$lhs == "dem60"]
   load_65 <- pt$free[pt$op == "=~" & pt$lhs == "dem65"]
 
-  # Define a custom gradient function that differs from the default
-  custom_gr <- function(v) 2 * v / (v^2 + 0.01)^2 # Different from gr_l0a
+  # A custom gradient function that differs from the built-in gr_l0a
+  custom_gr <- function(v) 2 * v / (v^2 + 0.01)^2
 
-  # Fit with custom gradient
-  fit_custom <- penalized_est(
-    x = fit_un,
-    w = 0.03,
-    pen_diff_id = list(loadings = rbind(load_60, load_65)),
-    pen_fn = "l0a",
-    pen_gr = custom_gr
+  # Documented behavior: when pen_fn is the built-in "l0a", a user-supplied
+  # pen_gr is ignored (with a message) and the built-in gradient is used
+  expect_message(
+    fit_custom <- penalized_est(
+      x = fit_un2,
+      w = 0.03,
+      pen_diff_id = list(loadings = rbind(load_60, load_65)),
+      pen_fn = "l0a",
+      pen_gr = custom_gr
+    ),
+    "pen_gr is ignored"
   )
 
-  # Fit with default gradient
   fit_default <- penalized_est(
-    x = fit_un,
+    x = fit_un2,
     w = 0.03,
     pen_diff_id = list(loadings = rbind(load_60, load_65)),
-    pen_fn = "l0a",
-    pen_gr = NULL
+    pen_fn = "l0a"
   )
 
-  # The two should produce *different* results (custom vs default gradient)
-  # We verify by checking that the objective values differ (convergence depends on gradients)
-  expect_false(
-    all.equal(fit_custom@optim$fx, fit_default@optim$fx, tolerance = 1e-6) ==
-      TRUE
+  # Since the custom pen_gr was ignored, both fits must agree exactly
+  expect_equal(fit_custom@optim$fx, fit_default@optim$fx, tolerance = 1e-8)
+})
+
+test_that("structural NA in pen_diff_id is excluded from pairwise differences", {
+  set.seed(42)
+  pt <- parTable(fit_un)
+  load_60 <- pt$free[pt$op == "=~" & pt$lhs == "dem60"]
+  load_65 <- pt$free[pt$op == "=~" & pt$lhs == "dem65"]
+  # Column 2 (y6) is structurally absent in the second row
+  pen <- list(loadings = rbind(load_60, c(load_65[1], NA, load_65[3], load_65[4])))
+
+  fit_na <- penalized_est(fit_un, w = 0.03, pen_diff_id = pen)
+
+  expect_true(inherits(fit_na, "lavaan"))
+  expect_true(fit_na@optim$converged)
+
+  # The final objective must decompose exactly into the lavaan part plus the
+  # penalty over the three *present* pairs, which proves the penalty pairs
+  # the right parameters despite the mid-matrix NA.
+  x <- fit_na@optim$x
+  ff <- lavaan::lav_export_estimation(fit_un)
+  lavaan_part <- ff$objective_function(x, lavaan_model = fit_un)
+  diffs <- c(
+    x[load_60[1]] - x[load_65[1]],
+    x[load_60[3]] - x[load_65[3]],
+    x[load_60[4]] - x[load_65[4]]
+  )
+  # rescale = (nrow - 1) / ncombn(nrow, 2) = (2 - 1) / 1 = 1
+  intended <- sum(l0a(diffs, eps = 0.01))
+  # ignore_attr: lavaan's objective_function() returns fx with metadata attrs
+  expect_equal(
+    fit_na@optim$fx,
+    lavaan_part + 0.03 * intended,
+    tolerance = 1e-8,
+    ignore_attr = TRUE
   )
 })
 
@@ -570,32 +610,44 @@ test_that("custom pen_gr is used when pen_fn is 'l0a'", {
 # Correctness tests: robust SE failure should degrade gracefully
 # ---------------------------------------------------------------------------
 
-test_that("singular Hessian in robust.huber.white warns and degrades gracefully", {
+test_that("se = 'robust.huber.white' degrades gracefully when sandwich SE fails", {
   set.seed(42)
-  fit_un <- cfa(
+  fit_un2 <- cfa(
     small_model,
     data = PoliticalDemocracy,
     std.lv = TRUE,
     do.fit = FALSE
   )
 
-  pt <- parTable(fit_un)
+  pt <- parTable(fit_un2)
   load_60 <- pt$free[pt$op == "=~" & pt$lhs == "dem60"]
   load_65 <- pt$free[pt$op == "=~" & pt$lhs == "dem65"]
+  penalty <- list(loadings = rbind(load_60, load_65))
 
-  # Use a mock test: we can't easily force a singular Hessian in practice,
-  # but we can verify that if SE computation fails, a warning is issued and
-  # the fit still has valid estimates (just without SEs).
-  # For now, just verify that the code path exists and doesn't crash
-  fit_pen <- penalized_est(
-    x = fit_un,
-    w = 0.03,
-    pen_diff_id = list(loadings = rbind(load_60, load_65)),
-    se = "robust.huber.white"
+  # Force the sandwich SE computation to fail (as it would with a singular
+  # Hessian) by mocking the internal add_vcov_pen() to error. The fit must
+  # then warn and fall back to a fit without standard errors.
+  # (capture_warnings() is used instead of expect_warning() because, in
+  # testthat edition 3, expect_warning() returns the condition, not the
+  # value of the expression.)
+  with_mocked_bindings(
+    add_vcov_pen = function(fit, hess) stop("mocked singular Hessian"),
+    {
+      warns <- capture_warnings(
+        fit_pen <- penalized_est(
+          x = fit_un2,
+          w = 0.03,
+          pen_diff_id = penalty,
+          se = "robust.huber.white"
+        )
+      )
+      expect_true(any(grepl("Computation of robust sandwich", warns)))
+    },
+    .package = "plavaan"
   )
 
-  # If SE computation succeeded, vcov should be a matrix; if it failed,
-  # SEs were not computed. Either way, the fit should be valid.
   expect_true(inherits(fit_pen, "lavaan"))
-  expect_true(fit_pen@optim$converged || !is.null(fit_pen@vcov$vcov))
+  expect_true(fit_pen@optim$converged)
+  # make_penalized_fit() fallback sets se = "none"
+  expect_false(isTRUE(fit_pen@vcov$se == "robust.huber.white"))
 })

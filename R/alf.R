@@ -9,9 +9,9 @@
 #'   (`l0a`), but users can provide custom functions as well.
 #' @param trans A transformation function to apply to `x` before computing
 #'   pairwise differences. Default is `identity` (no transformation).
-#' @param rescale Either `"df"` (default) to rescale the total loss by the degrees
-#'   of freedom (number of rows - 1), or a numeric value (likely between 0 and 1)
-#'   to multiply the total loss by.
+#' @param rescale Either `"df"` (default) to rescale the total loss by
+#'   `(nrow - 1) / ncombn(nrow, 2)`, where `nrow` is the number of rows, or a
+#'   numeric value (likely between 0 and 1) to multiply the total loss by.
 #' @param ... Additional arguments passed to the loss function `fun`.
 #'
 #' @return A numeric scalar representing the sum of losses across all pairwise
@@ -72,43 +72,6 @@ hot_gr <- function(x, hot, fun, ...) {
     out
 }
 
-gr_cpl <- function(
-    x,
-    gr_fun,
-    trans = identity,
-    gr_trans = function(x) 1,
-    rescale = "df",
-    combn_idx = NULL
-) {
-    x_mat <- as.matrix(trans(x))
-    if (is.null(combn_idx)) {
-        combn_idx <- combn(nrow(x_mat), 2)
-    }
-    diffs <- x_mat[combn_idx[1, ], , drop = FALSE] -
-        x_mat[combn_idx[2, ], , drop = FALSE]
-    grad_contribs <- gr_fun(diffs)
-    grad <- matrix(0, nrow = nrow(x_mat), ncol = ncol(x_mat))
-    for (i in seq_len(nrow(x_mat))) {
-        idx1 <- which(combn_idx[1, ] == i)
-        idx2 <- which(combn_idx[2, ] == i)
-        grad[i, ] <- colSums(
-            grad_contribs[idx1, , drop = FALSE],
-            na.rm = TRUE
-        ) -
-            colSums(grad_contribs[idx2, , drop = FALSE], na.rm = TRUE)
-    }
-    grad[which(is.na(x_mat))] <- NA
-    if (rescale == "df") {
-        dof <- nrow(x_mat) - 1
-        ncombn <- ncol(combn_idx)
-        rescale <- dof / ncombn
-    }
-    if (!is.numeric(rescale)) {
-        stop("rescale must be 'df' or a numeric value.")
-    }
-    as.vector(grad) * rescale * gr_trans(as.vector(x))
-}
-
 #' Loss functions
 #'
 #' For small eps this provides a smooth,
@@ -122,7 +85,6 @@ gr_cpl <- function(
 #' @return Numeric vector of the same length as x.
 #' @name loss
 NULL
-#> NULL
 
 #' @rdname loss
 #'
