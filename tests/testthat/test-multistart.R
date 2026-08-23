@@ -506,18 +506,25 @@ test_that("all starts failing raises warning and returns fit", {
   load_65 <- pt$free[pt$op == "=~" & pt$lhs == "dem65"]
 
   # Force non-convergence with tiny iter.max
-  fit_warn <- penalized_est_multistart(
-    x = fit_un2,
-    w = 0.03,
-    pen_diff_id = list(loadings = rbind(load_60, load_65)),
-    n_starts = 3,
-    verbose = FALSE,
-    opt_control = list(iter.max = 1)
+  warns <- capture_warnings(
+    fit_warn <- penalized_est_multistart(
+      x = fit_un2,
+      w = 0.03,
+      pen_diff_id = list(loadings = rbind(load_60, load_65)),
+      n_starts = 3,
+      verbose = FALSE,
+      opt_control = list(iter.max = 1)
+    )
   )
 
   expect_true(inherits(fit_warn, "lavaan"))
   ms <- attr(fit_warn, "multistart")
   expect_equal(nrow(ms), 3)
+  # Each start warns about non-convergence, and multistart warns that it is
+  # returning the best of the non-converged runs.
+  expect_length(warns, 4)
+  expect_true(all(grepl("did not converge", warns[1:3])))
+  expect_true(grepl("None of the 3 optimization runs converged", warns[4]))
 })
 
 # ---------------------------------------------------------------------------
