@@ -326,11 +326,42 @@ plavaan_npar_eff <- function(x, spec) {
     out
 }
 
-# Number of sample statistics, counted per group from the parameter table
-# of the USER's fit: for k observed variables, k * (k + 1) / 2 moments,
-# plus k means if the group has a mean structure (intercept rows).
+# Number of sample statistics of the USER's fit. This is the quantity the
+# effective degrees of freedom are measured against (df = n_stats -
+# npar_effective), so it must equal the number of sample moments lavaan
+# itself uses in the model test.
+#
+# Primary: lavaan::lav_pt_ndat(), lavaan's own count (exported in recent
+# lavaan). It handles ordinal thresholds, composites, the correlation
+# metric, multilevel, and group models, and by construction always matches
+# lavaan's own model df.
+#
+# Fallback: for lavaan versions without lav_pt_ndat(), the count is derived
+# structurally from the parameter table (see plavaan_n_stats_structural()).
 plavaan_n_stats <- function(x) {
     pt <- lavaan::parTable(x)
+    if (exists("lav_pt_ndat", envir = asNamespace("lavaan"))) {
+        return(lavaan::lav_pt_ndat(pt))
+    }
+    plavaan_n_stats_structural(pt)
+}
+
+# Structural fallback for plavaan_n_stats(): count the sample moments per
+# group from the parameter table. For a group with m observed variables of
+# which c are continuous, this is the m * (m - 1) / 2 unique (co)variances,
+# plus the c continuous variances (ordinal variances are fixed to 1 in the
+# polychoric/biserial metric), plus the ordinal threshold parameters (one
+# per category beyond the first, per ordinal variable), plus any
+# continuous-variable intercepts.
+#
+# Two subtleties that break a naive k * (k + 1) / 2 count:
+# - Threshold rows (op "|") carry the ordinal category counts; their rhs
+#   ("t1", "t2", ...) are not variables and must be excluded, and each such
+#   row is itself a sample statistic.
+# - Ordinal "means" are absorbed into the thresholds, so only intercepts on
+#   continuous observed variables are counted (WLSMV adds intercepts for
+#   continuous variables automatically).
+plavaan_n_stats_structural <- function(pt) {
     gr <- pt$group
     groups <- if (all(is.na(gr))) 1L else unique(gr[!is.na(gr)])
     n_stats <- 0
@@ -340,15 +371,22 @@ plavaan_n_stats <- function(x) {
         } else {
             gr == g
         }
-        allv <- unique(c(pt$lhs[sel], pt$rhs[sel]))
+        # Threshold rows (op "|") hold category counts, not variables.
+        nth <- pt$op != "|"
+        allv <- unique(c(pt$lhs[sel & nth], pt$rhs[sel & nth]))
         # Intercept rows (op "~1") have an empty rhs; drop empty names.
         allv <- allv[nzchar(allv)]
         lat <- unique(pt$lhs[sel & pt$op == "=~"])
-        k <- length(setdiff(allv, lat))
-        # Mean structure iff intercept rows exist (absent without
-        # meanstructure, auto-present in group models).
-        ms <- any(pt$op[sel] == "~1")
-        n_stats <- n_stats + k * (k + 1) / 2 + k * ms
+        obs <- setdiff(allv, lat)
+        m <- length(obs)
+        # Ordinal observed variables have threshold rows; the group's
+        # threshold parameters equal the number of threshold rows.
+        ord <- intersect(unique(pt$lhs[sel & pt$op == "|"]), obs)
+        n_thresh <- sum(sel & pt$op == "|")
+        # Intercept statistics on continuous observed variables.
+        n_mean <- sum(sel & pt$op == "~1" & pt$lhs %in% setdiff(obs, ord))
+        n_stats <- n_stats +
+            m * (m - 1) / 2 + (m - length(ord)) + n_thresh + n_mean
     }
     n_stats
 }

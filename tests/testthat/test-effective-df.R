@@ -90,6 +90,35 @@ fit_k4_ms <- cfa(
   do.fit = FALSE
 )
 
+# Ordinal / mixed fixtures for the plavaan_n_stats() regression tests. The
+# observed variables are discretized at fixed quantiles so the category
+# counts -- and hence the number of threshold parameters -- are
+# deterministic. do.fit = FALSE, so no optimization is involved and the
+# counts are platform-independent.
+mod_ord <- "dem =~ x1 + x2 + x3 + y1"
+ord_vars <- c("x1", "x2", "x3", "y1")
+d_ord3 <- PoliticalDemocracy
+for (v in ord_vars) {
+  d_ord3[[v]] <- cut(d_ord3[[v]], quantile(d_ord3[[v]], c(0, 1/3, 2/3, 1)),
+                     include.lowest = TRUE, labels = letters[1:3])
+}
+fit_ord3 <- cfa(mod_ord, data = d_ord3, estimator = "WLSMV",
+                ordered = ord_vars, do.fit = FALSE)
+d_ord2 <- PoliticalDemocracy
+for (v in ord_vars) {
+  d_ord2[[v]] <- cut(d_ord2[[v]], quantile(d_ord2[[v]], c(0, 0.5, 1)),
+                     include.lowest = TRUE, labels = letters[1:2])
+}
+fit_ord2 <- cfa(mod_ord, data = d_ord2, estimator = "WLSMV",
+                ordered = ord_vars, do.fit = FALSE)
+d_mixed <- PoliticalDemocracy
+for (v in c("x3", "y1")) {
+  d_mixed[[v]] <- cut(d_mixed[[v]], quantile(d_mixed[[v]], c(0, 1/3, 2/3, 1)),
+                      include.lowest = TRUE, labels = letters[1:3])
+}
+fit_mixed <- cfa(mod_ord, data = d_mixed, estimator = "WLSMV",
+                 ordered = c("x3", "y1"), do.fit = FALSE)
+
 # ---------------------------------------------------------------------------
 # effective_df() reference values
 # ---------------------------------------------------------------------------
@@ -199,6 +228,33 @@ test_that("plavaan_n_stats counts the sample moments per group", {
   # two groups with k = 8, mean structure auto-present in group models:
   # 2 * (8 * (8 + 1) / 2 + 8) = 2 * 44 = 88
   expect_equal(plavaan_n_stats(fit_grp), 88)
+})
+
+test_that("plavaan_n_stats counts ordinal thresholds and mixed moments", {
+  # All four variables ordinal with 3 categories: 4 * 3 / 2 polychoric
+  # correlations + 4 * 2 thresholds = 6 + 8 = 14. Ordinal variances are
+  # fixed to 1 and ordinal "means" are absorbed into the thresholds, so
+  # neither adds a sample statistic.
+  expect_equal(plavaan_n_stats(fit_ord3), 14)
+  # All four variables dichotomous: 4 * 3 / 2 + 4 * 1 = 6 + 4 = 10.
+  expect_equal(plavaan_n_stats(fit_ord2), 10)
+  # Two continuous + two ordinal (3 cats): 4 * 3 / 2 (co)variances +
+  # 2 continuous variances + 2 * 2 thresholds + 2 continuous intercepts
+  # (auto-added by WLSMV) = 6 + 2 + 4 + 2 = 14.
+  expect_equal(plavaan_n_stats(fit_mixed), 14)
+})
+
+test_that("the structural fallback agrees with lavaan's own count", {
+  # plavaan_n_stats() delegates to lavaan::lav_pt_ndat() when it is
+  # available. The structural fallback must return the same values so that
+  # lavaan versions without lav_pt_ndat() still count correctly.
+  for (fit in list(fit_k4, fit_k4_ms, fit_grp, fit_ord2, fit_ord3, fit_mixed)) {
+    expect_equal(plavaan_n_stats_structural(parTable(fit)), plavaan_n_stats(fit))
+  }
+  # ...and the fallback is correct in its own right.
+  expect_equal(plavaan_n_stats_structural(parTable(fit_ord3)), 14)
+  expect_equal(plavaan_n_stats_structural(parTable(fit_ord2)), 10)
+  expect_equal(plavaan_n_stats_structural(parTable(fit_mixed)), 14)
 })
 
 test_that("plavaan_n_stats matches npar + df of a normally fitted group model", {
