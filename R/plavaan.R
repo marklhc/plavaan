@@ -45,7 +45,10 @@ setClass("plavaan", contains = "lavaan")
 #   (fit evaluation disabled), "Chisq" / "SatorraBentler" compute the
 #   chi-square test that fitmeasures() and the summary read from the test
 #   slot.
-# - slotData = fit@Data works for single-group, meanstructure, and group
+# - Pass both slotData and slotSampleStats from the original fit: for fits
+#   created from sample statistics, @Data alone is insufficient (the refit
+#   fails), and providing the original @SampleStats also avoids recomputing
+#   the sample moments. Works for single-group, meanstructure, and group
 #   models.
 plavaan_freeze <- function(fit, test) {
     ptf <- lavaan::parTable(fit)
@@ -58,19 +61,37 @@ plavaan_freeze <- function(fit, test) {
     opts$start <- NULL
     opts$optim.force.converged <- TRUE
     opts$se <- "none"
-    lavaan::lavaan(ptf, slotOptions = opts, slotData = fit@Data)
+    lavaan::lavaan(
+        ptf,
+        slotOptions = opts,
+        slotData = fit@Data,
+        slotSampleStats = fit@SampleStats
+    )
 }
 
 #' @importFrom stats pchisq
 plavaan_patch <- function(frozen, fit, npar_eff) {
     n_stats <- plavaan_n_stats(fit)
     df_eff <- n_stats - npar_eff
+    # A non-positive effective df means the effective model is still
+    # under-identified, so the chi-square p-value is undefined (pchisq()
+    # would return NaN with a warning). Report it as NA and warn once.
+    if (df_eff <= 0) {
+        warning(
+            "The effective model degrees of freedom are non-positive (",
+            round(df_eff, 2),
+            "); the chi-square p-value is not available.",
+            call. = FALSE
+        )
+    }
     for (nm in names(frozen@test)) {
         if (frozen@test[[nm]]$refdistr == "chisq") {
             frozen@test[[nm]]$df <- df_eff
-            frozen@test[[nm]]$pvalue <- pchisq(
-                frozen@test[[nm]]$stat, df_eff, lower.tail = FALSE
-            )
+            frozen@test[[nm]]$pvalue <- if (df_eff > 0) {
+                pchisq(frozen@test[[nm]]$stat, df_eff, lower.tail = FALSE)
+            } else {
+                NA_real_
+            }
         }
     }
     # n is the total number of observations. Use @loglik$ntotal rather

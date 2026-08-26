@@ -202,6 +202,57 @@ test_that("fitmeasures on a group fit uses the total sample size", {
 })
 
 # ---------------------------------------------------------------------------
+# Robustness of the frozen refit
+# ---------------------------------------------------------------------------
+
+test_that("fit evaluation guards against non-positive effective df", {
+  # An under-identified model that saves no degrees of freedom has
+  # effective df < 0, so the chi-square p-value is undefined.
+  pen_np <- penalized_est(fit_efa, w = 0.03, pen_par_id = NULL, eps = .01,
+                          test = "Chisq")
+  expect_lt(attr(effective_df(pen_np), "info")$df_model_effective, 0)
+
+  ws <- character(0)
+  fm <- withCallingHandlers(
+    fitmeasures(pen_np, c("chisq", "df", "pvalue")),
+    message = function(c) invokeRestart("muffleMessage"),
+    warning = function(c) {
+      ws <<- c(ws, conditionMessage(c))
+      invokeRestart("muffleWarning")
+    }
+  )
+  # pvalue is NA (not NaN) and a warning is issued
+  expect_true(is.na(unname(fm["pvalue"])))
+  expect_false(is.nan(unname(fm["pvalue"])))
+  expect_true(any(grepl("non-positive", ws)))
+})
+
+test_that("frozen refit works for fits created from sample statistics", {
+  d8 <- PoliticalDemocracy[, paste0("y", 1:8)]
+  fit_ss <- lavaan::lavaan(
+    "dem60 =~ y1 + y2 + y3 + y4
+     dem65 =~ y5 + y6 + y7 + y8
+     dem60 ~~ dem65",
+    sample_cov = cov(d8), sample_nobs = nrow(d8),
+    std.lv = TRUE, do.fit = FALSE
+  )
+  pt <- parTable(fit_ss)
+  l60 <- pt$free[pt$op == "=~" & pt$lhs == "dem60"]
+  l65 <- pt$free[pt$op == "=~" & pt$lhs == "dem65"]
+  # The 'Sigma.hat is not positive definite' warning during optimization is a
+  # benign lavaan artifact of fitting from these sample statistics; it is
+  # unrelated to the assertion below, so it is suppressed.
+  pen_ss <- suppressWarnings(penalized_est(
+    fit_ss, w = 0.03, pen_diff_id = list(loadings = rbind(l60, l65)),
+    eps = .01, test = "Chisq"
+  ))
+  # Regression guard: before slotSampleStats was passed to the refit, this
+  # failed with 'subscript out of bounds'.
+  frozen <- suppressWarnings(expect_no_error(plavaan_frozen(pen_ss)))
+  expect_s4_class(frozen, "lavaan")
+})
+
+# ---------------------------------------------------------------------------
 # Caching of the frozen refit
 # ---------------------------------------------------------------------------
 
@@ -284,8 +335,9 @@ test_that("with the default test = 'none', summary skips the chi-square test", {
 # ---------------------------------------------------------------------------
 
 test_that("penalized_est validates the test argument", {
-  # non-string, empty string, and length-2 vector are all rejected
-  for (bad in list(5, "", c("a", "b"))) {
+  # non-strings, wrong lengths, and values outside the allow-list
+  # ('none', 'Chisq', 'SatorraBentler') are all rejected
+  for (bad in list(5, "", c("a", "b"), "Foo", "chisq")) {
     expect_error(
       penalized_est(
         fit_small,
@@ -294,7 +346,7 @@ test_that("penalized_est validates the test argument", {
         eps = .01,
         test = bad
       ),
-      "test must be a character string"
+      "test must be one of"
     )
   }
   # a valid non-default value is accepted and recorded on the object

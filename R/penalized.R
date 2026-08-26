@@ -244,11 +244,12 @@ penalized_est <- function(
     se <- "none"
   }
 
-  if (!is.character(test) || length(test) != 1 || !nzchar(test)) {
-    stop(
-      "test must be a character string, e.g. 'none', 'Chisq', or ",
-      "'SatorraBentler'."
-    )
+  if (
+    !is.character(test) ||
+      length(test) != 1 ||
+      !test %in% c("none", "Chisq", "SatorraBentler")
+  ) {
+    stop("test must be one of 'none', 'Chisq', or 'SatorraBentler'.")
   }
 
   pen_fn_name <- if (is.character(pen_fn) && length(pen_fn) == 1) {
