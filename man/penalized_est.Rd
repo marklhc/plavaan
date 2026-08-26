@@ -12,6 +12,7 @@ penalized_est(
   pen_fn = "l0a",
   pen_gr = NULL,
   se = "none",
+  test = "none",
   opt_control = list(),
   start = NULL,
   eps = 0.01,
@@ -49,6 +50,16 @@ Options are \code{"none"} (default; no standard errors) or \code{"robust.huber.w
 (robust sandwich estimator using numerical Hessian and first-order information,
 which is the same as used in the \code{"mlr"} estimator).}
 
+\item{test}{Character string specifying the model test used by the fit
+evaluation on the returned object (\code{fitmeasures()} and the chi-square test
+in \code{summary()}), via an internal "frozen" refit. Fit evaluation for
+penalized fits is \strong{experimental}, so it is disabled by default:
+\code{"none"} (default) means no model test is run, \code{fitmeasures()} is
+unavailable, and \code{summary()} shows no chi-square test. Set to \code{"Chisq"}
+(ML/PML estimators) or \code{"SatorraBentler"} (WLSMV/MLM/MLR) to enable fit
+measures and the chi-square test; an experimental notice is then shown
+when \code{fitmeasures()} or \code{summary()} is called.}
+
 \item{opt_control}{A list of control parameters passed to \code{\link[stats:nlminb]{stats::nlminb()}}.
 Default includes \code{eval.max = 2e4}, \code{iter.max = 1e4}, and \code{abs.tol = 1e-20}.}
 
@@ -72,9 +83,12 @@ stage after the first uses the preceding stage's estimates.}
 }
 \value{
 A lavaan model object updated with the penalized parameter estimates.
-With \code{eps = "telescoping"}, it includes a \code{"telescoping"} data frame with
-per-stage epsilon values, parameter changes, objective values, and
-convergence indicators.
+The object has S4 class \code{plavaan} (a subclass of \code{lavaan}) and a
+\code{penalized} attribute recording the penalty specification, which enables
+\code{\link[=effective_df]{effective_df()}} and, when \code{test} is not \code{"none"}, \code{fitmeasures()} and
+\code{summary()} with effective degrees of freedom. With \code{eps = "telescoping"},
+it also includes a \code{"telescoping"} data frame with per-stage epsilon
+values, parameter changes, objective values, and convergence indicators.
 }
 \description{
 Performs penalized estimation on a lavaan model object by optimizing a
@@ -89,7 +103,13 @@ combines the standard lavaan objective function with a penalty term. Only the
 parameter estimates and the log-likelihood should be interpreted. The
 returned object was not "fitted" (\code{do.fit = FALSE}) to avoid users
 interpreting the standard errors, which are generally not valid with
-penalized estimation. The degrees of freedom may also be inaccurate. If the
+penalized estimation. The nominal model degrees of freedom can also be
+misleading, as the penalized model is often under-identified;
+\code{\link[=effective_df]{effective_df()}} reports the effective number of parameters and the
+effective model degrees of freedom. When \code{test} is not \code{"none"},
+\code{fitmeasures()} / \code{summary()} on the returned object additionally report
+fit indices at the effective df (frozen refit at the penalized estimates);
+this fit evaluation is experimental and disabled by default. If the
 optimization does not converge (convergence code != 0), a warning is issued.
 
 With \code{eps = "telescoping"}, the model is fit along a log-spaced sequence from
@@ -106,6 +126,12 @@ The returned object is not fitted using standard ML. Standard errors reported
 by \code{summary()} or \code{parameterEstimates()} will be missing unless
 \code{se = "robust.huber.white"} was specified. Even then, they are based on an
 experimental sandwich approximation and should be interpreted with caution.
+
+Fit evaluation (\code{fitmeasures()} and the chi-square test in \code{summary()}) is
+also \strong{experimental} and disabled by default (\code{test = "none"}). Enable it
+with \code{test = "Chisq"} (or \code{"SatorraBentler"}); interpret any resulting fit
+indices with caution, as they are based on a frozen refit at the penalized
+estimates with the effective degrees of freedom.
 }
 
 \examples{
@@ -152,6 +178,9 @@ pen_fit <- penalized_est(
 
 # Compare parameter estimates
 summary(pen_fit)
+
+# Effective number of parameters and degrees of freedom
+effective_df(pen_fit)
 
 }
 \seealso{

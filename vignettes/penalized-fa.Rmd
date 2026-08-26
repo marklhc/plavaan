@@ -56,9 +56,16 @@ parTable(fit)
 pefa_fit <- penalized_est(
     fit,
     w = .03,
-    pen_par_id = 4:10
+    pen_par_id = 4:10,
+    test = "Chisq"
 )
 summary(pefa_fit)
+```
+
+Fit indices can be obtained directly from the penalized fit. Fit evaluation is experimental and disabled by default, so the fit above was created with `test = "Chisq"`; with the default `test = "none"`, `fitmeasures()` is unavailable and `summary()` shows no chi-square test. When enabled, `fitmeasures()` refits the model with all parameters frozen at the penalized estimates and reports the indices at the effective degrees of freedom (11.97 here, versus the nominal 6), and an experimental notice is shown. For the under-identified models later in this vignette (negative nominal df), the effective df is the meaningful value.
+
+```{r}
+fitmeasures(pefa_fit, c("chisq", "df", "cfi", "rmsea"))
 ```
 
 ## Penalize Cross-loadings and Unique Covariances
@@ -97,14 +104,13 @@ pefa_fit2 <- penalized_est(
 summary(pefa_fit2)
 ```
 
-The unique covariances were all estimated close to zero. One can approximate the "effective" number of cross-loadings and unique covariances by:
+The unique covariances were all estimated close to zero. The effective number of cross-loadings and unique covariances can be reported with `effective_df()`:
 
 ```{r}
-pen_ests <- as.numeric(coef(pefa_fit2)[c(4:10, 15:35)])
-sum(l0a(pen_ests))
+effective_df(pefa_fit2)
 ```
 
-So out of 28 parameters penalized, only about 1.6 (or close to 2) are effectively non-zero.
+So out of 28 penalized parameters, only about 1.6 (or close to 2) are effectively non-zero. The table also shows the effective model degrees of freedom (11.44), where the nominal df (-15) is negative because the model is under-identified.
 
 ## Penalize Cross-Loadings, Unique Covariances, and Difference in Loadings and Intercepts Across Time
 
@@ -207,20 +213,10 @@ pefa_fit3 <- penalized_est(
 summary(pefa_fit3, standardized = TRUE)
 ```
 
-We can again compute the "effective" number of cross-loadings and unique covariances that are non-zero:
+`effective_df()` reports the effective number of cross-loadings and unique covariances that are non-zero, and the effective number of loadings and intercepts that differ across time:
 
 ```{r}
-pen_ests2 <- as.numeric(coef(pefa_fit3)[c(4:10, 35:55)])
-sum(l0a(pen_ests2))
+effective_df(pefa_fit3)
 ```
 
-And the "effective" number of loadings and intercepts that differ across time:
-
-```{r}
-ld_ests <- as.numeric(coef(pefa_fit3)[11:18])
-int_ests <- as.numeric(coef(pefa_fit3)[27:34])
-ld_mat <- matrix(ld_ests, nrow = 2, byrow = TRUE)
-int_mat <- matrix(int_ests, nrow = 2, byrow = TRUE)
-composite_pair_loss(ld_mat, fun = l0a) +
-    composite_pair_loss(int_mat, fun = l0a)
-```
+For a difference-penalty block, `npar_effective` is the number of columns (one shared invariance baseline per parameter) plus the effective number of non-invariant values. Here the `loadings` and `intercepts` rows (4.02 and 4.03, versus 4 baseline values each) indicate that the loadings and intercepts are effectively invariant across time, while only about 1.3 of the 28 cross-loadings and unique covariances are effectively non-zero.
