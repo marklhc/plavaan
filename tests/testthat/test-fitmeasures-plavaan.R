@@ -355,9 +355,11 @@ test_that("with the default test = 'none', summary skips the chi-square test", {
 # ---------------------------------------------------------------------------
 
 test_that("penalized_est validates the test argument", {
-  # non-strings, wrong lengths, and values outside the allow-list
-  # ('none', 'Chisq', 'SatorraBentler') are all rejected
-  for (bad in list(5, "", c("a", "b"), "Foo", "chisq")) {
+  # non-strings, wrong lengths, NAs, and values outside the allow-list
+  # ('none', 'Chisq', 'SatorraBentler') are all rejected with the intended
+  # message (NA_character_ in particular must hit stop(), not error with an
+  # invalid `if` condition)
+  for (bad in list(5, "", NA, NA_character_, c("a", "b"), "Foo", "chisq")) {
     expect_error(
       penalized_est(
         fit_small,

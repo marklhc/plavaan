@@ -423,8 +423,10 @@ make_penalized_fit <- function(x, opt, pen_spec = NULL) {
     # A shared environment: R copies objects on write, so an attribute set
     # inside a later method call would not persist on the caller's object.
     # An environment is a shared reference, so every copy of this fit can
-    # read and write the same cache (see plavaan_frozen()).
-    attr(out, "plavaan.cache") <- new.env(size = 0)
+    # read and write the same cache (see plavaan_frozen()). The parent is
+    # emptyenv() because the cache only stores internal objects and should
+    # not retain references from (or look up symbols in) the caller's frame.
+    attr(out, "plavaan.cache") <- new.env(parent = emptyenv())
     class(out) <- "plavaan"
   }
   out
