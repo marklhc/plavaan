@@ -214,7 +214,12 @@ plavaan_penalty_spec <- function(x, pen_par_id = NULL, pen_diff_id = NULL,
 
     if (
         !is.function(pen_fn) &&
-            !(is.character(pen_fn) && length(pen_fn) == 1 && pen_fn %in% c("l0a", "alf"))
+            !(
+                is.character(pen_fn) &&
+                    length(pen_fn) == 1 &&
+                    !is.na(pen_fn) &&
+                    pen_fn %in% c("l0a", "alf")
+            )
     ) {
         stop("pen_fn must be 'l0a', 'alf', or a function.")
     }

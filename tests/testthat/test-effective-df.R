@@ -375,6 +375,15 @@ test_that("a custom penalty function is evaluated on the estimates", {
   expect_equal(ed_cust$df_saved, ed_l0a$df_saved, tolerance = 1e-12)
 })
 
+test_that("effective_df rejects invalid pen_fn values", {
+  # Values outside the allow-list ('l0a', 'alf') and missing values are
+  # rejected with the intended message. NA in particular must hit stop(),
+  # not an "invalid if condition" error.
+  for (bad in list("Foo", NA, NA_character_)) {
+    expect_error(effective_df(pen_efa, pen_fn = bad), "pen_fn must be")
+  }
+})
+
 # ---------------------------------------------------------------------------
 # print method
 # ---------------------------------------------------------------------------

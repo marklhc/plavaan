@@ -247,6 +247,7 @@ penalized_est <- function(
   if (
     !is.character(test) ||
       length(test) != 1 ||
+      is.na(test) ||
       !test %in% c("none", "Chisq", "SatorraBentler")
   ) {
     stop("test must be one of 'none', 'Chisq', or 'SatorraBentler'.")
