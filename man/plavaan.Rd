@@ -15,7 +15,7 @@ the effective degrees of freedom (see \code{\link[=effective_df]{effective_df()}
 with the effective parameter and degrees-of-freedom counts. Fit
 evaluation (\code{fitmeasures()} and the chi-square test in
 \code{summary()}) is experimental and only available when the fit was
-created with a non-\verb{\code{"none"}} \code{test} (see
+created with a non-\code{"none"} \code{test} (see
 \code{\link[=penalized_est]{penalized_est()}}).
 }
 \keyword{internal}

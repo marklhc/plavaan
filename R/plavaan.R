@@ -11,7 +11,7 @@
 #' with the effective parameter and degrees-of-freedom counts. Fit
 #' evaluation (\code{fitmeasures()} and the chi-square test in
 #' \code{summary()}) is experimental and only available when the fit was
-#' created with a non-`\code{"none"}` \code{test} (see
+#' created with a non-\code{"none"} \code{test} (see
 #' [penalized_est()]).
 #'
 #' @name plavaan
@@ -73,10 +73,18 @@ plavaan_freeze <- function(fit, test) {
 plavaan_patch <- function(frozen, fit, npar_eff) {
     n_stats <- plavaan_n_stats(fit)
     df_eff <- n_stats - npar_eff
+    # A chi-square test is present only when fit evaluation was requested
+    # (a non-"none" test); with test = "none" no p-value is computed.
+    has_chisq <- any(vapply(
+        frozen@test,
+        function(t) identical(t$refdistr, "chisq"),
+        logical(1)
+    ))
     # A non-positive effective df means the effective model is still
     # under-identified, so the chi-square p-value is undefined (pchisq()
-    # would return NaN with a warning). Report it as NA and warn once.
-    if (df_eff <= 0) {
+    # would return NaN with a warning). Report it as NA and warn once, but
+    # only when a chi-square test was actually requested.
+    if (has_chisq && df_eff <= 0) {
         warning(
             "The effective model degrees of freedom are non-positive (",
             round(df_eff, 2),
@@ -158,7 +166,7 @@ plavaan_frozen <- function(fit) {
 #' refit.
 #'
 #' Fit evaluation is experimental and disabled by default: it requires the
-#' fit to have been created with [penalized_est()] using a non-`\code{"none"}`
+#' fit to have been created with [penalized_est()] using a non-\code{"none"}
 #' \code{test}. When \code{test = "none"} (the default), \code{fitmeasures()}
 #' returns \code{NULL} with a message explaining how to enable it. When the
 #' test is enabled, an experimental notice is shown on every call.
@@ -194,7 +202,7 @@ setMethod("fitmeasures", signature = "plavaan", function(object, ...) {
 #'
 #' The chi-square test in the summary is part of the experimental fit
 #' evaluation and is only shown when the fit was created with
-#' [penalized_est()] using a non-`\code{"none"}` \code{test}; in that case
+#' [penalized_est()] using a non-\code{"none"} \code{test}; in that case
 #' an experimental notice is also shown. With the default
 #' \code{test = "none"}, the summary shows the model and parameter estimates
 #' (at the effective parameter count) but no chi-square test.

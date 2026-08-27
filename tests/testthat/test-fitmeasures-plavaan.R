@@ -227,6 +227,26 @@ test_that("fit evaluation guards against non-positive effective df", {
   expect_true(any(grepl("non-positive", ws)))
 })
 
+test_that("no non-positive-df warning when fit evaluation is disabled", {
+  # The same under-identified fit with the default test = "none": fit
+  # evaluation is disabled, so no chi-square p-value is computed and the
+  # non-positive-df warning must not fire (e.g. when summary() triggers the
+  # frozen refit).
+  pen_np_none <- penalized_est(fit_efa, w = 0.03, pen_par_id = NULL, eps = .01)
+  expect_lt(attr(effective_df(pen_np_none), "info")$df_model_effective, 0)
+
+  ws <- character(0)
+  withCallingHandlers(
+    summary(pen_np_none),
+    message = function(c) invokeRestart("muffleMessage"),
+    warning = function(c) {
+      ws <<- c(ws, conditionMessage(c))
+      invokeRestart("muffleWarning")
+    }
+  )
+  expect_false(any(grepl("non-positive", ws)))
+})
+
 test_that("frozen refit works for fits created from sample statistics", {
   d8 <- PoliticalDemocracy[, paste0("y", 1:8)]
   fit_ss <- lavaan::lavaan(

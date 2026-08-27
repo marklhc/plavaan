@@ -70,7 +70,7 @@
 #' BIC) are obtained with `fitmeasures()` on a fit from
 #' [penalized_est()], which freezes the parameters at the penalized
 #' estimates and refits. This fit evaluation is experimental and requires
-#' the fit to have been created with a non-`\code{"none"}` \code{test}
+#' the fit to have been created with a non-\code{"none"} \code{test}
 #' (e.g. `test = "Chisq"`); with the default `test = "none"`,
 #' `fitmeasures()` is unavailable.
 #'

@@ -91,7 +91,7 @@ Fit indices based on the effective df (chi-square, CFI, RMSEA, AIC,
 BIC) are obtained with \code{fitmeasures()} on a fit from
 \code{\link[=penalized_est]{penalized_est()}}, which freezes the parameters at the penalized
 estimates and refits. This fit evaluation is experimental and requires
-the fit to have been created with a non-\verb{\code{"none"}} \code{test}
+the fit to have been created with a non-\code{"none"} \code{test}
 (e.g. \code{test = "Chisq"}); with the default \code{test = "none"},
 \code{fitmeasures()} is unavailable.
 }
