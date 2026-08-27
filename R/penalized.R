@@ -54,6 +54,15 @@ penalized_obj <- function(x, obj_fn, w, pen_fn, pen_par_id, diff_configs, ...) {
 #'   Options are `"none"` (default; no standard errors) or `"robust.huber.white"`
 #'   (robust sandwich estimator using numerical Hessian and first-order information,
 #'   which is the same as used in the `"mlr"` estimator).
+#' @param test Character string specifying the model test used by the fit
+#'   evaluation on the returned object (`fitmeasures()` and the chi-square test
+#'   in `summary()`), via an internal "frozen" refit. Fit evaluation for
+#'   penalized fits is **experimental**, so it is disabled by default:
+#'   `"none"` (default) means no model test is run, `fitmeasures()` is
+#'   unavailable, and `summary()` shows no chi-square test. Set to `"Chisq"`
+#'   (ML/PML estimators) or `"SatorraBentler"` (WLSMV/MLM/MLR) to enable fit
+#'   measures and the chi-square test; an experimental notice is then shown
+#'   when `fitmeasures()` or `summary()` is called.
 #' @param opt_control A list of control parameters passed to [stats::nlminb()].
 #'   Default includes `eval.max = 2e4`, `iter.max = 1e4`, and `abs.tol = 1e-20`.
 #' @param start Numeric vector of starting values for the optimizer, or `NULL`
@@ -77,10 +86,19 @@ penalized_obj <- function(x, obj_fn, w, pen_fn, pen_par_id, diff_configs, ...) {
 #' `se = "robust.huber.white"` was specified. Even then, they are based on an
 #' experimental sandwich approximation and should be interpreted with caution.
 #'
+#' Fit evaluation (`fitmeasures()` and the chi-square test in `summary()`) is
+#' also **experimental** and disabled by default (`test = "none"`). Enable it
+#' with `test = "Chisq"` (or `"SatorraBentler"`); interpret any resulting fit
+#' indices with caution, as they are based on a frozen refit at the penalized
+#' estimates with the effective degrees of freedom.
+#'
 #' @return A lavaan model object updated with the penalized parameter estimates.
-#'   With `eps = "telescoping"`, it includes a `"telescoping"` data frame with
-#'   per-stage epsilon values, parameter changes, objective values, and
-#'   convergence indicators.
+#'   The object has S4 class `plavaan` (a subclass of `lavaan`) and a
+#'   `penalized` attribute recording the penalty specification, which enables
+#'   [effective_df()] and, when `test` is not `"none"`, `fitmeasures()` and
+#'   `summary()` with effective degrees of freedom. With `eps = "telescoping"`,
+#'   it also includes a `"telescoping"` data frame with per-stage epsilon
+#'   values, parameter changes, objective values, and convergence indicators.
 #'
 #' @details
 #' The function uses `nlminb()` to minimize a penalized objective function that
@@ -88,7 +106,13 @@ penalized_obj <- function(x, obj_fn, w, pen_fn, pen_par_id, diff_configs, ...) {
 #' parameter estimates and the log-likelihood should be interpreted. The
 #' returned object was not "fitted" (`do.fit = FALSE`) to avoid users
 #' interpreting the standard errors, which are generally not valid with
-#' penalized estimation. The degrees of freedom may also be inaccurate. If the
+#' penalized estimation. The nominal model degrees of freedom can also be
+#' misleading, as the penalized model is often under-identified;
+#' [effective_df()] reports the effective number of parameters and the
+#' effective model degrees of freedom. When `test` is not `"none"`,
+#' `fitmeasures()` / `summary()` on the returned object additionally report
+#' fit indices at the effective df (frozen refit at the penalized estimates);
+#' this fit evaluation is experimental and disabled by default. If the
 #' optimization does not converge (convergence code != 0), a warning is issued.
 #'
 #' With `eps = "telescoping"`, the model is fit along a log-spaced sequence from
@@ -147,6 +171,9 @@ penalized_obj <- function(x, obj_fn, w, pen_fn, pen_par_id, diff_configs, ...) {
 #' # Compare parameter estimates
 #' summary(pen_fit)
 #'
+#' # Effective number of parameters and degrees of freedom
+#' effective_df(pen_fit)
+#'
 #' @importFrom utils modifyList
 #' @export
 penalized_est <- function(
@@ -157,6 +184,7 @@ penalized_est <- function(
   pen_fn = "l0a",
   pen_gr = NULL,
   se = "none",
+  test = "none",
   opt_control = list(),
   start = NULL,
   eps = .01,
@@ -216,6 +244,15 @@ penalized_est <- function(
     se <- "none"
   }
 
+  if (
+    !is.character(test) ||
+      length(test) != 1 ||
+      is.na(test) ||
+      !test %in% c("none", "Chisq", "SatorraBentler")
+  ) {
+    stop("test must be one of 'none', 'Chisq', or 'SatorraBentler'.")
+  }
+
   pen_fn_name <- if (is.character(pen_fn) && length(pen_fn) == 1) {
     pen_fn
   } else {
@@ -254,6 +291,17 @@ penalized_est <- function(
       pen_fn_stage <- function(z, ...) alf(z, eps = stage_eps)
       pen_gr_stage <- function(z, ...) gr_alf(z, eps = stage_eps)
     }
+    # Record the penalty specification so that downstream utilities
+    # (effective_df(), fitmeasures(), summary()) can resolve it from the
+    # returned object.
+    pen_spec <- list(
+      w = w,
+      pen_par_id = pen_par_id,
+      pen_diff_id = pen_diff_id,
+      pen_fn = if (is.null(pen_fn_name)) pen_fn else pen_fn_name,
+      eps = stage_eps,
+      test = test
+    )
     penalized_est_stage(
       x = x,
       w = w,
@@ -264,6 +312,7 @@ penalized_est <- function(
       se = se,
       opt_control = opt_control,
       start = stage_start,
+      pen_spec = pen_spec,
       ...
     )
   }
@@ -356,7 +405,7 @@ make_diff_configs <- function(pen_diff_id) {
   })
 }
 
-make_penalized_fit <- function(x, opt) {
+make_penalized_fit <- function(x, opt, pen_spec = NULL) {
   x_opt <- x@Options
   x_opt$start <- opt$par
   x_opt$do.fit <- FALSE
@@ -367,7 +416,21 @@ make_penalized_fit <- function(x, opt) {
     slotSampleStats = x@SampleStats,
     slotData = x@Data
   )
-  add_nlminb_info(out, opt)
+  # Note: S4 slot assignment is copy-on-write, so the nlminb information is
+  # carried by add_nlminb_info()'s return value (not in-place).
+  out <- add_nlminb_info(out, opt)
+  if (!is.null(pen_spec)) {
+    attr(out, "penalized") <- pen_spec
+    # A shared environment: R copies objects on write, so an attribute set
+    # inside a later method call would not persist on the caller's object.
+    # An environment is a shared reference, so every copy of this fit can
+    # read and write the same cache (see plavaan_frozen()). The parent is
+    # emptyenv() because the cache only stores internal objects and should
+    # not retain references from (or look up symbols in) the caller's frame.
+    attr(out, "plavaan.cache") <- new.env(parent = emptyenv())
+    class(out) <- "plavaan"
+  }
+  out
 }
 
 penalized_est_stage <- function(
@@ -380,6 +443,7 @@ penalized_est_stage <- function(
   se,
   opt_control,
   start,
+  pen_spec = NULL,
   ...
 ) {
   # Define default control parameters
@@ -452,7 +516,7 @@ penalized_est_stage <- function(
       "or adjusting optimization control parameters."
     )
   }
-  out <- make_penalized_fit(x, opt)
+  out <- make_penalized_fit(x, opt, pen_spec = pen_spec)
   if (se == "robust.huber.white") {
     hess <- numDeriv::hessian(f1, opt$par)
     attr(out, "hessian") <- hess
@@ -463,7 +527,7 @@ penalized_est_stage <- function(
         "(likely due to a singular or nearly-singular Hessian). ",
         "Standard errors are not available."
       )
-      out <- make_penalized_fit(x, opt)
+      out <- make_penalized_fit(x, opt, pen_spec = pen_spec)
     }
   }
   out

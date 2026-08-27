@@ -12,6 +12,11 @@
 #' @param rescale Either `"df"` (default) to rescale the total loss by
 #'   `(nrow - 1) / ncombn(nrow, 2)`, where `nrow` is the number of rows, or a
 #'   numeric value (likely between 0 and 1) to multiply the total loss by.
+#'   With `rescale = "df"` and a 0/1-valued `fun` such as `l0a`, the returned
+#'   value approximates the number of degrees of freedom of non-invariance in
+#'   the block: `0` when all rows are equal (full invariance) and `nrow - 1`
+#'   per column when all rows differ (fully free). It soft-counts how many of
+#'   the `nrow - 1` pairwise-invariance constraints per column are violated.
 #' @param ... Additional arguments passed to the loss function `fun`.
 #'
 #' @return A numeric scalar representing the sum of losses across all pairwise
@@ -27,6 +32,11 @@
 #'   \item Applying the loss function `fun` to each difference
 #'   \item Summing all the individual losses
 #' }
+#'
+#' [effective_df()] builds on this degrees-of-freedom interpretation
+#' (`rescale = "df"` with a 0/1-valued `fun` such as `l0a`) to report the
+#' effective number of parameters, and hence the effective model degrees of
+#' freedom, of penalized fits returned by [penalized_est()].
 #'
 #' @examples
 #' # Example with a simple matrix

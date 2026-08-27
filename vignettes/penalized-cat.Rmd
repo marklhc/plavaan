@@ -165,7 +165,7 @@ summary(fit_pen_mg)
 
 ## Evaluate Invariance
 
-Here are the estimated loadings and thresholds, and we can calculate the effective number of parameters that differ across groups:
+Here are the estimated loadings and thresholds. The effective number of parameters that differ across groups can be reported with `effective_df()`:
 
 ```{r}
 # Loadings
@@ -173,14 +173,12 @@ load_ests_g1 <- as.numeric(coef(fit_pen_mg)[load_g1])
 load_ests_g2 <- as.numeric(coef(fit_pen_mg)[load_g2])
 load_mat <- rbind(load_ests_g1, load_ests_g2)
 colnames(load_mat) <- names(coef(fit_pen_mg))[load_g1]
-eff_load_diff <- composite_pair_loss(load_mat, fun = l0a)
 
 # Thresholds
 thresh_ests_g1 <- as.numeric(coef(fit_pen_mg)[thresh_g1])
 thresh_ests_g2 <- as.numeric(coef(fit_pen_mg)[thresh_g2])
 thresh_mat <- rbind(thresh_ests_g1, thresh_ests_g2)
 colnames(thresh_mat) <- names(coef(fit_pen_mg))[thresh_g1]
-eff_thresh_diff <- composite_pair_loss(thresh_mat, fun = l0a)
 
 cat("Penalized Loading Estimates:\n")
 print(load_mat, digits = 3)
@@ -188,9 +186,10 @@ print(load_mat, digits = 3)
 cat("\nPenalized Threshold Estimates:\n")
 print(thresh_mat, digits = 3)
 
-cat("Effective number of non-invariant loadings:", eff_load_diff, "\n")
-cat("Effective number of non-invariant thresholds:", eff_thresh_diff, "\n")
-```  
+effective_df(fit_pen_mg)
+```
+
+For a difference-penalty block, `npar_effective` is the number of columns (one shared invariance baseline per parameter) plus the effective number of non-invariant values. Here the `loadings` row (9.00, versus 9 baselines) indicates that the loadings are effectively invariant, while the `thresholds` row (19.97, versus 18 baselines) indicates about 2 non-invariant thresholds, consistent with the score test above.
 
 The penalized estimation approach identifies which loadings and thresholds substantively differ across groups, providing an efficient, data-driven assessment of measurement invariance for ordinal data.
 

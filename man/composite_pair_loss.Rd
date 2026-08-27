@@ -19,7 +19,12 @@ pairwise differences. Default is \code{identity} (no transformation).}
 
 \item{rescale}{Either \code{"df"} (default) to rescale the total loss by
 \code{(nrow - 1) / ncombn(nrow, 2)}, where \code{nrow} is the number of rows, or a
-numeric value (likely between 0 and 1) to multiply the total loss by.}
+numeric value (likely between 0 and 1) to multiply the total loss by.
+With \code{rescale = "df"} and a 0/1-valued \code{fun} such as \code{l0a}, the returned
+value approximates the number of degrees of freedom of non-invariance in
+the block: \code{0} when all rows are equal (full invariance) and \code{nrow - 1}
+per column when all rows differ (fully free). It soft-counts how many of
+the \code{nrow - 1} pairwise-invariance constraints per column are violated.}
 
 \item{...}{Additional arguments passed to the loss function \code{fun}.}
 }
@@ -40,6 +45,11 @@ The function works by:
 \item Applying the loss function \code{fun} to each difference
 \item Summing all the individual losses
 }
+
+\code{\link[=effective_df]{effective_df()}} builds on this degrees-of-freedom interpretation
+(\code{rescale = "df"} with a 0/1-valued \code{fun} such as \code{l0a}) to report the
+effective number of parameters, and hence the effective model degrees of
+freedom, of penalized fits returned by \code{\link[=penalized_est]{penalized_est()}}.
 }
 \examples{
 # Example with a simple matrix
