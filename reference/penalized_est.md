@@ -17,6 +17,7 @@ penalized_est(
   pen_fn = "l0a",
   pen_gr = NULL,
   se = "none",
+  test = "none",
   opt_control = list(),
   start = NULL,
   eps = 0.01,
@@ -74,6 +75,24 @@ penalized_est(
   Hessian and first-order information, which is the same as used in the
   `"mlr"` estimator).
 
+- test:
+
+  Character string specifying the model test used by the fit evaluation
+  on the returned object
+  ([`fitmeasures()`](https://rdrr.io/pkg/lavaan/man/fitMeasures.html)
+  and the chi-square test in
+  [`summary()`](https://rdrr.io/r/base/summary.html)), via an internal
+  "frozen" refit. Fit evaluation for penalized fits is **experimental**,
+  so it is disabled by default: `"none"` (default) means no model test
+  is run,
+  [`fitmeasures()`](https://rdrr.io/pkg/lavaan/man/fitMeasures.html) is
+  unavailable, and [`summary()`](https://rdrr.io/r/base/summary.html)
+  shows no chi-square test. Set to `"Chisq"` (ML/PML estimators) or
+  `"SatorraBentler"` (WLSMV/MLM/MLR) to enable fit measures and the
+  chi-square test; an experimental notice is then shown when
+  [`fitmeasures()`](https://rdrr.io/pkg/lavaan/man/fitMeasures.html) or
+  [`summary()`](https://rdrr.io/r/base/summary.html) is called.
+
 - opt_control:
 
   A list of control parameters passed to
@@ -110,9 +129,15 @@ penalized_est(
 ## Value
 
 A lavaan model object updated with the penalized parameter estimates.
-With `eps = "telescoping"`, it includes a `"telescoping"` data frame
-with per-stage epsilon values, parameter changes, objective values, and
-convergence indicators.
+The object has S4 class `plavaan` (a subclass of `lavaan`) and a
+`penalized` attribute recording the penalty specification, which enables
+[`effective_df()`](https://marklhc.github.io/plavaan/reference/effective_df.md)
+and, when `test` is not `"none"`,
+[`fitmeasures()`](https://rdrr.io/pkg/lavaan/man/fitMeasures.html) and
+[`summary()`](https://rdrr.io/r/base/summary.html) with effective
+degrees of freedom. With `eps = "telescoping"`, it also includes a
+`"telescoping"` data frame with per-stage epsilon values, parameter
+changes, objective values, and convergence indicators.
 
 ## Details
 
@@ -122,9 +147,17 @@ lavaan objective function with a penalty term. Only the parameter
 estimates and the log-likelihood should be interpreted. The returned
 object was not "fitted" (`do.fit = FALSE`) to avoid users interpreting
 the standard errors, which are generally not valid with penalized
-estimation. The degrees of freedom may also be inaccurate. If the
-optimization does not converge (convergence code != 0), a warning is
-issued.
+estimation. The nominal model degrees of freedom can also be misleading,
+as the penalized model is often under-identified;
+[`effective_df()`](https://marklhc.github.io/plavaan/reference/effective_df.md)
+reports the effective number of parameters and the effective model
+degrees of freedom. When `test` is not `"none"`,
+[`fitmeasures()`](https://rdrr.io/pkg/lavaan/man/fitMeasures.html) /
+[`summary()`](https://rdrr.io/r/base/summary.html) on the returned
+object additionally report fit indices at the effective df (frozen refit
+at the penalized estimates); this fit evaluation is experimental and
+disabled by default. If the optimization does not converge (convergence
+code != 0), a warning is issued.
 
 With `eps = "telescoping"`, the model is fit along a log-spaced sequence
 from `telescoping_control$eps_1` to `telescoping_control$eps_end`. By
@@ -143,6 +176,15 @@ will be missing unless `se = "robust.huber.white"` was specified. Even
 then, they are based on an experimental sandwich approximation and
 should be interpreted with caution.
 
+Fit evaluation
+([`fitmeasures()`](https://rdrr.io/pkg/lavaan/man/fitMeasures.html) and
+the chi-square test in
+[`summary()`](https://rdrr.io/r/base/summary.html)) is also
+**experimental** and disabled by default (`test = "none"`). Enable it
+with `test = "Chisq"` (or `"SatorraBentler"`); interpret any resulting
+fit indices with caution, as they are based on a frozen refit at the
+penalized estimates with the effective degrees of freedom.
+
 ## See also
 
 [`lavaan`](https://rdrr.io/pkg/lavaan/man/lavaan.html),
@@ -152,8 +194,6 @@ should be interpreted with caution.
 
 ``` r
 library(lavaan)
-#> This is lavaan 0.7-2
-#> lavaan is FREE software! Please report any bugs.
 
 # Define a longitudinal factor model with PoliticalDemocracy data
 model <- "
@@ -196,11 +236,12 @@ pen_fit <- penalized_est(
 
 # Compare parameter estimates
 summary(pen_fit)
+#> Penalized fit (w = 0.03, eps = 0.01, penalty = l0a): effective npar = 24, effective df = 20 (nominal df = 13).
 #> lavaan 0.7-2 ended normally after 129 iterations
 #> 
 #>   Estimator                                         ML
 #>   Optimization method                           NLMINB
-#>   Number of model parameters                        31
+#>   Number of model parameters                        24
 #> 
 #>   Number of observations                            75
 #> 
@@ -260,4 +301,16 @@ summary(pen_fit)
 #>    .y7                3.615
 #>    .y8                2.456
 #> 
+
+# Effective number of parameters and degrees of freedom
+effective_df(pen_fit)
+#>            npar npar_effective df_saved
+#> loadings      8       4.016903 3.983097
+#> intercepts    8       4.986691 3.013309
+#> TOTAL        31      24.003594 6.996406
+#> 
+#> n_stats (sample moments):  44
+#> nominal model df:  13
+#> effective model df:  20
+#> penalty:  l0a (w = 0.03, eps = 0.01)
 ```

@@ -501,11 +501,12 @@ fit_pen_mg <- penalized_est(
     )
 )
 summary(fit_pen_mg)
+#> Penalized fit (w = 0.03, eps = 0.01, penalty = l0a): effective npar = 40.98, effective df = 67.02 (nominal df = 42).
 #> lavaan 0.7-2 ended normally after 207 iterations
 #> 
 #>   Estimator                                       DWLS
 #>   Optimization method                           NLMINB
-#>   Number of model parameters                        66
+#>   Number of model parameters                        41
 #> 
 #>   Number of observations per group:                   
 #>     Pasteur                                        156
@@ -655,8 +656,9 @@ summary(fit_pen_mg)
 
 ## Evaluate Invariance
 
-Here are the estimated loadings and thresholds, and we can calculate the
-effective number of parameters that differ across groups:
+Here are the estimated loadings and thresholds. The effective number of
+parameters that differ across groups can be reported with
+[`effective_df()`](https://marklhc.github.io/plavaan/reference/effective_df.md):
 
 ``` r
 
@@ -665,14 +667,12 @@ load_ests_g1 <- as.numeric(coef(fit_pen_mg)[load_g1])
 load_ests_g2 <- as.numeric(coef(fit_pen_mg)[load_g2])
 load_mat <- rbind(load_ests_g1, load_ests_g2)
 colnames(load_mat) <- names(coef(fit_pen_mg))[load_g1]
-eff_load_diff <- composite_pair_loss(load_mat, fun = l0a)
 
 # Thresholds
 thresh_ests_g1 <- as.numeric(coef(fit_pen_mg)[thresh_g1])
 thresh_ests_g2 <- as.numeric(coef(fit_pen_mg)[thresh_g2])
 thresh_mat <- rbind(thresh_ests_g1, thresh_ests_g2)
 colnames(thresh_mat) <- names(coef(fit_pen_mg))[thresh_g1]
-eff_thresh_diff <- composite_pair_loss(thresh_mat, fun = l0a)
 
 cat("Penalized Loading Estimates:\n")
 #> Penalized Loading Estimates:
@@ -695,11 +695,25 @@ print(thresh_mat, digits = 3)
 #> thresh_ests_g1 0.788  3.11 -1.16  1.06 -0.217  2.47 -0.763  2.88
 #> thresh_ests_g2 0.788  3.11 -1.15  1.69 -0.221  2.48 -0.766  2.88
 
-cat("Effective number of non-invariant loadings:", eff_load_diff, "\n")
-#> Effective number of non-invariant loadings: 0.002959255
-cat("Effective number of non-invariant thresholds:", eff_thresh_diff, "\n")
-#> Effective number of non-invariant thresholds: 1.973607
+effective_df(fit_pen_mg)
+#>            npar npar_effective  df_saved
+#> loadings     18       9.002959  8.997041
+#> thresholds   36      19.973607 16.026393
+#> TOTAL        66      40.976566 25.023434
+#> 
+#> n_stats (sample moments):  108
+#> nominal model df:  42
+#> effective model df:  67.02
+#> penalty:  l0a (w = 0.03, eps = 0.01)
 ```
+
+For a difference-penalty block, `npar_effective` is the number of
+columns (one shared invariance baseline per parameter) plus the
+effective number of non-invariant values. Here the `loadings` row (9.00,
+versus 9 baselines) indicates that the loadings are effectively
+invariant, while the `thresholds` row (19.97, versus 18 baselines)
+indicates about 2 non-invariant thresholds, consistent with the score
+test above.
 
 The penalized estimation approach identifies which loadings and
 thresholds substantively differ across groups, providing an efficient,

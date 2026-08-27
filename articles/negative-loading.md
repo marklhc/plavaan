@@ -115,65 +115,63 @@ fit_pen <- penalized_est(
   se = "robust.huber.white"
 )
 summary(fit_pen)
+#> Penalized fit (w = 0.03, eps = 0.01, penalty = l0a): effective npar = 21.99, effective df = 13.01 (nominal df = 8).
 #> lavaan 0.7-2 ended normally after 113 iterations
 #> 
 #>   Estimator                                         ML
 #>   Optimization method                           NLMINB
-#>   Number of model parameters                        27
+#>   Number of model parameters                        22
 #> 
 #>   Number of observations                            75
 #> 
 #> 
 #> Parameter Estimates:
 #> 
-#>   Standard errors                             Sandwich
-#>   Information bread                           Observed
-#>   Observed information based on                Hessian
 #> 
 #> Latent Variables:
-#>                    Estimate  Std.Err  z-value  P(>|z|)
-#>   dem60 =~                                            
-#>     y1                2.095    0.214    9.788    0.000
-#>     y2               -2.964    0.288  -10.277    0.000
-#>     y3                2.260    0.324    6.983    0.000
-#>     y4                2.978    0.220   13.533    0.000
-#>   dem65 =~                                            
-#>     y5                2.093    0.216    9.704    0.000
-#>     y6               -2.963    0.289  -10.235    0.000
-#>     y8                2.981    0.220   13.523    0.000
+#>                    Estimate
+#>   dem60 =~                 
+#>     y1                2.095
+#>     y2               -2.964
+#>     y3                2.260
+#>     y4                2.978
+#>   dem65 =~                 
+#>     y5                2.093
+#>     y6               -2.963
+#>     y8                2.981
 #> 
 #> Covariances:
-#>                    Estimate  Std.Err  z-value  P(>|z|)
-#>   dem60 ~~                                            
-#>     dem65             0.872    0.056   15.692    0.000
-#>  .y1 ~~                                               
-#>    .y5                0.940    0.454    2.071    0.038
-#>  .y2 ~~                                               
-#>    .y6                1.747    0.899    1.943    0.052
-#>  .y4 ~~                                               
-#>    .y8                0.246    0.505    0.488    0.626
+#>                    Estimate
+#>   dem60 ~~                 
+#>     dem65             0.872
+#>  .y1 ~~                    
+#>    .y5                0.940
+#>  .y2 ~~                    
+#>    .y6                1.747
+#>  .y4 ~~                    
+#>    .y8                0.246
 #> 
 #> Intercepts:
-#>                    Estimate  Std.Err  z-value  P(>|z|)
-#>     dem60             0.000                           
-#>     dem65            -0.146    0.073   -2.008    0.045
-#>    .y1                5.456    0.291   18.778    0.000
-#>    .y2               -4.252    0.455   -9.354    0.000
-#>    .y3                6.563    0.376   17.442    0.000
-#>    .y4                4.465    0.376   11.868    0.000
-#>    .y5                5.455    0.290   18.802    0.000
-#>    .y6               -3.412    0.450   -7.580    0.000
-#>    .y8                4.466    0.376   11.868    0.000
+#>                    Estimate
+#>     dem60             0.000
+#>     dem65            -0.146
+#>    .y1                5.456
+#>    .y2               -4.252
+#>    .y3                6.563
+#>    .y4                4.465
+#>    .y5                5.455
+#>    .y6               -3.412
+#>    .y8                4.466
 #> 
 #> Variances:
-#>                    Estimate  Std.Err  z-value  P(>|z|)
-#>     dem60             1.000                           
-#>     dem65             0.868    0.094    9.244    0.000
-#>    .y1                2.206    0.521    4.238    0.000
-#>    .y2                6.472    1.334    4.850    0.000
-#>    .y3                5.514    1.086    5.077    0.000
-#>    .y4                2.456    0.627    3.914    0.000
-#>    .y5                3.002    0.615    4.884    0.000
-#>    .y6                3.747    0.803    4.664    0.000
-#>    .y8                2.429    0.705    3.445    0.001
+#>                    Estimate
+#>     dem60             1.000
+#>     dem65             0.868
+#>    .y1                2.206
+#>    .y2                6.472
+#>    .y3                5.514
+#>    .y4                2.456
+#>    .y5                3.002
+#>    .y6                3.747
+#>    .y8                2.429
 ```

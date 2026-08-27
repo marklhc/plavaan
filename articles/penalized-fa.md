@@ -75,17 +75,25 @@ parTable(fit)
 pefa_fit <- penalized_est(
     fit,
     w = .03,
-    pen_par_id = 4:10
+    pen_par_id = 4:10,
+    test = "Chisq"
 )
 summary(pefa_fit)
+#> Penalized fit (w = 0.03, eps = 0.01, penalty = l0a): effective npar = 16.05, effective df = 11.95 (nominal df = 6).
+#> Fit evaluation for penalized fits is experimental; interpret the chi-square test and fit indices with caution.
 #> lavaan 0.7-2 ended normally after 126 iterations
 #> 
 #>   Estimator                                         ML
 #>   Optimization method                           NLMINB
-#>   Number of model parameters                        22
+#>   Number of model parameters                        16
 #> 
 #>   Number of observations                            75
 #> 
+#> Model Test User Model:
+#>                                                       
+#>   Test statistic                                19.923
+#>   Degrees of freedom                            11.948
+#>   P-value (Chi-square)                           0.067
 #> 
 #> Parameter Estimates:
 #> 
@@ -125,6 +133,59 @@ summary(pefa_fit)
 #>    .y3                5.512
 #>    .y4                2.017
 #>     dem60             1.000
+```
+
+Fit indices can be obtained directly from the penalized fit. Fit
+evaluation is experimental and disabled by default, so the fit above was
+created with `test = "Chisq"`; with the default `test = "none"`,
+[`fitmeasures()`](https://rdrr.io/pkg/lavaan/man/fitMeasures.html) is
+unavailable and [`summary()`](https://rdrr.io/r/base/summary.html) shows
+no chi-square test. When enabled,
+[`fitmeasures()`](https://rdrr.io/pkg/lavaan/man/fitMeasures.html)
+refits the model with all parameters frozen at the penalized estimates
+and reports the indices at the effective degrees of freedom (11.97 here,
+versus the nominal 6), and an experimental notice is shown. For the
+under-identified models later in this vignette (negative nominal df),
+the effective df is the meaningful value.
+
+``` r
+
+fitmeasures(pefa_fit, c("chisq", "df", "cfi", "rmsea"))
+#> Fit evaluation for penalized fits is experimental; interpret fit indices with caution.
+#>                  npar                  fmin                 chisq 
+#>                16.000                 0.133                19.923 
+#>                    df                pvalue        baseline.chisq 
+#>                11.948                 0.067               406.880 
+#>           baseline.df       baseline.pvalue                   cfi 
+#>                21.000                 0.000                 0.979 
+#>                   tli                  nnfi                   rfi 
+#>                 0.964                 0.964                 0.914 
+#>                   nfi                  pnfi                   ifi 
+#>                 0.951                 0.541                 0.980 
+#>                   rni                  logl     unrestricted.logl 
+#>                 0.979              -936.175              -926.214 
+#>                   aic                   bic                ntotal 
+#>              1904.454              1941.654                75.000 
+#>                  bic2                 rmsea        rmsea.ci.lower 
+#>              1930.527                 0.094                 0.000 
+#>        rmsea.ci.upper        rmsea.ci.level          rmsea.pvalue 
+#>                 0.165                 0.900                 0.154 
+#>        rmsea.close.h0 rmsea.notclose.pvalue     rmsea.notclose.h0 
+#>                 0.050                 0.668                 0.080 
+#>                   rmr            rmr_nomean                  srmr 
+#>                 0.309                 0.309                 0.038 
+#>          srmr_bentler   srmr_bentler_nomean                  crmr 
+#>                 0.038                 0.038                 0.044 
+#>           crmr_nomean            srmr_mplus     srmr_mplus_nomean 
+#>                 0.044                 0.038                 0.038 
+#>                   gfi          gfi.ci.lower          gfi.ci.upper 
+#>                 0.972                 0.916                 1.000 
+#>          gfi.ci.level                 cn_05                 cn_01 
+#>                 0.900                79.891                99.405 
+#>            gfi_lisrel           agfi_lisrel                  pgfi 
+#>                 0.931                 0.837                 0.397 
+#>                   mfi                  ecvi 
+#>                 0.948                 0.692
 ```
 
 ## Penalize Cross-loadings and Unique Covariances
@@ -211,11 +272,12 @@ pefa_fit2 <- penalized_est(
     pen_par_id = c(4:10, 15:35)
 )
 summary(pefa_fit2)
+#> Penalized fit (w = 0.03, eps = 0.01, penalty = l0a): effective npar = 16.56, effective df = 11.44 (nominal df = -15).
 #> lavaan 0.7-2 ended normally after 182 iterations
 #> 
 #>   Estimator                                         ML
 #>   Optimization method                           NLMINB
-#>   Number of model parameters                        43
+#>   Number of model parameters                        17
 #> 
 #>   Number of observations                            75
 #> 
@@ -287,19 +349,27 @@ summary(pefa_fit2)
 #>     dem60             1.000
 ```
 
-The unique covariances were all estimated close to zero. One can
-approximate the “effective” number of cross-loadings and unique
-covariances by:
+The unique covariances were all estimated close to zero. The effective
+number of cross-loadings and unique covariances can be reported with
+[`effective_df()`](https://marklhc.github.io/plavaan/reference/effective_df.md):
 
 ``` r
 
-pen_ests <- as.numeric(coef(pefa_fit2)[c(4:10, 15:35)])
-sum(l0a(pen_ests))
-#> [1] 1.564465
+effective_df(pefa_fit2)
+#>                npar npar_effective df_saved
+#> direct penalty   28       1.564465 26.43554
+#> TOTAL            43      16.564465 26.43554
+#> 
+#> n_stats (sample moments):  28
+#> nominal model df:  -15 (negative: the nominal model is under-identified; the effective df is the meaningful quantity)
+#> effective model df:  11.44
+#> penalty:  l0a (w = 0.03, eps = 0.01)
 ```
 
-So out of 28 parameters penalized, only about 1.6 (or close to 2) are
-effectively non-zero.
+So out of 28 penalized parameters, only about 1.6 (or close to 2) are
+effectively non-zero. The table also shows the effective model degrees
+of freedom (11.44), where the nominal df (-15) is negative because the
+model is under-identified.
 
 ## Penalize Cross-Loadings, Unique Covariances, and Difference in Loadings and Intercepts Across Time
 
@@ -404,11 +474,12 @@ pefa_fit3 <- penalized_est(
     )
 )
 summary(pefa_fit3, standardized = TRUE)
+#> Penalized fit (w = 0.03, eps = 0.01, penalty = l0a): effective npar = 35.4, effective df = 41.6 (nominal df = 7).
 #> lavaan 0.7-2 ended normally after 190 iterations
 #> 
 #>   Estimator                                         ML
 #>   Optimization method                           NLMINB
-#>   Number of model parameters                        70
+#>   Number of model parameters                        35
 #> 
 #>   Number of observations                            75
 #> 
@@ -521,26 +592,30 @@ summary(pefa_fit3, standardized = TRUE)
 #>    .y8                2.655    2.655    0.264
 ```
 
-We can again compute the “effective” number of cross-loadings and unique
-covariances that are non-zero:
+[`effective_df()`](https://marklhc.github.io/plavaan/reference/effective_df.md)
+reports the effective number of cross-loadings and unique covariances
+that are non-zero, and the effective number of loadings and intercepts
+that differ across time:
 
 ``` r
 
-pen_ests2 <- as.numeric(coef(pefa_fit3)[c(4:10, 35:55)])
-sum(l0a(pen_ests2))
-#> [1] 1.343755
+effective_df(pefa_fit3)
+#>                npar npar_effective  df_saved
+#> direct penalty   28       1.343755 26.656245
+#> loadings          8       4.020045  3.979955
+#> intercepts        8       4.032270  3.967730
+#> TOTAL            70      35.396069 34.603931
+#> 
+#> n_stats (sample moments):  77
+#> nominal model df:  7
+#> effective model df:  41.6
+#> penalty:  l0a (w = 0.03, eps = 0.01)
 ```
 
-And the “effective” number of loadings and intercepts that differ across
-time:
-
-``` r
-
-ld_ests <- as.numeric(coef(pefa_fit3)[11:18])
-int_ests <- as.numeric(coef(pefa_fit3)[27:34])
-ld_mat <- matrix(ld_ests, nrow = 2, byrow = TRUE)
-int_mat <- matrix(int_ests, nrow = 2, byrow = TRUE)
-composite_pair_loss(ld_mat, fun = l0a) +
-    composite_pair_loss(int_mat, fun = l0a)
-#> [1] 0.05231487
-```
+For a difference-penalty block, `npar_effective` is the number of
+columns (one shared invariance baseline per parameter) plus the
+effective number of non-invariant values. Here the `loadings` and
+`intercepts` rows (4.02 and 4.03, versus 4 baseline values each)
+indicate that the loadings and intercepts are effectively invariant
+across time, while only about 1.3 of the 28 cross-loadings and unique
+covariances are effectively non-zero.

@@ -74,7 +74,12 @@ pairwise differences. Default is <code>identity</code> (no transformation).</p><
 <dt id="arg-rescale">rescale<a class="anchor" aria-label="anchor" href="#arg-rescale"></a></dt>
 <dd><p>Either <code>"df"</code> (default) to rescale the total loss by
 <code>(nrow - 1) / ncombn(nrow, 2)</code>, where <code>nrow</code> is the number of rows, or a
-numeric value (likely between 0 and 1) to multiply the total loss by.</p></dd>
+numeric value (likely between 0 and 1) to multiply the total loss by.
+With <code>rescale = "df"</code> and a 0/1-valued <code>fun</code> such as <code>l0a</code>, the returned
+value approximates the number of degrees of freedom of non-invariance in
+the block: <code>0</code> when all rows are equal (full invariance) and <code>nrow - 1</code>
+per column when all rows differ (fully free). It soft-counts how many of
+the <code>nrow - 1</code> pairwise-invariance constraints per column are violated.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
@@ -94,7 +99,11 @@ combinations of rows.</p>
 <li><p>Computing the difference between each pair of rows</p></li>
 <li><p>Applying the loss function <code>fun</code> to each difference</p></li>
 <li><p>Summing all the individual losses</p></li>
-</ol></div>
+</ol><p><code><a href="effective_df.html">effective_df()</a></code> builds on this degrees-of-freedom interpretation
+(<code>rescale = "df"</code> with a 0/1-valued <code>fun</code> such as <code>l0a</code>) to report the
+effective number of parameters, and hence the effective model degrees of
+freedom, of penalized fits returned by <code><a href="penalized_est.html">penalized_est()</a></code>.</p>
+    </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>

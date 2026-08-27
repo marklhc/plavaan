@@ -32,7 +32,12 @@ composite_pair_loss(x, fun, trans = identity, rescale = "df", ...)
   Either `"df"` (default) to rescale the total loss by
   `(nrow - 1) / ncombn(nrow, 2)`, where `nrow` is the number of rows, or
   a numeric value (likely between 0 and 1) to multiply the total loss
-  by.
+  by. With `rescale = "df"` and a 0/1-valued `fun` such as `l0a`, the
+  returned value approximates the number of degrees of freedom of
+  non-invariance in the block: `0` when all rows are equal (full
+  invariance) and `nrow - 1` per column when all rows differ (fully
+  free). It soft-counts how many of the `nrow - 1` pairwise-invariance
+  constraints per column are violated.
 
 - ...:
 
@@ -58,6 +63,13 @@ The function works by:
 5.  Applying the loss function `fun` to each difference
 
 6.  Summing all the individual losses
+
+[`effective_df()`](https://marklhc.github.io/plavaan/reference/effective_df.md)
+builds on this degrees-of-freedom interpretation (`rescale = "df"` with
+a 0/1-valued `fun` such as `l0a`) to report the effective number of
+parameters, and hence the effective model degrees of freedom, of
+penalized fits returned by
+[`penalized_est()`](https://marklhc.github.io/plavaan/reference/penalized_est.md).
 
 ## Examples
 

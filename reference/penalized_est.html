@@ -68,6 +68,7 @@ the optimized parameter estimates.</p>
 <span>  pen_fn <span class="op">=</span> <span class="st">"l0a"</span>,</span>
 <span>  pen_gr <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  se <span class="op">=</span> <span class="st">"none"</span>,</span>
+<span>  test <span class="op">=</span> <span class="st">"none"</span>,</span>
 <span>  opt_control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  start <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  eps <span class="op">=</span> <span class="fl">0.01</span>,</span>
@@ -123,6 +124,18 @@ Options are <code>"none"</code> (default; no standard errors) or <code>"robust.h
 which is the same as used in the <code>"mlr"</code> estimator).</p></dd>
 
 
+<dt id="arg-test">test<a class="anchor" aria-label="anchor" href="#arg-test"></a></dt>
+<dd><p>Character string specifying the model test used by the fit
+evaluation on the returned object (<code><a href="https://rdrr.io/pkg/lavaan/man/fitMeasures.html" class="external-link">fitmeasures()</a></code> and the chi-square test
+in <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code>), via an internal "frozen" refit. Fit evaluation for
+penalized fits is <strong>experimental</strong>, so it is disabled by default:
+<code>"none"</code> (default) means no model test is run, <code><a href="https://rdrr.io/pkg/lavaan/man/fitMeasures.html" class="external-link">fitmeasures()</a></code> is
+unavailable, and <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> shows no chi-square test. Set to <code>"Chisq"</code>
+(ML/PML estimators) or <code>"SatorraBentler"</code> (WLSMV/MLM/MLR) to enable fit
+measures and the chi-square test; an experimental notice is then shown
+when <code><a href="https://rdrr.io/pkg/lavaan/man/fitMeasures.html" class="external-link">fitmeasures()</a></code> or <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> is called.</p></dd>
+
+
 <dt id="arg-opt-control">opt_control<a class="anchor" aria-label="anchor" href="#arg-opt-control"></a></dt>
 <dd><p>A list of control parameters passed to <code><a href="https://rdrr.io/r/stats/nlminb.html" class="external-link">stats::nlminb()</a></code>.
 Default includes <code>eval.max = 2e4</code>, <code>iter.max = 1e4</code>, and <code>abs.tol = 1e-20</code>.</p></dd>
@@ -157,9 +170,12 @@ stage after the first uses the preceding stage's estimates.</p></dd>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A lavaan model object updated with the penalized parameter estimates.
-With <code>eps = "telescoping"</code>, it includes a <code>"telescoping"</code> data frame with
-per-stage epsilon values, parameter changes, objective values, and
-convergence indicators.</p>
+The object has S4 class <code>plavaan</code> (a subclass of <code>lavaan</code>) and a
+<code>penalized</code> attribute recording the penalty specification, which enables
+<code><a href="effective_df.html">effective_df()</a></code> and, when <code>test</code> is not <code>"none"</code>, <code><a href="https://rdrr.io/pkg/lavaan/man/fitMeasures.html" class="external-link">fitmeasures()</a></code> and
+<code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> with effective degrees of freedom. With <code>eps = "telescoping"</code>,
+it also includes a <code>"telescoping"</code> data frame with per-stage epsilon
+values, parameter changes, objective values, and convergence indicators.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -168,7 +184,13 @@ combines the standard lavaan objective function with a penalty term. Only the
 parameter estimates and the log-likelihood should be interpreted. The
 returned object was not "fitted" (<code>do.fit = FALSE</code>) to avoid users
 interpreting the standard errors, which are generally not valid with
-penalized estimation. The degrees of freedom may also be inaccurate. If the
+penalized estimation. The nominal model degrees of freedom can also be
+misleading, as the penalized model is often under-identified;
+<code><a href="effective_df.html">effective_df()</a></code> reports the effective number of parameters and the
+effective model degrees of freedom. When <code>test</code> is not <code>"none"</code>,
+<code><a href="https://rdrr.io/pkg/lavaan/man/fitMeasures.html" class="external-link">fitmeasures()</a></code> / <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> on the returned object additionally report
+fit indices at the effective df (frozen refit at the penalized estimates);
+this fit evaluation is experimental and disabled by default. If the
 optimization does not converge (convergence code != 0), a warning is issued.</p>
 <p>With <code>eps = "telescoping"</code>, the model is fit along a log-spaced sequence from
 <code>telescoping_control$eps_1</code> to <code>telescoping_control$eps_end</code>. By default,
@@ -186,6 +208,11 @@ has a <code>"telescoping"</code> attribute with stage diagnostics.</p>
 by <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> or <code><a href="https://rdrr.io/pkg/lavaan/man/parameterEstimates.html" class="external-link">parameterEstimates()</a></code> will be missing unless
 <code>se = "robust.huber.white"</code> was specified. Even then, they are based on an
 experimental sandwich approximation and should be interpreted with caution.</p>
+<p>Fit evaluation (<code><a href="https://rdrr.io/pkg/lavaan/man/fitMeasures.html" class="external-link">fitmeasures()</a></code> and the chi-square test in <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code>) is
+also <strong>experimental</strong> and disabled by default (<code>test = "none"</code>). Enable it
+with <code>test = "Chisq"</code> (or <code>"SatorraBentler"</code>); interpret any resulting fit
+indices with caution, as they are based on a frozen refit at the penalized
+estimates with the effective degrees of freedom.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
@@ -195,8 +222,6 @@ experimental sandwich approximation and should be interpreted with caution.</p>
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://lavaan.ugent.be" class="external-link">lavaan</a></span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> This is lavaan 0.7-2</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> lavaan is FREE software! Please report any bugs.</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Define a longitudinal factor model with PoliticalDemocracy data</span></span></span>
 <span class="r-in"><span><span class="va">model</span> <span class="op">&lt;-</span> <span class="st">"</span></span></span>
@@ -239,11 +264,12 @@ experimental sandwich approximation and should be interpreted with caution.</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Compare parameter estimates</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">pen_fit</span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Penalized fit (w = 0.03, eps = 0.01, penalty = l0a): effective npar = 24, effective df = 20 (nominal df = 13).</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> lavaan 0.7-2 ended normally after 129 iterations</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   Estimator                                         ML</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   Optimization method                           NLMINB</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   Number of model parameters                        31</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   Number of model parameters                        24</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   Number of observations                            75</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -303,6 +329,18 @@ experimental sandwich approximation and should be interpreted with caution.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    .y7                3.615</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    .y8                2.456</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Effective number of parameters and degrees of freedom</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="effective_df.html">effective_df</a></span><span class="op">(</span><span class="va">pen_fit</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            npar npar_effective df_saved</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> loadings      8       4.016903 3.983097</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> intercepts    8       4.986691 3.013309</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> TOTAL        31      24.003594 6.996406</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> n_stats (sample moments):  44</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> nominal model df:  13</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> effective model df:  20</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> penalty:  l0a (w = 0.03, eps = 0.01)</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

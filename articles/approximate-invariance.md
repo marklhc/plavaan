@@ -77,67 +77,65 @@ fit_pen <- penalized_est(
   telescoping_control = list(warm_start = TRUE)
 )
 summary(fit_pen)
+#> Penalized fit (w = 0.03, eps = 0.000695192796177561, penalty = l0a): effective npar = 22, effective df = 13 (nominal df = 8).
 #> lavaan 0.7-2 ended normally after 32 iterations
 #> 
 #>   Estimator                                         ML
 #>   Optimization method                           NLMINB
-#>   Number of model parameters                        27
+#>   Number of model parameters                        22
 #> 
 #>   Number of observations                            75
 #> 
 #> 
 #> Parameter Estimates:
 #> 
-#>   Standard errors                             Sandwich
-#>   Information bread                           Observed
-#>   Observed information based on                Hessian
 #> 
 #> Latent Variables:
-#>                    Estimate  Std.Err  z-value  P(>|z|)
-#>   dem60 =~                                            
-#>     y1                2.095    0.214    9.771    0.000
-#>     y2                2.963    0.289   10.250    0.000
-#>     y3                2.260    0.324    6.982    0.000
-#>     y4                2.979    0.220   13.524    0.000
-#>   dem65 =~                                            
-#>     y5                2.095    0.215    9.762    0.000
-#>     y6                2.963    0.289   10.244    0.000
-#>     y8                2.980    0.220   13.521    0.000
+#>                    Estimate
+#>   dem60 =~                 
+#>     y1                2.095
+#>     y2                2.963
+#>     y3                2.260
+#>     y4                2.979
+#>   dem65 =~                 
+#>     y5                2.095
+#>     y6                2.963
+#>     y8                2.980
 #> 
 #> Covariances:
-#>                    Estimate  Std.Err  z-value  P(>|z|)
-#>   dem60 ~~                                            
-#>     dem65             0.872    0.056   15.694    0.000
-#>  .y1 ~~                                               
-#>    .y5                0.939    0.454    2.070    0.038
-#>  .y2 ~~                                               
-#>    .y6                1.747    0.899    1.942    0.052
-#>  .y4 ~~                                               
-#>    .y8                0.246    0.505    0.486    0.627
+#>                    Estimate
+#>   dem60 ~~                 
+#>     dem65             0.872
+#>  .y1 ~~                    
+#>    .y5                0.939
+#>  .y2 ~~                    
+#>    .y6                1.747
+#>  .y4 ~~                    
+#>    .y8                0.246
 #> 
 #> Intercepts:
-#>                    Estimate  Std.Err  z-value  P(>|z|)
-#>     dem60             0.000                           
-#>     dem65            -0.145    0.072   -2.009    0.045
-#>    .y1                5.455    0.290   18.785    0.000
-#>    .y2                4.256    0.453    9.399    0.000
-#>    .y3                6.563    0.376   17.441    0.000
-#>    .y4                4.464    0.376   11.869    0.000
-#>    .y5                5.455    0.290   18.795    0.000
-#>    .y6                3.408    0.448    7.607    0.000
-#>    .y8                4.464    0.376   11.869    0.000
+#>                    Estimate
+#>     dem60             0.000
+#>     dem65            -0.145
+#>    .y1                5.455
+#>    .y2                4.256
+#>    .y3                6.563
+#>    .y4                4.464
+#>    .y5                5.455
+#>    .y6                3.408
+#>    .y8                4.464
 #> 
 #> Variances:
-#>                    Estimate  Std.Err  z-value  P(>|z|)
-#>     dem60             1.000                           
-#>     dem65             0.868    0.094    9.244    0.000
-#>    .y1                2.207    0.521    4.237    0.000
-#>    .y2                6.472    1.333    4.854    0.000
-#>    .y3                5.514    1.086    5.078    0.000
-#>    .y4                2.454    0.628    3.910    0.000
-#>    .y5                3.001    0.614    4.886    0.000
-#>    .y6                3.748    0.804    4.664    0.000
-#>    .y8                2.432    0.704    3.452    0.001
+#>                    Estimate
+#>     dem60             1.000
+#>     dem65             0.868
+#>    .y1                2.207
+#>    .y2                6.472
+#>    .y3                5.514
+#>    .y4                2.454
+#>    .y5                3.001
+#>    .y6                3.748
+#>    .y8                2.432
 ```
 
 The penalized estimation finds a solution where the loadings and
