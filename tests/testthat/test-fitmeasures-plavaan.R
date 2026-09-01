@@ -212,6 +212,47 @@ test_that("fitmeasures on a group fit uses the total sample size", {
   expect_true(is.finite(unname(fm["bic"])))
 })
 
+test_that("fitmeasures forwards the fit_measures selection (and other args)", {
+  # Regression: the plavaan fitmeasures() method was declared (object, ...),
+  # so lavaan's fitmeasures() generic named formals (fit_measures, output,
+  # level, ...) were matched to the generic at dispatch and then dropped
+  # before reaching the method. The selection was therefore ignored and every
+  # call returned the full set of fit measures. The method now declares and
+  # forwards them. A fresh fit is used so the test does not depend on the
+  # cache state of the shared fixtures (see the caching test below).
+  fit_fs <- cfa(
+    "dem60 =~ y1 + y2 + y3 + y4
+     dem65 =~ y5 + y6 + y7 + y8
+     dem60 ~~ dem65",
+    data = PoliticalDemocracy, std.lv = TRUE, do.fit = FALSE
+  )
+  pt <- parTable(fit_fs)
+  l60 <- pt$free[pt$op == "=~" & pt$lhs == "dem60"]
+  l65 <- pt$free[pt$op == "=~" & pt$lhs == "dem65"]
+  pen_fs <- penalized_est(
+    fit_fs, w = 0.03, pen_diff_id = list(loadings = rbind(l60, l65)),
+    eps = .01, test = "Chisq"
+  )
+  expect_message(fm1 <- fitmeasures(pen_fs, c("rmsea")), "experimental")
+  expect_length(fm1, 1)
+  expect_identical(names(fm1), "rmsea")
+  expect_message(fm2 <- fitmeasures(pen_fs, c("chisq", "df", "rmsea")), "experimental")
+  expect_identical(names(fm2), c("chisq", "df", "rmsea"))
+  expect_message(fm_all <- fitmeasures(pen_fs), "experimental")
+  expect_gt(length(fm_all), 10)
+  # the filtered value equals the unfiltered value for the same measure
+  expect_equal(as.numeric(fm1["rmsea"]), as.numeric(fm_all["rmsea"]), tolerance = 1e-10)
+  # output = "matrix" is forwarded
+  expect_message(fm_m <- fitmeasures(pen_fs, c("rmsea", "cfi"), output = "matrix"), "experimental")
+  expect_true(is.matrix(fm_m))
+  # fm_args is forwarded (rmsea.ci.level is tunable)
+  expect_message(
+    fm_cl <- fitmeasures(pen_fs, "rmsea.ci.level", fm_args = list(rmsea.ci.level = 0.99)),
+    "experimental"
+  )
+  expect_equal(as.numeric(fm_cl), 0.99, tolerance = 1e-10)
+})
+
 # ---------------------------------------------------------------------------
 # Robustness of the frozen refit
 # ---------------------------------------------------------------------------

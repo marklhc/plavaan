@@ -173,7 +173,16 @@ plavaan_frozen <- function(fit) {
 #'
 #' @noRd
 #' @importFrom lavaan fitmeasures
-setMethod("fitmeasures", signature = "plavaan", function(object, ...) {
+setMethod("fitmeasures", signature = "plavaan", function(
+    object,
+    fit_measures = "all",
+    baseline_model = NULL,
+    h1_model = NULL,
+    fm_args = NULL,
+    output = "vector",
+    level = NULL,
+    ...
+) {
     spec <- plavaan_penalty_spec(object)
     if (identical(spec$test, "none")) {
         message(
@@ -188,7 +197,23 @@ setMethod("fitmeasures", signature = "plavaan", function(object, ...) {
         "Fit evaluation for penalized fits is experimental; interpret fit ",
         "indices with caution."
     )
-    lavaan::fitmeasures(plavaan_frozen(object), ...)
+    # S4 does not forward a generic's named formals to a method declared as
+    # (object, ...): arguments such as fit_measures, output, and level would
+    # be matched to lavaan's fitmeasures() generic and then silently dropped
+    # before reaching this method. Declare them explicitly (mirroring lavaan's
+    # signature) and pass them through. fm_args uses a NULL sentinel so that
+    # lavaan's own default is used when the caller omits it.
+    call_args <- list(
+        fit_measures = fit_measures,
+        baseline_model = baseline_model,
+        h1_model = h1_model,
+        output = output,
+        level = level
+    )
+    if (!is.null(fm_args)) {
+        call_args$fm_args <- fm_args
+    }
+    do.call(lavaan::fitmeasures, c(list(plavaan_frozen(object)), call_args, list(...)))
 })
 
 #' Summary Method for Penalized lavaan Fits
