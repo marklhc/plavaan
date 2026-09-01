@@ -78,7 +78,7 @@ fit_pen <- penalized_est(
 )
 summary(fit_pen)
 #> Penalized fit (w = 0.03, eps = 0.000695192796177561, penalty = l0a): effective npar = 22, effective df = 13 (nominal df = 8).
-#> lavaan 0.7-2 ended normally after 30 iterations
+#> lavaan 0.7-2 ended normally after 32 iterations
 #> 
 #>   Estimator                                         ML
 #>   Optimization method                           NLMINB
@@ -99,7 +99,7 @@ summary(fit_pen)
 #>     y1                2.095    0.214    9.771    0.000
 #>     y2                2.963    0.289   10.250    0.000
 #>     y3                2.260    0.324    6.982    0.000
-#>     y4                2.979    0.220   13.525    0.000
+#>     y4                2.979    0.220   13.524    0.000
 #>   dem65 =~                                            
 #>     y5                2.095    0.215    9.762    0.000
 #>     y6                2.963    0.289   10.244    0.000
@@ -112,7 +112,7 @@ summary(fit_pen)
 #>  .y1 ~~                                               
 #>    .y5                0.939    0.454    2.070    0.038
 #>  .y2 ~~                                               
-#>    .y6                1.747    0.899    1.943    0.052
+#>    .y6                1.747    0.899    1.942    0.052
 #>  .y4 ~~                                               
 #>    .y8                0.246    0.505    0.486    0.627
 #> 
@@ -131,7 +131,7 @@ summary(fit_pen)
 #> Variances:
 #>                    Estimate  Std.Err  z-value  P(>|z|)
 #>     dem60             1.000                           
-#>     dem65             0.868    0.094    9.245    0.000
+#>     dem65             0.868    0.094    9.244    0.000
 #>    .y1                2.207    0.521    4.237    0.000
 #>    .y2                6.472    1.333    4.854    0.000
 #>    .y3                5.514    1.086    5.078    0.000

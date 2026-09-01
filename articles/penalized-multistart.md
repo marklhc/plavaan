@@ -113,15 +113,15 @@ fit_multi <- penalized_est_multistart(
 # Inspect the spread of objective values across starts
 attr(fit_multi, "multistart")
 #>    start_id objective converged
-#> 10       10 0.2792071      TRUE
-#> 3         3 0.2792071      TRUE
-#> 8         8 0.2792071      TRUE
-#> 1         1 0.2792071      TRUE
-#> 5         5 0.2792071      TRUE
-#> 6         6 0.2792071      TRUE
 #> 2         2 0.2792071      TRUE
-#> 4         4 0.2792071      TRUE
+#> 3         3 0.2792071      TRUE
 #> 7         7 0.2792071      TRUE
+#> 8         8 0.2792071      TRUE
+#> 5         5 0.2792071      TRUE
+#> 4         4 0.2792071      TRUE
+#> 6         6 0.2792071      TRUE
+#> 10       10 0.2792071      TRUE
+#> 1         1 0.2792071      TRUE
 #> 9         9 0.2792071      TRUE
 ```
 

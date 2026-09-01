@@ -502,7 +502,7 @@ fit_pen_mg <- penalized_est(
 )
 summary(fit_pen_mg)
 #> Penalized fit (w = 0.03, eps = 0.01, penalty = l0a): effective npar = 40.98, effective df = 67.02 (nominal df = 42).
-#> lavaan 0.7-2 ended normally after 206 iterations
+#> lavaan 0.7-2 ended normally after 207 iterations
 #> 
 #>   Estimator                                       DWLS
 #>   Optimization method                           NLMINB
@@ -568,7 +568,7 @@ summary(fit_pen_mg)
 #>     x8|t1            -0.217
 #>     x8|t2             2.475
 #>     x9|t1            -0.763
-#>     x9|t2             2.882
+#>     x9|t2             2.883
 #> 
 #> Variances:
 #>                    Estimate

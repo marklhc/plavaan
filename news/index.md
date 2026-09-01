@@ -36,6 +36,16 @@
   the penalized estimates. This fit evaluation is experimental and
   disabled by default (`test = "none"`, the new default for the `test`
   argument); an experimental notice is shown whenever it is used.
+- [`summary()`](https://rdrr.io/r/base/summary.html) on a penalized fit
+  prints standard errors (and the resulting z-values and p-values) when
+  [`penalized_est()`](https://marklhc.github.io/plavaan/reference/penalized_est.md)
+  was called with `se = "robust.huber.white"`. A development-version
+  change that computed the
+  [`summary()`](https://rdrr.io/r/base/summary.html) from a frozen refit
+  had suppressed the standard-error column even when standard errors
+  were requested; this is now corrected.
+  [`parameterEstimates()`](https://rdrr.io/pkg/lavaan/man/parameterEstimates.html)
+  was unaffected.
 
 ## plavaan 0.0.2
 

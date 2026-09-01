@@ -79,9 +79,9 @@ pefa_fit <- penalized_est(
     test = "Chisq"
 )
 summary(pefa_fit)
-#> Penalized fit (w = 0.03, eps = 0.01, penalty = l0a): effective npar = 16.03, effective df = 11.97 (nominal df = 6).
+#> Penalized fit (w = 0.03, eps = 0.01, penalty = l0a): effective npar = 16.05, effective df = 11.95 (nominal df = 6).
 #> Fit evaluation for penalized fits is experimental; interpret the chi-square test and fit indices with caution.
-#> lavaan 0.7-2 ended normally after 128 iterations
+#> lavaan 0.7-2 ended normally after 126 iterations
 #> 
 #>   Estimator                                         ML
 #>   Optimization method                           NLMINB
@@ -91,9 +91,9 @@ summary(pefa_fit)
 #> 
 #> Model Test User Model:
 #>                                                       
-#>   Test statistic                                19.803
-#>   Degrees of freedom                            11.966
-#>   P-value (Chi-square)                           0.070
+#>   Test statistic                                19.923
+#>   Degrees of freedom                            11.948
+#>   P-value (Chi-square)                           0.067
 #> 
 #> Parameter Estimates:
 #> 
@@ -101,37 +101,37 @@ summary(pefa_fit)
 #> Latent Variables:
 #>                    Estimate
 #>   ind60 =~                 
-#>     x1                0.657
-#>     x2                1.458
-#>     x3                1.221
-#>     y1                0.002
-#>     y2               -0.005
-#>     y3                0.003
-#>     y4                0.423
+#>     x1                0.658
+#>     x2                1.456
+#>     x3                1.222
+#>     y1               -0.007
+#>     y2               -0.608
+#>     y3               -0.001
+#>     y4                0.006
 #>   dem60 =~                 
-#>     x1                0.027
-#>     x2               -0.001
-#>     x3               -0.011
-#>     y1                2.129
-#>     y2                2.980
-#>     y3                2.314
-#>     y4                2.752
+#>     x1                0.025
+#>     x2               -0.002
+#>     x3               -0.010
+#>     y1                2.071
+#>     y2                3.290
+#>     y3                2.256
+#>     y4                2.999
 #> 
 #> Covariances:
 #>                    Estimate
 #>   ind60 ~~                 
-#>     dem60             0.394
+#>     dem60             0.481
 #> 
 #> Variances:
 #>                    Estimate
 #>     ind60             1.000
-#>    .x1                0.081
-#>    .x2                0.120
-#>    .x3                0.463
-#>    .y1                2.228
-#>    .y2                6.458
-#>    .y3                5.229
-#>    .y4                2.341
+#>    .x1                0.079
+#>    .x2                0.127
+#>    .x3                0.464
+#>    .y1                2.493
+#>    .y2                6.048
+#>    .y3                5.512
+#>    .y4                2.017
 #>     dem60             1.000
 ```
 
@@ -153,39 +153,39 @@ the effective df is the meaningful value.
 fitmeasures(pefa_fit, c("chisq", "df", "cfi", "rmsea"))
 #> Fit evaluation for penalized fits is experimental; interpret fit indices with caution.
 #>                  npar                  fmin                 chisq 
-#>                16.000                 0.132                19.803 
+#>                16.000                 0.133                19.923 
 #>                    df                pvalue        baseline.chisq 
-#>                11.966                 0.070               406.880 
+#>                11.948                 0.067               406.880 
 #>           baseline.df       baseline.pvalue                   cfi 
-#>                21.000                 0.000                 0.980 
+#>                21.000                 0.000                 0.979 
 #>                   tli                  nnfi                   rfi 
-#>                 0.964                 0.964                 0.915 
+#>                 0.964                 0.964                 0.914 
 #>                   nfi                  pnfi                   ifi 
-#>                 0.951                 0.542                 0.980 
+#>                 0.951                 0.541                 0.980 
 #>                   rni                  logl     unrestricted.logl 
-#>                 0.980              -936.115              -926.214 
+#>                 0.979              -936.175              -926.214 
 #>                   aic                   bic                ntotal 
-#>              1904.298              1941.458                75.000 
+#>              1904.454              1941.654                75.000 
 #>                  bic2                 rmsea        rmsea.ci.lower 
-#>              1930.344                 0.093                 0.000 
+#>              1930.527                 0.094                 0.000 
 #>        rmsea.ci.upper        rmsea.ci.level          rmsea.pvalue 
-#>                 0.164                 0.900                 0.159 
+#>                 0.165                 0.900                 0.154 
 #>        rmsea.close.h0 rmsea.notclose.pvalue     rmsea.notclose.h0 
-#>                 0.050                 0.661                 0.080 
+#>                 0.050                 0.668                 0.080 
 #>                   rmr            rmr_nomean                  srmr 
-#>                 0.317                 0.317                 0.038 
+#>                 0.309                 0.309                 0.038 
 #>          srmr_bentler   srmr_bentler_nomean                  crmr 
 #>                 0.038                 0.038                 0.044 
 #>           crmr_nomean            srmr_mplus     srmr_mplus_nomean 
 #>                 0.044                 0.038                 0.038 
 #>                   gfi          gfi.ci.lower          gfi.ci.upper 
-#>                 0.972                 0.917                 1.000 
+#>                 0.972                 0.916                 1.000 
 #>          gfi.ci.level                 cn_05                 cn_01 
-#>                 0.900                80.460               100.102 
+#>                 0.900                79.891                99.405 
 #>            gfi_lisrel           agfi_lisrel                  pgfi 
-#>                 0.931                 0.838                 0.398 
+#>                 0.931                 0.837                 0.397 
 #>                   mfi                  ecvi 
-#>                 0.949                 0.691
+#>                 0.948                 0.692
 ```
 
 ## Penalize Cross-loadings and Unique Covariances
@@ -273,7 +273,7 @@ pefa_fit2 <- penalized_est(
 )
 summary(pefa_fit2)
 #> Penalized fit (w = 0.03, eps = 0.01, penalty = l0a): effective npar = 16.56, effective df = 11.44 (nominal df = -15).
-#> lavaan 0.7-2 ended normally after 171 iterations
+#> lavaan 0.7-2 ended normally after 182 iterations
 #> 
 #>   Estimator                                         ML
 #>   Optimization method                           NLMINB
@@ -357,8 +357,8 @@ number of cross-loadings and unique covariances can be reported with
 
 effective_df(pefa_fit2)
 #>                npar npar_effective df_saved
-#> direct penalty   28       1.564467 26.43553
-#> TOTAL            43      16.564467 26.43553
+#> direct penalty   28       1.564465 26.43554
+#> TOTAL            43      16.564465 26.43554
 #> 
 #> n_stats (sample moments):  28
 #> nominal model df:  -15 (negative: the nominal model is under-identified; the effective df is the meaningful quantity)
@@ -475,7 +475,7 @@ pefa_fit3 <- penalized_est(
 )
 summary(pefa_fit3, standardized = TRUE)
 #> Penalized fit (w = 0.03, eps = 0.01, penalty = l0a): effective npar = 35.4, effective df = 41.6 (nominal df = 7).
-#> lavaan 0.7-2 ended normally after 189 iterations
+#> lavaan 0.7-2 ended normally after 190 iterations
 #> 
 #>   Estimator                                         ML
 #>   Optimization method                           NLMINB
@@ -601,7 +601,7 @@ that differ across time:
 
 effective_df(pefa_fit3)
 #>                npar npar_effective  df_saved
-#> direct penalty   28       1.343754 26.656246
+#> direct penalty   28       1.343755 26.656245
 #> loadings          8       4.020045  3.979955
 #> intercepts        8       4.032270  3.967730
 #> TOTAL            70      35.396069 34.603931
