@@ -110,6 +110,17 @@ pen_small_none <- penalized_est(
   eps = .01
 )
 
+# Same small model as pen_small, but fitted with robust sandwich standard
+# errors (se = "robust.huber.white"), to test that summary() displays them
+pen_small_se <- penalized_est(
+  fit_small,
+  w = 0.03,
+  pen_diff_id = list(loadings = rbind(l60s, l65s)),
+  eps = .01,
+  se = "robust.huber.white",
+  test = "Chisq"
+)
+
 # ---------------------------------------------------------------------------
 # Class and recorded penalty specification
 # ---------------------------------------------------------------------------
@@ -324,6 +335,27 @@ test_that("summary reuses the cached frozen refit", {
   expect_true(any(grepl("experimental", msgs)))
   # summary() must not refit or replace the cached object
   expect_identical(frozen, cache$frozen)
+})
+
+test_that("summary displays standard errors when se = 'robust.huber.white'", {
+  # the fixture genuinely carries robust sandwich SEs
+  expect_identical(pen_small_se@Options$se, "robust.huber.white")
+  expect_true(any(!is.na(pen_small_se@ParTable$se) & pen_small_se@ParTable$se > 0))
+  out <- capture.output(print(summary(pen_small_se)))
+  # the parameter estimates table carries a Std.Err column (regression: the
+  # frozen refit is run with se = "none", which used to hide the SE column
+  # even though the ParTable carried the original fit's standard errors)
+  expect_true(any(grepl("Std.Err", out, fixed = TRUE)))
+  # displaying the SEs must not mutate the cached frozen object
+  expect_identical(
+    attr(pen_small_se, "plavaan.cache")$frozen@Options$se,
+    "none"
+  )
+})
+
+test_that("summary shows no standard errors with the default se = 'none'", {
+  out <- capture.output(print(summary(pen_small_none)))
+  expect_false(any(grepl("Std.Err", out, fixed = TRUE)))
 })
 
 # ---------------------------------------------------------------------------
