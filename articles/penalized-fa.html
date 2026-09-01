@@ -141,9 +141,9 @@
 <span>    test <span class="op">=</span> <span class="st">"Chisq"</span></span>
 <span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">pefa_fit</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Penalized fit (w = 0.03, eps = 0.01, penalty = l0a): effective npar = 16.05, effective df = 11.95 (nominal df = 6).</span></span>
+<span><span class="co">#&gt; Penalized fit (w = 0.03, eps = 0.01, penalty = l0a): effective npar = 16.03, effective df = 11.97 (nominal df = 6).</span></span>
 <span><span class="co">#&gt; Fit evaluation for penalized fits is experimental; interpret the chi-square test and fit indices with caution.</span></span>
-<span><span class="co">#&gt; lavaan 0.7-2 ended normally after 126 iterations</span></span>
+<span><span class="co">#&gt; lavaan 0.7-2 ended normally after 128 iterations</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;   Estimator                                         ML</span></span>
 <span><span class="co">#&gt;   Optimization method                           NLMINB</span></span>
@@ -153,9 +153,9 @@
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Model Test User Model:</span></span>
 <span><span class="co">#&gt;                                                       </span></span>
-<span><span class="co">#&gt;   Test statistic                                19.923</span></span>
-<span><span class="co">#&gt;   Degrees of freedom                            11.948</span></span>
-<span><span class="co">#&gt;   P-value (Chi-square)                           0.067</span></span>
+<span><span class="co">#&gt;   Test statistic                                19.803</span></span>
+<span><span class="co">#&gt;   Degrees of freedom                            11.966</span></span>
+<span><span class="co">#&gt;   P-value (Chi-square)                           0.070</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Parameter Estimates:</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -163,37 +163,37 @@
 <span><span class="co">#&gt; Latent Variables:</span></span>
 <span><span class="co">#&gt;                    Estimate</span></span>
 <span><span class="co">#&gt;   ind60 =~                 </span></span>
-<span><span class="co">#&gt;     x1                0.658</span></span>
-<span><span class="co">#&gt;     x2                1.456</span></span>
-<span><span class="co">#&gt;     x3                1.222</span></span>
-<span><span class="co">#&gt;     y1               -0.007</span></span>
-<span><span class="co">#&gt;     y2               -0.608</span></span>
-<span><span class="co">#&gt;     y3               -0.001</span></span>
-<span><span class="co">#&gt;     y4                0.006</span></span>
+<span><span class="co">#&gt;     x1                0.657</span></span>
+<span><span class="co">#&gt;     x2                1.458</span></span>
+<span><span class="co">#&gt;     x3                1.221</span></span>
+<span><span class="co">#&gt;     y1                0.002</span></span>
+<span><span class="co">#&gt;     y2               -0.005</span></span>
+<span><span class="co">#&gt;     y3                0.003</span></span>
+<span><span class="co">#&gt;     y4                0.423</span></span>
 <span><span class="co">#&gt;   dem60 =~                 </span></span>
-<span><span class="co">#&gt;     x1                0.025</span></span>
-<span><span class="co">#&gt;     x2               -0.002</span></span>
-<span><span class="co">#&gt;     x3               -0.010</span></span>
-<span><span class="co">#&gt;     y1                2.071</span></span>
-<span><span class="co">#&gt;     y2                3.290</span></span>
-<span><span class="co">#&gt;     y3                2.256</span></span>
-<span><span class="co">#&gt;     y4                2.999</span></span>
+<span><span class="co">#&gt;     x1                0.027</span></span>
+<span><span class="co">#&gt;     x2               -0.001</span></span>
+<span><span class="co">#&gt;     x3               -0.011</span></span>
+<span><span class="co">#&gt;     y1                2.129</span></span>
+<span><span class="co">#&gt;     y2                2.980</span></span>
+<span><span class="co">#&gt;     y3                2.314</span></span>
+<span><span class="co">#&gt;     y4                2.752</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Covariances:</span></span>
 <span><span class="co">#&gt;                    Estimate</span></span>
 <span><span class="co">#&gt;   ind60 ~~                 </span></span>
-<span><span class="co">#&gt;     dem60             0.481</span></span>
+<span><span class="co">#&gt;     dem60             0.394</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Variances:</span></span>
 <span><span class="co">#&gt;                    Estimate</span></span>
 <span><span class="co">#&gt;     ind60             1.000</span></span>
-<span><span class="co">#&gt;    .x1                0.079</span></span>
-<span><span class="co">#&gt;    .x2                0.127</span></span>
-<span><span class="co">#&gt;    .x3                0.464</span></span>
-<span><span class="co">#&gt;    .y1                2.493</span></span>
-<span><span class="co">#&gt;    .y2                6.048</span></span>
-<span><span class="co">#&gt;    .y3                5.512</span></span>
-<span><span class="co">#&gt;    .y4                2.017</span></span>
+<span><span class="co">#&gt;    .x1                0.081</span></span>
+<span><span class="co">#&gt;    .x2                0.120</span></span>
+<span><span class="co">#&gt;    .x3                0.463</span></span>
+<span><span class="co">#&gt;    .y1                2.228</span></span>
+<span><span class="co">#&gt;    .y2                6.458</span></span>
+<span><span class="co">#&gt;    .y3                5.229</span></span>
+<span><span class="co">#&gt;    .y4                2.341</span></span>
 <span><span class="co">#&gt;     dem60             1.000</span></span></code></pre></div>
 <p>Fit indices can be obtained directly from the penalized fit. Fit
 evaluation is experimental and disabled by default, so the fit above was
@@ -210,39 +210,39 @@ value.</p>
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/lavaan/man/fitMeasures.html" class="external-link">fitmeasures</a></span><span class="op">(</span><span class="va">pefa_fit</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"chisq"</span>, <span class="st">"df"</span>, <span class="st">"cfi"</span>, <span class="st">"rmsea"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Fit evaluation for penalized fits is experimental; interpret fit indices with caution.</span></span>
 <span><span class="co">#&gt;                  npar                  fmin                 chisq </span></span>
-<span><span class="co">#&gt;                16.000                 0.133                19.923 </span></span>
+<span><span class="co">#&gt;                16.000                 0.132                19.803 </span></span>
 <span><span class="co">#&gt;                    df                pvalue        baseline.chisq </span></span>
-<span><span class="co">#&gt;                11.948                 0.067               406.880 </span></span>
+<span><span class="co">#&gt;                11.966                 0.070               406.880 </span></span>
 <span><span class="co">#&gt;           baseline.df       baseline.pvalue                   cfi </span></span>
-<span><span class="co">#&gt;                21.000                 0.000                 0.979 </span></span>
+<span><span class="co">#&gt;                21.000                 0.000                 0.980 </span></span>
 <span><span class="co">#&gt;                   tli                  nnfi                   rfi </span></span>
-<span><span class="co">#&gt;                 0.964                 0.964                 0.914 </span></span>
+<span><span class="co">#&gt;                 0.964                 0.964                 0.915 </span></span>
 <span><span class="co">#&gt;                   nfi                  pnfi                   ifi </span></span>
-<span><span class="co">#&gt;                 0.951                 0.541                 0.980 </span></span>
+<span><span class="co">#&gt;                 0.951                 0.542                 0.980 </span></span>
 <span><span class="co">#&gt;                   rni                  logl     unrestricted.logl </span></span>
-<span><span class="co">#&gt;                 0.979              -936.175              -926.214 </span></span>
+<span><span class="co">#&gt;                 0.980              -936.115              -926.214 </span></span>
 <span><span class="co">#&gt;                   aic                   bic                ntotal </span></span>
-<span><span class="co">#&gt;              1904.454              1941.654                75.000 </span></span>
+<span><span class="co">#&gt;              1904.298              1941.458                75.000 </span></span>
 <span><span class="co">#&gt;                  bic2                 rmsea        rmsea.ci.lower </span></span>
-<span><span class="co">#&gt;              1930.527                 0.094                 0.000 </span></span>
+<span><span class="co">#&gt;              1930.344                 0.093                 0.000 </span></span>
 <span><span class="co">#&gt;        rmsea.ci.upper        rmsea.ci.level          rmsea.pvalue </span></span>
-<span><span class="co">#&gt;                 0.165                 0.900                 0.154 </span></span>
+<span><span class="co">#&gt;                 0.164                 0.900                 0.159 </span></span>
 <span><span class="co">#&gt;        rmsea.close.h0 rmsea.notclose.pvalue     rmsea.notclose.h0 </span></span>
-<span><span class="co">#&gt;                 0.050                 0.668                 0.080 </span></span>
+<span><span class="co">#&gt;                 0.050                 0.661                 0.080 </span></span>
 <span><span class="co">#&gt;                   rmr            rmr_nomean                  srmr </span></span>
-<span><span class="co">#&gt;                 0.309                 0.309                 0.038 </span></span>
+<span><span class="co">#&gt;                 0.317                 0.317                 0.038 </span></span>
 <span><span class="co">#&gt;          srmr_bentler   srmr_bentler_nomean                  crmr </span></span>
 <span><span class="co">#&gt;                 0.038                 0.038                 0.044 </span></span>
 <span><span class="co">#&gt;           crmr_nomean            srmr_mplus     srmr_mplus_nomean </span></span>
 <span><span class="co">#&gt;                 0.044                 0.038                 0.038 </span></span>
 <span><span class="co">#&gt;                   gfi          gfi.ci.lower          gfi.ci.upper </span></span>
-<span><span class="co">#&gt;                 0.972                 0.916                 1.000 </span></span>
+<span><span class="co">#&gt;                 0.972                 0.917                 1.000 </span></span>
 <span><span class="co">#&gt;          gfi.ci.level                 cn_05                 cn_01 </span></span>
-<span><span class="co">#&gt;                 0.900                79.891                99.405 </span></span>
+<span><span class="co">#&gt;                 0.900                80.460               100.102 </span></span>
 <span><span class="co">#&gt;            gfi_lisrel           agfi_lisrel                  pgfi </span></span>
-<span><span class="co">#&gt;                 0.931                 0.837                 0.397 </span></span>
+<span><span class="co">#&gt;                 0.931                 0.838                 0.398 </span></span>
 <span><span class="co">#&gt;                   mfi                  ecvi </span></span>
-<span><span class="co">#&gt;                 0.948                 0.692</span></span></code></pre></div>
+<span><span class="co">#&gt;                 0.949                 0.691</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
@@ -327,7 +327,7 @@ table (see the <code>free</code> column).</p>
 <span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">pefa_fit2</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Penalized fit (w = 0.03, eps = 0.01, penalty = l0a): effective npar = 16.56, effective df = 11.44 (nominal df = -15).</span></span>
-<span><span class="co">#&gt; lavaan 0.7-2 ended normally after 182 iterations</span></span>
+<span><span class="co">#&gt; lavaan 0.7-2 ended normally after 171 iterations</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;   Estimator                                         ML</span></span>
 <span><span class="co">#&gt;   Optimization method                           NLMINB</span></span>
@@ -407,8 +407,8 @@ reported with <code><a href="../reference/effective_df.html">effective_df()</a><
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/effective_df.html">effective_df</a></span><span class="op">(</span><span class="va">pefa_fit2</span><span class="op">)</span></span>
 <span><span class="co">#&gt;                npar npar_effective df_saved</span></span>
-<span><span class="co">#&gt; direct penalty   28       1.564465 26.43554</span></span>
-<span><span class="co">#&gt; TOTAL            43      16.564465 26.43554</span></span>
+<span><span class="co">#&gt; direct penalty   28       1.564467 26.43553</span></span>
+<span><span class="co">#&gt; TOTAL            43      16.564467 26.43553</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; n_stats (sample moments):  28</span></span>
 <span><span class="co">#&gt; nominal model df:  -15 (negative: the nominal model is under-identified; the effective df is the meaningful quantity)</span></span>
@@ -515,7 +515,7 @@ covariances</p>
 <span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">pefa_fit3</span>, standardized <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Penalized fit (w = 0.03, eps = 0.01, penalty = l0a): effective npar = 35.4, effective df = 41.6 (nominal df = 7).</span></span>
-<span><span class="co">#&gt; lavaan 0.7-2 ended normally after 190 iterations</span></span>
+<span><span class="co">#&gt; lavaan 0.7-2 ended normally after 189 iterations</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;   Estimator                                         ML</span></span>
 <span><span class="co">#&gt;   Optimization method                           NLMINB</span></span>
@@ -636,7 +636,7 @@ effective number of loadings and intercepts that differ across time:</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/effective_df.html">effective_df</a></span><span class="op">(</span><span class="va">pefa_fit3</span><span class="op">)</span></span>
 <span><span class="co">#&gt;                npar npar_effective  df_saved</span></span>
-<span><span class="co">#&gt; direct penalty   28       1.343755 26.656245</span></span>
+<span><span class="co">#&gt; direct penalty   28       1.343754 26.656246</span></span>
 <span><span class="co">#&gt; loadings          8       4.020045  3.979955</span></span>
 <span><span class="co">#&gt; intercepts        8       4.032270  3.967730</span></span>
 <span><span class="co">#&gt; TOTAL            70      35.396069 34.603931</span></span>

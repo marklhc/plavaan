@@ -140,7 +140,7 @@ penalizing the differences in intercepts and loadings across groups.</p>
 <span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">fit_pen</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Penalized fit (w = 0.03, eps = 0.000695192796177561, penalty = l0a): effective npar = 22, effective df = 13 (nominal df = 8).</span></span>
-<span><span class="co">#&gt; lavaan 0.7-2 ended normally after 32 iterations</span></span>
+<span><span class="co">#&gt; lavaan 0.7-2 ended normally after 30 iterations</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;   Estimator                                         ML</span></span>
 <span><span class="co">#&gt;   Optimization method                           NLMINB</span></span>
@@ -151,53 +151,56 @@ penalizing the differences in intercepts and loadings across groups.</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Parameter Estimates:</span></span>
 <span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;   Standard errors                             Sandwich</span></span>
+<span><span class="co">#&gt;   Information bread                           Observed</span></span>
+<span><span class="co">#&gt;   Observed information based on                Hessian</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Latent Variables:</span></span>
-<span><span class="co">#&gt;                    Estimate</span></span>
-<span><span class="co">#&gt;   dem60 =~                 </span></span>
-<span><span class="co">#&gt;     y1                2.095</span></span>
-<span><span class="co">#&gt;     y2                2.963</span></span>
-<span><span class="co">#&gt;     y3                2.260</span></span>
-<span><span class="co">#&gt;     y4                2.979</span></span>
-<span><span class="co">#&gt;   dem65 =~                 </span></span>
-<span><span class="co">#&gt;     y5                2.095</span></span>
-<span><span class="co">#&gt;     y6                2.963</span></span>
-<span><span class="co">#&gt;     y8                2.980</span></span>
+<span><span class="co">#&gt;                    Estimate  Std.Err  z-value  P(&gt;|z|)</span></span>
+<span><span class="co">#&gt;   dem60 =~                                            </span></span>
+<span><span class="co">#&gt;     y1                2.095    0.214    9.771    0.000</span></span>
+<span><span class="co">#&gt;     y2                2.963    0.289   10.250    0.000</span></span>
+<span><span class="co">#&gt;     y3                2.260    0.324    6.982    0.000</span></span>
+<span><span class="co">#&gt;     y4                2.979    0.220   13.525    0.000</span></span>
+<span><span class="co">#&gt;   dem65 =~                                            </span></span>
+<span><span class="co">#&gt;     y5                2.095    0.215    9.762    0.000</span></span>
+<span><span class="co">#&gt;     y6                2.963    0.289   10.244    0.000</span></span>
+<span><span class="co">#&gt;     y8                2.980    0.220   13.521    0.000</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Covariances:</span></span>
-<span><span class="co">#&gt;                    Estimate</span></span>
-<span><span class="co">#&gt;   dem60 ~~                 </span></span>
-<span><span class="co">#&gt;     dem65             0.872</span></span>
-<span><span class="co">#&gt;  .y1 ~~                    </span></span>
-<span><span class="co">#&gt;    .y5                0.939</span></span>
-<span><span class="co">#&gt;  .y2 ~~                    </span></span>
-<span><span class="co">#&gt;    .y6                1.747</span></span>
-<span><span class="co">#&gt;  .y4 ~~                    </span></span>
-<span><span class="co">#&gt;    .y8                0.246</span></span>
+<span><span class="co">#&gt;                    Estimate  Std.Err  z-value  P(&gt;|z|)</span></span>
+<span><span class="co">#&gt;   dem60 ~~                                            </span></span>
+<span><span class="co">#&gt;     dem65             0.872    0.056   15.694    0.000</span></span>
+<span><span class="co">#&gt;  .y1 ~~                                               </span></span>
+<span><span class="co">#&gt;    .y5                0.939    0.454    2.070    0.038</span></span>
+<span><span class="co">#&gt;  .y2 ~~                                               </span></span>
+<span><span class="co">#&gt;    .y6                1.747    0.899    1.943    0.052</span></span>
+<span><span class="co">#&gt;  .y4 ~~                                               </span></span>
+<span><span class="co">#&gt;    .y8                0.246    0.505    0.486    0.627</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Intercepts:</span></span>
-<span><span class="co">#&gt;                    Estimate</span></span>
-<span><span class="co">#&gt;     dem60             0.000</span></span>
-<span><span class="co">#&gt;     dem65            -0.145</span></span>
-<span><span class="co">#&gt;    .y1                5.455</span></span>
-<span><span class="co">#&gt;    .y2                4.256</span></span>
-<span><span class="co">#&gt;    .y3                6.563</span></span>
-<span><span class="co">#&gt;    .y4                4.464</span></span>
-<span><span class="co">#&gt;    .y5                5.455</span></span>
-<span><span class="co">#&gt;    .y6                3.408</span></span>
-<span><span class="co">#&gt;    .y8                4.464</span></span>
+<span><span class="co">#&gt;                    Estimate  Std.Err  z-value  P(&gt;|z|)</span></span>
+<span><span class="co">#&gt;     dem60             0.000                           </span></span>
+<span><span class="co">#&gt;     dem65            -0.145    0.072   -2.009    0.045</span></span>
+<span><span class="co">#&gt;    .y1                5.455    0.290   18.785    0.000</span></span>
+<span><span class="co">#&gt;    .y2                4.256    0.453    9.399    0.000</span></span>
+<span><span class="co">#&gt;    .y3                6.563    0.376   17.441    0.000</span></span>
+<span><span class="co">#&gt;    .y4                4.464    0.376   11.869    0.000</span></span>
+<span><span class="co">#&gt;    .y5                5.455    0.290   18.795    0.000</span></span>
+<span><span class="co">#&gt;    .y6                3.408    0.448    7.607    0.000</span></span>
+<span><span class="co">#&gt;    .y8                4.464    0.376   11.869    0.000</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Variances:</span></span>
-<span><span class="co">#&gt;                    Estimate</span></span>
-<span><span class="co">#&gt;     dem60             1.000</span></span>
-<span><span class="co">#&gt;     dem65             0.868</span></span>
-<span><span class="co">#&gt;    .y1                2.207</span></span>
-<span><span class="co">#&gt;    .y2                6.472</span></span>
-<span><span class="co">#&gt;    .y3                5.514</span></span>
-<span><span class="co">#&gt;    .y4                2.454</span></span>
-<span><span class="co">#&gt;    .y5                3.001</span></span>
-<span><span class="co">#&gt;    .y6                3.748</span></span>
-<span><span class="co">#&gt;    .y8                2.432</span></span></code></pre></div>
+<span><span class="co">#&gt;                    Estimate  Std.Err  z-value  P(&gt;|z|)</span></span>
+<span><span class="co">#&gt;     dem60             1.000                           </span></span>
+<span><span class="co">#&gt;     dem65             0.868    0.094    9.245    0.000</span></span>
+<span><span class="co">#&gt;    .y1                2.207    0.521    4.237    0.000</span></span>
+<span><span class="co">#&gt;    .y2                6.472    1.333    4.854    0.000</span></span>
+<span><span class="co">#&gt;    .y3                5.514    1.086    5.078    0.000</span></span>
+<span><span class="co">#&gt;    .y4                2.454    0.628    3.910    0.000</span></span>
+<span><span class="co">#&gt;    .y5                3.001    0.614    4.886    0.000</span></span>
+<span><span class="co">#&gt;    .y6                3.748    0.804    4.664    0.000</span></span>
+<span><span class="co">#&gt;    .y8                2.432    0.704    3.452    0.001</span></span></code></pre></div>
 <p>The penalized estimation finds a solution where the loadings and
 intercepts difference are minimized, depending on the penalty weight
 <code>w</code>.</p>

@@ -59,8 +59,8 @@ pefa_fit <- penalized_est(
     se = "robust.huber.white"
 )
 summary(pefa_fit)
-#> Penalized fit (w = 0.03, eps = 0.01, penalty = l0a): effective npar = 16.05, effective df = 11.95 (nominal df = 6).
-#> lavaan 0.7-2 ended normally after 126 iterations
+#> Penalized fit (w = 0.03, eps = 0.01, penalty = l0a): effective npar = 16.03, effective df = 11.97 (nominal df = 6).
+#> lavaan 0.7-2 ended normally after 128 iterations
 #> 
 #>   Estimator                                         ML
 #>   Optimization method                           NLMINB
@@ -71,41 +71,44 @@ summary(pefa_fit)
 #> 
 #> Parameter Estimates:
 #> 
+#>   Standard errors                             Sandwich
+#>   Information bread                           Observed
+#>   Observed information based on                Hessian
 #> 
 #> Latent Variables:
-#>                    Estimate
-#>   ind60 =~                 
-#>     x1                0.658
-#>     x2                1.456
-#>     x3                1.222
-#>     y1               -0.007
-#>     y2               -0.608
-#>     y3               -0.001
-#>     y4                0.006
-#>   dem60 =~                 
-#>     x1                0.025
-#>     x2               -0.002
-#>     x3               -0.010
-#>     y1                2.071
-#>     y2                3.290
-#>     y3                2.256
-#>     y4                2.999
+#>                    Estimate  Std.Err  z-value  P(>|z|)
+#>   ind60 =~                                            
+#>     x1                0.657    0.055   11.934    0.000
+#>     x2                1.458    0.107   13.680    0.000
+#>     x3                1.221    0.104   11.707    0.000
+#>     y1                0.002    0.008    0.278    0.781
+#>     y2               -0.005    0.007   -0.787    0.431
+#>     y3                0.003    0.007    0.505    0.614
+#>     y4                0.423    0.330    1.280    0.201
+#>   dem60 =~                                            
+#>     x1                0.027    0.026    1.049    0.294
+#>     x2               -0.001    0.014   -0.096    0.923
+#>     x3               -0.011    0.017   -0.682    0.495
+#>     y1                2.129    0.212   10.020    0.000
+#>     y2                2.980    0.292   10.206    0.000
+#>     y3                2.314    0.326    7.103    0.000
+#>     y4                2.752    0.289    9.520    0.000
 #> 
 #> Covariances:
-#>                    Estimate
-#>   ind60 ~~                 
-#>     dem60             0.481
+#>                    Estimate  Std.Err  z-value  P(>|z|)
+#>   ind60 ~~                                            
+#>     dem60             0.394    0.121    3.248    0.001
 #> 
 #> Variances:
-#>                    Estimate
-#>     ind60             1.000
-#>    .x1                0.079
-#>    .x2                0.127
-#>    .x3                0.464
-#>    .y1                2.493
-#>    .y2                6.048
-#>    .y3                5.512
-#>    .y4                2.017
+#>                    Estimate  Std.Err  z-value  P(>|z|)
+#>     ind60             1.000                           
+#>    .x1                0.081    0.018    4.507    0.000
+#>    .x2                0.120    0.073    1.648    0.099
+#>    .x3                0.463    0.084    5.525    0.000
+#>    .y1                2.228    0.545    4.085    0.000
+#>    .y2                6.458    1.417    4.558    0.000
+#>    .y3                5.229    1.165    4.488    0.000
+#>    .y4                2.341    0.729    3.212    0.001
 #>     dem60             1.000
 ```
 
