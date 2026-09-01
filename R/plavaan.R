@@ -207,6 +207,12 @@ setMethod("fitmeasures", signature = "plavaan", function(object, ...) {
 #' \code{test = "none"}, the summary shows the model and parameter estimates
 #' (at the effective parameter count) but no chi-square test.
 #'
+#' When the fit was created with [penalized_est()] using
+#' \code{se = "robust.huber.white"}, the summary displays the standard
+#' errors in the parameter estimates table (and the resulting z-values and
+#' p-values), as for a plain lavaan fit. With the default \code{se = "none"},
+#' no standard errors are shown.
+#'
 #' An S4 method is used (rather than an S3 method) because lavaan
 #' registers S4 methods for \code{summary()} on the \sQuote{lavaan} class,
 #' and S4 dispatch takes precedence for S4 objects: an S3
@@ -221,6 +227,24 @@ setMethod("fitmeasures", signature = "plavaan", function(object, ...) {
 #' @noRd
 setMethod("summary", signature = "plavaan", function(object, ...) {
     frozen <- plavaan_frozen(object)
+    # The frozen refit is run with se = "none" so that lavaan does not
+    # (re)compute standard errors for the zero-free-parameter model. Its
+    # ParTable nonetheless carries the original fit's standard errors: they
+    # are inherited because plavaan_freeze() feeds parTable(fit) -- which
+    # includes the se column -- into lavaan(). Restore the original se
+    # setting so that summary() displays the standard errors, matching the
+    # behaviour of a plain lavaan fit with se = "robust.huber.white". The
+    # guard checks the frozen ParTable (what summary actually prints) so the
+    # flag is only raised when SE values are genuinely present. Mutating the
+    # local copy does not affect the cached frozen object (copy-on-write).
+    frozen_se <- lavaan::parTable(frozen)$se
+    if (
+        identical(object@Options$se, "robust.huber.white") &&
+            any(!is.na(frozen_se) & frozen_se > 0)
+    ) {
+        frozen@Options$se <- "robust.huber.white"
+        frozen@vcov$se <- "robust.huber.white"
+    }
     s <- summary(frozen, ...)
     spec <- plavaan_penalty_spec(object)
     npar_eff <- plavaan_npar_eff(object, spec)
