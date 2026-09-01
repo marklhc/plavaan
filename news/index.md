@@ -46,6 +46,15 @@
   were requested; this is now corrected.
   [`parameterEstimates()`](https://rdrr.io/pkg/lavaan/man/parameterEstimates.html)
   was unaffected.
+- [`fitmeasures()`](https://rdrr.io/pkg/lavaan/man/fitMeasures.html) on
+  a penalized fit now honours its arguments for selecting and formatting
+  fit indices (e.g. `fitmeasures(fit, "rmsea")`, `output = "matrix"`,
+  `fm_args`). A development-version change had declared the method as
+  `(object, ...)`, so lavaan’s
+  [`fitmeasures()`](https://rdrr.io/pkg/lavaan/man/fitMeasures.html)
+  generic’s named arguments were silently dropped and every call
+  returned the full set of fit measures; the method now declares and
+  forwards them.
 
 ## plavaan 0.0.2
 

@@ -152,40 +152,8 @@ the effective df is the meaningful value.
 
 fitmeasures(pefa_fit, c("chisq", "df", "cfi", "rmsea"))
 #> Fit evaluation for penalized fits is experimental; interpret fit indices with caution.
-#>                  npar                  fmin                 chisq 
-#>                16.000                 0.133                19.923 
-#>                    df                pvalue        baseline.chisq 
-#>                11.948                 0.067               406.880 
-#>           baseline.df       baseline.pvalue                   cfi 
-#>                21.000                 0.000                 0.979 
-#>                   tli                  nnfi                   rfi 
-#>                 0.964                 0.964                 0.914 
-#>                   nfi                  pnfi                   ifi 
-#>                 0.951                 0.541                 0.980 
-#>                   rni                  logl     unrestricted.logl 
-#>                 0.979              -936.175              -926.214 
-#>                   aic                   bic                ntotal 
-#>              1904.454              1941.654                75.000 
-#>                  bic2                 rmsea        rmsea.ci.lower 
-#>              1930.527                 0.094                 0.000 
-#>        rmsea.ci.upper        rmsea.ci.level          rmsea.pvalue 
-#>                 0.165                 0.900                 0.154 
-#>        rmsea.close.h0 rmsea.notclose.pvalue     rmsea.notclose.h0 
-#>                 0.050                 0.668                 0.080 
-#>                   rmr            rmr_nomean                  srmr 
-#>                 0.309                 0.309                 0.038 
-#>          srmr_bentler   srmr_bentler_nomean                  crmr 
-#>                 0.038                 0.038                 0.044 
-#>           crmr_nomean            srmr_mplus     srmr_mplus_nomean 
-#>                 0.044                 0.038                 0.038 
-#>                   gfi          gfi.ci.lower          gfi.ci.upper 
-#>                 0.972                 0.916                 1.000 
-#>          gfi.ci.level                 cn_05                 cn_01 
-#>                 0.900                79.891                99.405 
-#>            gfi_lisrel           agfi_lisrel                  pgfi 
-#>                 0.931                 0.837                 0.397 
-#>                   mfi                  ecvi 
-#>                 0.948                 0.692
+#>  chisq     df    cfi  rmsea 
+#> 19.923 11.948  0.979  0.094
 ```
 
 ## Penalize Cross-loadings and Unique Covariances

@@ -160,38 +160,6 @@ effective_df(pen)
 #> penalty:  l0a (w = 0.03, eps = 0.01)
 fitmeasures(pen, c("chisq", "df", "cfi"))
 #> Fit evaluation for penalized fits is experimental; interpret fit indices with caution.
-#>                  npar                  fmin                 chisq 
-#>                13.000                 0.316                47.429 
-#>                    df                pvalue        baseline.chisq 
-#>                22.990                 0.002               461.111 
-#>           baseline.df       baseline.pvalue                   cfi 
-#>                28.000                 0.000                 0.944 
-#>                   tli                  nnfi                   rfi 
-#>                 0.931                 0.931                 0.875 
-#>                   nfi                  pnfi                   ifi 
-#>                 0.897                 0.737                 0.944 
-#>                   rni                  logl     unrestricted.logl 
-#>                 0.944             -1336.287             -1312.572 
-#>                   aic                   bic                ntotal 
-#>              2698.594              2728.745                75.000 
-#>                  bic2                 rmsea        rmsea.ci.lower 
-#>              2719.727                 0.119                 0.070 
-#>        rmsea.ci.upper        rmsea.ci.level          rmsea.pvalue 
-#>                 0.167                 0.900                 0.014 
-#>        rmsea.close.h0 rmsea.notclose.pvalue     rmsea.notclose.h0 
-#>                 0.050                 0.912                 0.080 
-#>                   rmr            rmr_nomean                  srmr 
-#>                 0.773                 0.773                 0.071 
-#>          srmr_bentler   srmr_bentler_nomean                  crmr 
-#>                 0.071                 0.071                 0.060 
-#>           crmr_nomean            srmr_mplus     srmr_mplus_nomean 
-#>                 0.060                 0.060                 0.060 
-#>                   gfi          gfi.ci.lower          gfi.ci.upper 
-#>                 0.923                 0.860                 0.971 
-#>          gfi.ci.level                 cn_05                 cn_01 
-#>                 0.900                56.598                66.821 
-#>            gfi_lisrel           agfi_lisrel                  pgfi 
-#>                 0.862                 0.784                 0.551 
-#>                   mfi                  ecvi 
-#>                 0.850                 0.979 
+#>  chisq     df    cfi 
+#> 47.429 22.990  0.944 
 ```
